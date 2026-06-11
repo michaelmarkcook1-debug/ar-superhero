@@ -1,4 +1,5 @@
 import pptxgen from "pptxgenjs";
+import { CEO_HEADSHOT_JPEG_BASE64 } from "./ceoHeadshot";
 
 // ============================================================================
 // Board-pack PPT toolkit
@@ -530,4 +531,119 @@ export function addSectionLabel(
 
 export function evidenceLabel(grade: "E1" | "E2" | "E3", confidence: string): string {
   return `Evidence ${grade} · Confidence ${confidence}`;
+}
+
+// ---------------------------------------------------------------------------
+// CEO profile slide — final slide on every deck.
+//
+// Bio text and headshot are taken verbatim from the AnalystGenius board-pack
+// source deck (PROOF-Board-Pack, slide 17). No invented biographical detail.
+// Dark navy to bookend the deck alongside the cover/closing.
+// ---------------------------------------------------------------------------
+
+const CEO_NAME = "Michael Cook";
+const CEO_TITLE = "CEO — AnalystGenius";
+const CEO_BIO =
+  "Michael Cook is CEO of AnalystGenius. With over a decade of experience spanning analyst research, advisory, and go-to-market strategy across the IT and BPO services landscape, Michael has held senior positions at NelsonHall, HfS Research, Cognizant's Center for the Future of Work, IDC, and Capgemini. He has advised the world's leading service providers on vendor positioning, enterprise AI adoption, and workforce transformation — and brings deep cross-market expertise to every AnalystGenius engagement.";
+
+export function addCeoBioSlide(pptx: pptxgen): void {
+  const slide = pptx.addSlide();
+  slide.background = { color: PALETTE.navy };
+
+  // Eyebrow.
+  slide.addText("ANALYSTGENIUS LEADERSHIP", {
+    x: 0.72,
+    y: 0.7,
+    w: 11,
+    h: 0.3,
+    fontFace: FONT_HEAD,
+    fontSize: 11,
+    bold: true,
+    color: PALETTE.gold,
+    charSpacing: 3,
+    margin: 0,
+  });
+
+  // Headshot — square, framed with a hairline.
+  const photoX = 0.72;
+  const photoY = 1.55;
+  const photoSize = 3.0;
+  slide.addShape(SHAPES.roundRect, {
+    x: photoX - 0.06,
+    y: photoY - 0.06,
+    w: photoSize + 0.12,
+    h: photoSize + 0.12,
+    rectRadius: 0.08,
+    fill: { color: "13294B" },
+    line: { color: "33455E", width: 1 },
+  });
+  slide.addImage({
+    data: CEO_HEADSHOT_JPEG_BASE64,
+    x: photoX,
+    y: photoY,
+    w: photoSize,
+    h: photoSize,
+    rounding: true,
+  });
+
+  // Name + title.
+  const textX = photoX + photoSize + 0.7;
+  const textW = SLIDE_W - textX - 0.72;
+  slide.addText(CEO_NAME, {
+    x: textX,
+    y: 1.55,
+    w: textW,
+    h: 0.7,
+    fontFace: FONT_SERIF,
+    fontSize: 30,
+    bold: true,
+    color: PALETTE.white,
+    margin: 0,
+    fit: "shrink",
+  });
+  slide.addText(CEO_TITLE, {
+    x: textX,
+    y: 2.22,
+    w: textW,
+    h: 0.4,
+    fontFace: FONT_HEAD,
+    fontSize: 14,
+    bold: true,
+    color: "9FB0C4",
+    charSpacing: 1,
+    margin: 0,
+    fit: "shrink",
+  });
+  // Bio paragraph (verbatim from source).
+  slide.addText(CEO_BIO, {
+    x: textX,
+    y: 2.85,
+    w: textW,
+    h: 2.6,
+    fontFace: FONT_BODY,
+    fontSize: 13.5,
+    color: "C7D2DF",
+    lineSpacingMultiple: 1.18,
+    margin: 0,
+    valign: "top",
+    fit: "shrink",
+  });
+
+  // Bottom hairline + provenance note.
+  slide.addShape(SHAPES.line, { x: 0.72, y: 6.55, w: 11.9, h: 0, line: { color: "33455E", width: 1 } });
+  slide.addText(
+    "Leadership profile and photograph sourced from AnalystGenius corporate materials. © 2026 AnalystGenius.",
+    {
+      x: 0.72,
+      y: 6.7,
+      w: 11.9,
+      h: 0.4,
+      fontFace: FONT_BODY,
+      fontSize: 9.5,
+      italic: true,
+      color: "8597AC",
+      margin: 0,
+      fit: "shrink",
+    }
+  );
 }
