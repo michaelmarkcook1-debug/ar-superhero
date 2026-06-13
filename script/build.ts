@@ -57,6 +57,27 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Serverless app bundle for the Vercel function (api/index.ts re-exports it).
+  // Every real package (and its subpaths) is kept external so Vercel's
+  // dependency tracer resolves them at runtime — including the native
+  // better-sqlite3 binary — while our own source (server/*, and shared/* via
+  // the @shared alias) is inlined into a single file. This guarantees no
+  // build-time path alias leaks to the Node runtime as a bare specifier.
+  console.log("building serverless app bundle...");
+  const externalAll = allDeps.flatMap((dep) => [dep, `${dep}/*`]);
+  await esbuild({
+    entryPoints: ["server/serverless.ts"],
+    platform: "node",
+    bundle: true,
+    format: "cjs",
+    outfile: "dist/server/app.cjs",
+    define: {
+      "process.env.NODE_ENV": '"production"',
+    },
+    external: externalAll,
+    logLevel: "info",
+  });
 }
 
 buildAll().catch((err) => {

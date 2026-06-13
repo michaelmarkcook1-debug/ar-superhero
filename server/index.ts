@@ -92,11 +92,14 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
+  // SO_REUSEPORT is supported on Linux but throws ENOTSUP on macOS/Windows.
+  // Only request it where it works so the server is portable for local dev.
+  const reusePort = process.platform === "linux";
   httpServer.listen(
     {
       port,
       host: "0.0.0.0",
-      reusePort: true,
+      reusePort,
     },
     () => {
       log(`serving on port ${port}`);

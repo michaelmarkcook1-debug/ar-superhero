@@ -1,6 +1,13 @@
 import pptxgen from "pptxgenjs";
 import { CEO_HEADSHOT_JPEG_BASE64 } from "./ceoHeadshot";
 
+// pptxgenjs ships a CJS module whose `module.exports` is the constructor.
+// ESM↔CJS default-import interop differs by loader: native Node ESM and the
+// esbuild production bundle expose the constructor as the default export,
+// while tsx (esbuild-kit) nests it under `.default`. Resolve both so the
+// server boots under dev (tsx) and prod (bundled) identically.
+const PptxGenJSCtor = ((pptxgen as any)?.default ?? pptxgen) as typeof pptxgen;
+
 // ============================================================================
 // Board-pack PPT toolkit
 //
@@ -39,7 +46,7 @@ export const FONT_HEAD = "Arial";
 export const FONT_BODY = "Arial";
 export const FONT_SERIF = "Georgia"; // used sparingly for cover title
 
-const SHAPES = new pptxgen().ShapeType;
+const SHAPES = new PptxGenJSCtor().ShapeType;
 
 export const SLIDE_W = 13.33;
 export const SLIDE_H = 7.5;
@@ -56,7 +63,7 @@ export type Brand = {
 };
 
 export function newDeck(meta: { title: string; subject: string }): pptxgen {
-  const pptx = new pptxgen();
+  const pptx = new PptxGenJSCtor();
   pptx.defineLayout({ name: "AR_WIDE", width: SLIDE_W, height: SLIDE_H });
   pptx.layout = "AR_WIDE";
   pptx.author = "AnalystGenius AR Superhero";

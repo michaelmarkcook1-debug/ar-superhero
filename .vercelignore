@@ -1,0 +1,9 @@
+qa
+notes
+.playwright-mcp
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+dist
+HANDOFF.md

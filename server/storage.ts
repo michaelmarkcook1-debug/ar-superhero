@@ -52,7 +52,13 @@ import { CONNECTOR_DESCRIPTORS } from "./connectors/registry";
 // option for production).
 // ============================================================================
 
-const sqlite = new Database("data.db");
+// On a serverless host (Vercel) the project filesystem is read-only — only
+// /tmp is writable. The DB holds demo data and is re-seeded by bootstrap() on
+// each cold start, so an ephemeral /tmp copy is fine. Locally it stays in-repo.
+const dbPath =
+  process.env.DB_PATH ?? (process.env.VERCEL ? "/tmp/data.db" : "data.db");
+
+const sqlite = new Database(dbPath);
 sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("foreign_keys = ON");
 

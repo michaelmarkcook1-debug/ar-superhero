@@ -14,3 +14,7 @@ data.db-journal
 
 *.log
 .DS_Store
+
+# Vercel project link (contains project/org IDs) and local editor config
+.vercel
+.claude/
