@@ -139,8 +139,8 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                         : active && lightMode
                         ? "border-[#a88945]/45 bg-[#a88945]/[0.12] text-[#6f5821] shadow-[0_0_28px_-18px_rgba(168,137,69,0.7)]"
                         : lightMode
-                        ? "border-[#061529]/10 bg-white/36 text-[#061529]/56 hover:border-[#061529]/18 hover:bg-white/60 hover:text-[#061529]/85"
-                        : "border-white/8 bg-white/[0.02] text-white/55 hover:border-white/14 hover:bg-white/[0.04] hover:text-white/85"
+                        ? "border-[#061529]/18 bg-white/50 text-[#061529]/75 hover:border-[#061529]/28 hover:bg-white/70 hover:text-[#061529]/95"
+                        : "border-white/12 bg-white/[0.04] text-white/65 hover:border-white/20 hover:bg-white/[0.06] hover:text-white/90"
                     )}
                   >
                     <span
