@@ -13,6 +13,7 @@ import {
   type PersonaId,
 } from "./services/directPersonaDeck";
 import { getIntelligenceMonitor } from "./services/intelligenceMonitor";
+import { AG_RESOURCES, agConfigured, agFetch, type AgResource } from "./services/agApi";
 
 // ============================================================================
 // API routes for the AR Superhero backend.
@@ -23,6 +24,45 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // --------------------------------------------------------------------------
+  // AnalystGenius intelligence API proxy (key stays server-side)
+  // --------------------------------------------------------------------------
+
+  app.get("/api/ag/status", async (_req, res) => {
+    if (!agConfigured()) {
+      return res.json({ configured: false, connected: false, resources: AG_RESOURCES });
+    }
+    const probe = await agFetch("news", { limit: "1" });
+    res.json({
+      configured: true,
+      connected: probe.status >= 200 && probe.status < 300,
+      upstreamStatus: probe.status,
+      resources: AG_RESOURCES,
+    });
+  });
+
+  app.get("/api/ag/:resource", async (req, res) => {
+    const resource = req.params.resource as AgResource;
+    if (!AG_RESOURCES.includes(resource)) {
+      return res.status(404).json({ success: false, error: `Unknown AG resource: ${resource}` });
+    }
+    const query: Record<string, string> = {};
+    for (const [k, v] of Object.entries(req.query)) {
+      if (typeof v === "string") query[k] = v;
+    }
+    const result = await agFetch(resource, query);
+    res.status(result.status).json(result.body);
+  });
+
+  app.get("/api/ag/:resource/:id", async (req, res) => {
+    const resource = req.params.resource as AgResource;
+    if (!AG_RESOURCES.includes(resource)) {
+      return res.status(404).json({ success: false, error: `Unknown AG resource: ${resource}` });
+    }
+    const result = await agFetch(`${resource}/${encodeURIComponent(req.params.id)}`);
+    res.status(result.status).json(result.body);
+  });
+
   // --------------------------------------------------------------------------
   // Integration registry + configs
   // --------------------------------------------------------------------------
