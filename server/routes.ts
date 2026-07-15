@@ -13,7 +13,13 @@ import {
   type PersonaId,
 } from "./services/directPersonaDeck";
 import { getIntelligenceMonitor } from "./services/intelligenceMonitor";
-import { AG_RESOURCES, agConfigured, agFetch, type AgResource } from "./services/agApi";
+import {
+  AG_ENDPOINTS,
+  AG_ENDPOINT_KEYS,
+  agConfigured,
+  agFetch,
+  getEndpoint,
+} from "./services/agApi";
 
 // ============================================================================
 // API routes for the AR Superhero backend.
@@ -29,37 +35,37 @@ export async function registerRoutes(
   // --------------------------------------------------------------------------
 
   app.get("/api/ag/status", async (_req, res) => {
+    const endpoints = AG_ENDPOINTS.map((e) => ({ key: e.key, label: e.label, requiresTicker: e.requiresTicker }));
     if (!agConfigured()) {
-      return res.json({ configured: false, connected: false, resources: AG_RESOURCES });
+      return res.json({ configured: false, connected: false, endpoints });
     }
-    const probe = await agFetch("news", { limit: "1" });
+    // Probe the catalog endpoint (no ticker needed) to confirm the key works.
+    const probe = await agFetch("providers");
     res.json({
       configured: true,
       connected: probe.status >= 200 && probe.status < 300,
       upstreamStatus: probe.status,
-      resources: AG_RESOURCES,
+      endpoints,
     });
   });
 
-  app.get("/api/ag/:resource", async (req, res) => {
-    const resource = req.params.resource as AgResource;
-    if (!AG_RESOURCES.includes(resource)) {
-      return res.status(404).json({ success: false, error: `Unknown AG resource: ${resource}` });
+  app.get("/api/ag/:key", async (req, res) => {
+    const endpoint = getEndpoint(req.params.key);
+    if (!endpoint) {
+      return res
+        .status(404)
+        .json({ success: false, error: `Unknown AG endpoint: ${req.params.key}`, allowed: AG_ENDPOINT_KEYS });
     }
     const query: Record<string, string> = {};
     for (const [k, v] of Object.entries(req.query)) {
       if (typeof v === "string") query[k] = v;
     }
-    const result = await agFetch(resource, query);
-    res.status(result.status).json(result.body);
-  });
-
-  app.get("/api/ag/:resource/:id", async (req, res) => {
-    const resource = req.params.resource as AgResource;
-    if (!AG_RESOURCES.includes(resource)) {
-      return res.status(404).json({ success: false, error: `Unknown AG resource: ${resource}` });
+    if (endpoint.requiresTicker && !query.ticker) {
+      return res
+        .status(400)
+        .json({ success: false, error: `Endpoint '${endpoint.key}' requires a ?ticker= query param` });
     }
-    const result = await agFetch(`${resource}/${encodeURIComponent(req.params.id)}`);
+    const result = await agFetch(endpoint.path, query);
     res.status(result.status).json(result.body);
   });
 

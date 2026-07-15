@@ -8,16 +8,37 @@ const AG_API_BASE =
   process.env.AG_API_BASE ?? "https://ag-api-dev-verdant-echo-2983.fly.dev/api/v1";
 const AG_API_KEY = process.env.AG_API_KEY ?? "";
 
-// Resources confirmed to exist on the upstream API (respond 401 without a key,
-// i.e. they are real routes behind auth). Anything else is rejected locally.
-export const AG_RESOURCES = [
-  "news",
-  "financial",
-  "companies",
-  "providers",
-  "competitors",
+// Honest endpoint allow-list. Sourced from the authoritative AnalystGenius
+// extractor (AG Sourcing Tool: packages/etl/src/extract/analystgenius.ts),
+// which lands this same API into the pipeline.
+//
+// FACTUAL-DATA GATE: per AnalystGenius's own DATA_AUDIT_2026_06.md, two upstream
+// endpoints return real-LOOKING but FABRICATED values and are deliberately NOT
+// ingested — they are excluded here too so the app can never surface them:
+//   - /financial          (priceChangePercent 0/null for all firms — never real)
+//   - /talent/intelligence (hiringTrend/layoffSignal/evidence are synthesized)
+//
+// Each entry: `path` is the upstream path; `requiresTicker` marks the ones that
+// need a ?ticker= query param. `real` flags how much of the payload is trusted.
+export interface AgEndpoint {
+  key: string;
+  path: string;
+  requiresTicker: boolean;
+  label: string;
+}
+
+export const AG_ENDPOINTS: readonly AgEndpoint[] = [
+  { key: "providers", path: "providers", requiresTicker: false, label: "Provider catalog (63 firms)" },
+  { key: "snapshot", path: "providers/snapshot", requiresTicker: true, label: "Per-firm snapshot detail" },
+  { key: "narrative-reality-gap", path: "narrative-reality-gap", requiresTicker: true, label: "Narrative–reality gap signal" },
+  { key: "reputation-trends", path: "reputation-tracker/trends", requiresTicker: true, label: "Reputation trend signal" },
 ] as const;
-export type AgResource = (typeof AG_RESOURCES)[number];
+
+export function getEndpoint(key: string): AgEndpoint | undefined {
+  return AG_ENDPOINTS.find((e) => e.key === key);
+}
+
+export const AG_ENDPOINT_KEYS = AG_ENDPOINTS.map((e) => e.key);
 
 export function agConfigured(): boolean {
   return AG_API_KEY.length > 0;
