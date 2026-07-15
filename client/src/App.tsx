@@ -28,6 +28,12 @@ import Learning from "@/pages/Learning";
 import Integrations from "@/pages/Integrations";
 import Placeholder from "@/pages/Placeholder";
 
+// AnalystGenius platform pages — live data from the AG intelligence API
+import PlatformPulse from "@/pages/platform/PlatformPulse";
+import PlatformFinancial from "@/pages/platform/PlatformFinancial";
+import PlatformCompetitive from "@/pages/platform/PlatformCompetitive";
+import PlatformReputation from "@/pages/platform/PlatformReputation";
+
 function CockpitRouter() {
   return (
     <Switch>
@@ -51,32 +57,15 @@ function LegacyRouter() {
       <Route path="/admin/leader-lens" component={LeaderLens} />
       <Route path="/admin/learning" component={Learning} />
       <Route path="/admin/integrations" component={Integrations} />
-      <Route path="/admin/platform/pulse">
+      <Route path="/admin/platform/pulse" component={PlatformPulse} />
+      <Route path="/admin/platform/financial" component={PlatformFinancial} />
+      <Route path="/admin/platform/competitive" component={PlatformCompetitive} />
+      <Route path="/admin/platform/reputation" component={PlatformReputation} />
+      <Route path="/admin/platform/deep-research">
         <Placeholder
           eyebrow="AnalystGenius platform"
-          title="The Pulse"
-          description="Market intelligence stream across IT services. Lives in the wider AnalystGenius platform — outside the AR Superhero MVP scope."
-        />
-      </Route>
-      <Route path="/admin/platform/financial">
-        <Placeholder
-          eyebrow="AnalystGenius platform"
-          title="Financial Snapshot"
-          description="Vendor financial overview across the IT services peer set. Lives in the wider AnalystGenius platform."
-        />
-      </Route>
-      <Route path="/admin/platform/competitive">
-        <Placeholder
-          eyebrow="AnalystGenius platform"
-          title="Competitive Intel"
-          description="Cross-vendor narratives. AR Superhero surfaces only the slice directly relevant to active analyst engagements."
-        />
-      </Route>
-      <Route path="/admin/platform/reputation">
-        <Placeholder
-          eyebrow="AnalystGenius platform"
-          title="Reputation Tracker"
-          description="Sentiment and visibility across analyst houses and trade press."
+          title="Deep Research"
+          description="On-demand analyst-grade research briefs. Lives in the wider AnalystGenius platform."
         />
       </Route>
       <Route component={NotFound} />

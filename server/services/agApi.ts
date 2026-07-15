@@ -28,7 +28,7 @@ export interface AgEndpoint {
 }
 
 export const AG_ENDPOINTS: readonly AgEndpoint[] = [
-  { key: "providers", path: "providers", requiresTicker: false, label: "Provider catalog (63 firms)" },
+  { key: "providers", path: "providers", requiresTicker: false, label: "Provider catalog" },
   { key: "snapshot", path: "providers/snapshot", requiresTicker: true, label: "Per-firm snapshot detail" },
   { key: "narrative-reality-gap", path: "narrative-reality-gap", requiresTicker: true, label: "Narrative–reality gap signal" },
   { key: "reputation-trends", path: "reputation-tracker/trends", requiresTicker: true, label: "Reputation trend signal" },

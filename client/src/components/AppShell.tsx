@@ -26,41 +26,41 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: "AR Superhero",
     items: [
-      { href: "/command-centre", label: "Command Centre", icon: LayoutGrid },
-      { href: "/workstreams", label: "Workstreams", icon: Activity, badge: "5" },
-      { href: "/analysts", label: "Analyst Landscape", icon: Users, badge: "9" },
-      { href: "/evidence", label: "Evidence Library", icon: Library },
-      { href: "/leader-lens", label: "Leader Lens", icon: ClipboardList },
-      { href: "/learning", label: "Learning Queue", icon: GraduationCap, badge: "4" },
-      { href: "/integrations", label: "Integrations", icon: Plug },
+      { href: "/admin/command-centre", label: "Command Centre", icon: LayoutGrid },
+      { href: "/admin/workstreams", label: "Workstreams", icon: Activity, badge: "5" },
+      { href: "/admin/analysts", label: "Analyst Landscape", icon: Users, badge: "9" },
+      { href: "/admin/evidence", label: "Evidence Library", icon: Library },
+      { href: "/admin/leader-lens", label: "Leader Lens", icon: ClipboardList },
+      { href: "/admin/learning", label: "Learning Queue", icon: GraduationCap, badge: "4" },
+      { href: "/admin/integrations", label: "Integrations", icon: Plug },
     ],
   },
   {
     group: "AnalystGenius platform",
     items: [
-      { href: "/platform/pulse", label: "The Pulse", icon: Activity },
-      { href: "/platform/financial", label: "Financial Snapshot", icon: LayoutGrid },
-      { href: "/platform/competitive", label: "Competitive Intel", icon: Users },
-      { href: "/platform/reputation", label: "Reputation Tracker", icon: Library },
+      { href: "/admin/platform/pulse", label: "The Pulse", icon: Activity },
+      { href: "/admin/platform/financial", label: "Financial Snapshot", icon: LayoutGrid },
+      { href: "/admin/platform/competitive", label: "Competitive Intel", icon: Users },
+      { href: "/admin/platform/reputation", label: "Reputation Tracker", icon: Library },
     ],
   },
 ];
 
 const WORKSPACE_TABS: NavItem[] = [
-  { href: "/command-centre", label: "Command", icon: LayoutGrid },
-  { href: "/workstreams", label: "Workstreams", icon: Activity, badge: "5" },
-  { href: "/analysts", label: "Analysts", icon: Users, badge: "9" },
-  { href: "/evidence", label: "Evidence", icon: Library },
-  { href: "/leader-lens", label: "Leader Lens", icon: ClipboardList },
-  { href: "/learning", label: "Learning", icon: GraduationCap, badge: "4" },
-  { href: "/integrations", label: "Integrations", icon: Plug },
+  { href: "/admin/command-centre", label: "Command", icon: LayoutGrid },
+  { href: "/admin/workstreams", label: "Workstreams", icon: Activity, badge: "5" },
+  { href: "/admin/analysts", label: "Analysts", icon: Users, badge: "9" },
+  { href: "/admin/evidence", label: "Evidence", icon: Library },
+  { href: "/admin/leader-lens", label: "Leader Lens", icon: ClipboardList },
+  { href: "/admin/learning", label: "Learning", icon: GraduationCap, badge: "4" },
+  { href: "/admin/integrations", label: "Integrations", icon: Plug },
 ];
 
 const PLATFORM_TABS: NavItem[] = [
-  { href: "/platform/pulse", label: "The Pulse", icon: Activity },
-  { href: "/platform/financial", label: "Financials", icon: LayoutGrid },
-  { href: "/platform/competitive", label: "Competitive", icon: Users },
-  { href: "/platform/reputation", label: "Reputation", icon: Library },
+  { href: "/admin/platform/pulse", label: "The Pulse", icon: Activity },
+  { href: "/admin/platform/financial", label: "Financials", icon: LayoutGrid },
+  { href: "/admin/platform/competitive", label: "Competitive", icon: Users },
+  { href: "/admin/platform/reputation", label: "Reputation", icon: Library },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -96,8 +96,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const active =
-                    item.href === "/command-centre"
-                      ? location === "/command-centre"
+                    item.href === "/admin/command-centre"
+                      ? location === "/admin/command-centre"
                       : location === item.href || location.startsWith(item.href + "/");
                   const Icon = item.icon;
                   return (
@@ -225,8 +225,8 @@ function TabGroup({
       </span>
       {tabs.map((tab) => {
         const active =
-          tab.href === "/command-centre"
-            ? location === "/command-centre"
+          tab.href === "/admin/command-centre"
+            ? location === "/admin/command-centre"
             : location === tab.href || location.startsWith(tab.href + "/");
         const Icon = tab.icon;
         return (
@@ -263,13 +263,17 @@ function TabGroup({
 
 function Breadcrumb({ location }: { location: string }) {
   const map: Record<string, string> = {
-    "/command-centre": "Command Centre",
-    "/workstreams": "Workstreams",
-    "/analysts": "Analyst Landscape",
-    "/evidence": "Evidence Library",
-    "/leader-lens": "Leader Lens",
-    "/learning": "Learning Queue",
-    "/integrations": "Integrations",
+    "/admin/command-centre": "Command Centre",
+    "/admin/workstreams": "Workstreams",
+    "/admin/analysts": "Analyst Landscape",
+    "/admin/evidence": "Evidence Library",
+    "/admin/leader-lens": "Leader Lens",
+    "/admin/learning": "Learning Queue",
+    "/admin/integrations": "Integrations",
+    "/admin/platform/pulse": "The Pulse",
+    "/admin/platform/financial": "Financial Snapshot",
+    "/admin/platform/competitive": "Competitive Intel",
+    "/admin/platform/reputation": "Reputation Tracker",
   };
   const label = map[location] || "Command Centre";
   return (

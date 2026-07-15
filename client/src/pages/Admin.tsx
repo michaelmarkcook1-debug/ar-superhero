@@ -1,6 +1,33 @@
 import { Link } from "wouter";
-import { Settings, Database, Plug, Users, Library, ClipboardList, GraduationCap, Activity } from "lucide-react";
+import { Settings, Database, Plug, Users, Library, ClipboardList, GraduationCap, Activity, LineChart, Swords, Gauge } from "lucide-react";
 import { Pane, Eyebrow, SectionTitle, Glyph } from "@/components/cockpit/atoms";
+
+const PLATFORM_LINKS = [
+  {
+    href: "/admin/platform/pulse",
+    label: "The Pulse",
+    icon: Activity,
+    detail: "Live market intelligence across all 65 tracked IT & business-services providers — assessment and AI-readiness scores.",
+  },
+  {
+    href: "/admin/platform/financial",
+    label: "Financial Snapshot",
+    icon: LineChart,
+    detail: "Reported financials, revenue trend, strengths and risks for any provider — from the AnalystGenius engine.",
+  },
+  {
+    href: "/admin/platform/competitive",
+    label: "Competitive Intel",
+    icon: Swords,
+    detail: "Narrative–reality gap: how the analyst-house story compares to measured performance, with top divergences.",
+  },
+  {
+    href: "/admin/platform/reputation",
+    label: "Reputation Tracker",
+    icon: Gauge,
+    detail: "Sentiment across analyst, media, social, customer and employee lenses over time, with AI-generated reads.",
+  },
+];
 
 const ADMIN_LINKS = [
   {
@@ -91,6 +118,31 @@ export default function Admin() {
                   <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">
                     {item.detail}
                   </p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mb-12">
+        <SectionTitle eyebrow="AnalystGenius platform" title="Live provider intelligence" />
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {PLATFORM_LINKS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                data-testid={`platform-link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                className="group flex items-start gap-4 rounded-xl border border-[#a88945]/[0.14] bg-[#a88945]/[0.03] p-5 transition hover:border-[#a88945]/[0.3] hover:bg-[#a88945]/[0.06]"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#a88945]/[0.18] bg-[#a88945]/[0.06] text-[#d5b46b] transition">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[14px] font-semibold tracking-tight text-[#e7e3d8]">{item.label}</div>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-white/50">{item.detail}</p>
                 </div>
               </Link>
             );
