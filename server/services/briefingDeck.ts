@@ -14,6 +14,7 @@ import {
   PALETTE,
   type Brand,
 } from "./boardPack";
+import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
 
 // ============================================================================
 // Succeed tab — AR analyst assessment "defence pack".
@@ -233,6 +234,7 @@ export async function createBriefingDeck(momentId: string, vendorId = "capgemini
       "AnalystGenius-driven readiness and evidence view. Built from AG demo data; missing fields are shown as open inputs, not inferred. No predicted rating, rank, or outcome.",
   });
 
+  await addAgIntelligenceSlides(pptx, brand, idx);
   addReadinessSummary(pptx, brand, moment, gaps, idx);
   addWhyMatters(pptx, brand, moment, idx);
   addReadinessSnapshot(pptx, brand, moment, idx);

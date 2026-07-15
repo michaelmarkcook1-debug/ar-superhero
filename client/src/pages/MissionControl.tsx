@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Activity, AlertTriangle, Users, Sparkles } from "lucide-react";
 import {
   MODES,
@@ -24,10 +25,38 @@ import {
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
 
+type ArBriefItem = {
+  id: string;
+  title: string;
+  detail: string;
+  source: string;
+  severity?: "HIGH" | "MEDIUM" | "LOW";
+  metric?: string;
+};
+type ArBrief = {
+  live: boolean;
+  generatedAt: string;
+  focal?: { ticker: string; name: string };
+  emergencies: ArBriefItem[];
+  highlights: ArBriefItem[];
+  actions: ArBriefItem[];
+  sourceNote: string;
+};
+
 export default function MissionControl() {
-  const changed = BRIEF_ITEMS.filter((b) => b.category === "changed");
-  const exposed = BRIEF_ITEMS.filter((b) => b.category === "exposed");
-  const action = BRIEF_ITEMS.filter((b) => b.category === "action");
+  const { data: arBrief } = useQuery<ArBrief>({ queryKey: ["/api/ag/ar-brief"] });
+  const live = Boolean(arBrief?.live);
+
+  // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
+  const changed = live
+    ? arBrief!.highlights
+    : BRIEF_ITEMS.filter((b) => b.category === "changed");
+  const exposed = live
+    ? arBrief!.emergencies
+    : BRIEF_ITEMS.filter((b) => b.category === "exposed");
+  const action = live
+    ? arBrief!.actions
+    : BRIEF_ITEMS.filter((b) => b.category === "action");
 
   const exposedMoments = MOMENTS.filter((m) =>
     ["Weak", "Missing", "Unsupported"].includes(m.readiness)
@@ -59,14 +88,27 @@ export default function MissionControl() {
               What changed in the analyst world, where the business is exposed,
               who needs a briefing, and what AR can prove right now — composed
               from the AnalystGenius intelligence layer and your active moments.
+              {live && arBrief?.focal && (
+                <span className="mt-2 block text-[13px] text-[#d5b46b]/90">
+                  Live signals for {arBrief.focal.name} — every item names the AnalystGenius field it is derived from.
+                </span>
+              )}
             </p>
           </div>
           <div className="hidden shrink-0 text-right md:block">
             <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/40">
-              Briefing generated
+              {live ? "Live brief · AnalystGenius" : "Briefing generated"}
             </div>
             <div className="mt-1.5 font-mono text-[12px] text-[#d5b46b]">
-              13 May 2026 · 21:54 BST
+              {live && arBrief
+                ? new Date(arBrief.generatedAt).toLocaleString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Demo view · seeded content"}
             </div>
           </div>
         </div>
@@ -318,6 +360,14 @@ export default function MissionControl() {
 // Local components
 // ============================================================================
 
+type BucketItem = {
+  id: string;
+  title: string;
+  detail: string;
+  source: string;
+  severity?: "HIGH" | "MEDIUM" | "LOW";
+};
+
 function BriefBucket({
   glyph,
   tone,
@@ -328,7 +378,7 @@ function BriefBucket({
   glyph: string;
   tone: "gold" | "teal";
   label: string;
-  items: typeof BRIEF_ITEMS;
+  items: BucketItem[];
   icon: React.ReactNode;
 }) {
   return (
@@ -360,8 +410,11 @@ function BriefBucket({
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/55">
               {item.detail}
             </p>
-            <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
-              {item.source}
+            <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
+              <span className="truncate">{item.source}</span>
+              {item.severity === "HIGH" && (
+                <span className="shrink-0 rounded-sm border border-[#d5b46b]/40 px-1 py-px text-[#d5b46b]">high</span>
+              )}
             </div>
           </li>
         ))}

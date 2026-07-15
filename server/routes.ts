@@ -20,6 +20,7 @@ import {
   agFetch,
   getEndpoint,
 } from "./services/agApi";
+import { getArBrief } from "./services/agIntelligence";
 
 // ============================================================================
 // API routes for the AR Superhero backend.
@@ -47,6 +48,13 @@ export async function registerRoutes(
       upstreamStatus: probe.status,
       endpoints,
     });
+  });
+
+  // Derived AR brief: emergencies, highlights, stakeholder actions.
+  // Registered before the generic :key proxy so "ar-brief" is not shadowed.
+  app.get("/api/ag/ar-brief", async (_req, res) => {
+    const brief = await getArBrief();
+    res.json(brief);
   });
 
   app.get("/api/ag/:key", async (req, res) => {

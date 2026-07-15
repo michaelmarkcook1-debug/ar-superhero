@@ -14,6 +14,7 @@ import {
   PALETTE,
   type Brand,
 } from "./boardPack";
+import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
 
 // ============================================================================
 // Direct tab — persona analyst-influence briefing packs.
@@ -445,6 +446,8 @@ export async function createDirectPersonaDeck(
       fontSize: 10.5,
     });
   }
+
+  await addAgIntelligenceSlides(pptx, brand, idx);
 
   for (const persona of personas) {
     addPersonaSection(pptx, brand, persona, idx);
