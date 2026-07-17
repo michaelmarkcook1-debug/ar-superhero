@@ -31,10 +31,13 @@ export function Pane({
   return (
     <Tag
       className={cn(
-        "relative rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.025] to-white/[0.008] backdrop-blur-sm",
-        "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_24px_60px_-32px_rgba(0,0,0,0.7)]",
+        // Surfaces are shaded in the green family (sampled from the möbius
+        // hero) rather than veiled in white — tonal depth, not grey haze.
+        "relative rounded-2xl border border-[#3d8f6d]/[0.16] backdrop-blur-sm",
+        "bg-gradient-to-b from-[#1a5540]/[0.30] via-[#12402f]/[0.16] to-[#0a1f18]/[0.10]",
+        "shadow-[inset_0_1px_0_0_rgba(120,190,158,0.07),0_24px_60px_-32px_rgba(4,12,9,0.85)]",
         glow === "gold" &&
-          "before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-[radial-gradient(circle_at_15%_-30%,rgba(168,137,69,0.18),transparent_55%)]",
+          "before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-[radial-gradient(circle_at_15%_-30%,rgba(168,137,69,0.20),transparent_55%)]",
         glow === "teal" &&
           "before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:bg-[radial-gradient(circle_at_85%_-30%,rgba(0,167,183,0.16),transparent_55%)]",
         className
@@ -186,7 +189,7 @@ export function ReadinessBar({
               "rounded-[2px] transition",
               h,
               w,
-              i <= fill[band] ? tone[band] : "bg-white/8"
+              i <= fill[band] ? tone[band] : "bg-[#1a5540]/30"
             )}
           />
         ))}
@@ -216,7 +219,7 @@ export function SourceTag({
               "rounded-full border px-1.5 py-0.5 text-[9.5px] tracking-[0.18em]",
               tag === "demo" && "border-[#d5b46b]/30 text-[#d5b46b]",
               tag === "external signal" && "border-[#63d7de]/30 text-[#63d7de]",
-              tag === "internal" && "border-white/12 text-white/40"
+              tag === "internal" && "border-[#3d8f6d]/26 text-white/40"
             )}
           >
             {tag}

@@ -61,13 +61,13 @@ export default function AssessmentPlaybooks() {
             type="button"
             data-testid="button-evidence-boundary"
             onClick={() => setShowBoundary((v) => !v)}
-            className="shrink-0 rounded-full border border-white/12 px-3 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45 transition hover:text-white/75"
+            className="shrink-0 rounded-full border border-[#3d8f6d]/26 px-3 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45 transition hover:text-white/75"
           >
             {showBoundary ? "Hide" : "Evidence boundary"}
           </button>
         </div>
         {showBoundary && (
-          <ul className="mt-4 space-y-1.5 border-t border-white/[0.06] pt-4">
+          <ul className="mt-4 space-y-1.5 border-t border-[#3d8f6d]/[0.16] pt-4">
             {EVIDENCE_BOUNDARY.map((line, i) => (
               <li key={i} className="flex gap-2.5 text-[12px] leading-relaxed text-white/50">
                 <ChevronRight className="mt-1 h-3 w-3 shrink-0 text-white/25" />
@@ -89,7 +89,7 @@ export default function AssessmentPlaybooks() {
             className={
               p.id === houseId
                 ? "inline-flex items-center gap-2 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-3.5 py-2 text-[12px] font-medium text-[#f0dca8]"
-                : "inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.02] px-3.5 py-2 text-[12px] font-medium text-white/55 transition hover:border-white/[0.16] hover:text-white/85"
+                : "inline-flex items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3.5 py-2 text-[12px] font-medium text-white/55 transition hover:border-[#3d8f6d]/32 hover:text-white/85"
             }
           >
             {p.house}
@@ -138,7 +138,7 @@ export default function AssessmentPlaybooks() {
                   className={
                     s.id === stageId
                       ? "rounded-xl border border-[#00a7b7]/40 bg-[#00a7b7]/[0.08] px-3 py-3 text-left"
-                      : "rounded-xl border border-white/[0.06] bg-white/[0.015] px-3 py-3 text-left transition hover:border-white/[0.14]"
+                      : "rounded-xl border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.16] px-3 py-3 text-left transition hover:border-[#3d8f6d]/30"
                   }
                 >
                   <div className="flex items-center justify-between">
@@ -156,7 +156,7 @@ export default function AssessmentPlaybooks() {
                         className={
                           g.rank === 1
                             ? "rounded-sm border border-[#a88945]/45 bg-[#a88945]/[0.12] px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-[#f0dca8]"
-                            : "rounded-sm border border-white/10 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/40"
+                            : "rounded-sm border border-[#3d8f6d]/24 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/40"
                         }
                         title="Directional influence rank within this house (1 = greatest practical influence). Not a published weight."
                       >
@@ -216,9 +216,9 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
           </span>
         </div>
         <div className="flex-1">
-          <div className="relative h-32 rounded-lg border border-white/[0.08] bg-white/[0.015]">
-            <div className="absolute inset-x-0 top-1/2 h-px bg-white/[0.06]" />
-            <div className="absolute inset-y-0 left-1/2 w-px bg-white/[0.06]" />
+          <div className="relative h-32 rounded-lg border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.16]">
+            <div className="absolute inset-x-0 top-1/2 h-px bg-[#1a5540]/[0.34]" />
+            <div className="absolute inset-y-0 left-1/2 w-px bg-[#1a5540]/[0.34]" />
             <div className="absolute right-2 top-2 rounded-md border border-[#a88945]/40 bg-[#a88945]/[0.12] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[#f0dca8]">
               Leadership
             </div>
@@ -242,7 +242,7 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
         {playbook.leadershipFramework.length ? (
           <ol className="space-y-2">
             {playbook.leadershipFramework.map((step, i) => (
-              <li key={i} className="flex gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3.5 py-2.5">
+              <li key={i} className="flex gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-2.5">
                 <span className="font-mono text-[10px] tracking-[0.22em] text-[#d5b46b]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -270,10 +270,6 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
             ))}
           </ul>
         </div>
-      </div>
-
-      <div className="mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30">
-        Structure: published assessment definitions · Guidance: owner playbook documents
       </div>
     </Pane>
   );
@@ -309,7 +305,7 @@ function CrossHouseFramework() {
       </p>
       <ol className="space-y-3">
         {CROSS_HOUSE_FRAMEWORK.map((item, i) => (
-          <li key={i} className="rounded-lg border border-white/[0.05] bg-white/[0.015] px-3.5 py-3">
+          <li key={i} className="rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-3">
             <div className="flex gap-3">
               <span className="font-mono text-[10px] tracking-[0.22em] text-[#63d7de]">
                 {String(i + 1).padStart(2, "0")}
@@ -348,7 +344,7 @@ function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; g
       {blocks.map(
         (b) =>
           guidance[b.key].length > 0 && (
-            <div key={b.key} className="rounded-xl border border-white/[0.05] bg-white/[0.015] p-4">
+            <div key={b.key} className="rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] p-4">
               <div className={`mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.18em] ${b.tone}`}>
                 {b.label}
               </div>
@@ -372,7 +368,7 @@ function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; g
 function AwaitingContent({ what, tall = false }: { what: string; tall?: boolean }) {
   return (
     <div
-      className={`flex items-center gap-3 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.01] px-4 ${
+      className={`flex items-center gap-3 rounded-xl border border-dashed border-white/[0.12] bg-[#1a5540]/[0.12] px-4 ${
         tall ? "py-10" : "py-5"
       }`}
       data-testid="awaiting-content"

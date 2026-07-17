@@ -126,7 +126,7 @@ export default function Enable() {
       {/* Sub-tabs */}
       <section className="mb-10">
         <div
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] p-1"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] p-1"
           data-testid="enable-tabs"
         >
           <SubTab id="sell" current={tab} onClick={setTab} label="Sell" />
@@ -180,7 +180,7 @@ function SubTab({
       data-testid={`tab-${id}`}
       className={`rounded-full px-5 py-2 text-[12.5px] font-medium uppercase tracking-[0.14em] transition ${
         active
-          ? "bg-[#a88945] text-[#0a0d14]"
+          ? "bg-[#a88945] text-[#0c1a15]"
           : "text-white/55 hover:text-white/85"
       }`}
     >
@@ -201,14 +201,14 @@ function SellContent() {
   return (
     <div>
       {/* Top numbers */}
-      <section className="mb-12 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04]">
-        <div className="bg-[#0a0d14] p-6">
+      <section className="mb-12 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.26]">
+        <div className="bg-[#0c1a15] p-6">
           <NumberMark value={String(safeCount)} label="Sales-safe proof" sub="Cleared for buyers" />
         </div>
-        <div className="bg-[#0a0d14] p-6">
+        <div className="bg-[#0c1a15] p-6">
           <NumberMark value={String(restrictedCount)} label="Restricted reuse" sub="Audience controls apply" />
         </div>
-        <div className="bg-[#0a0d14] p-6">
+        <div className="bg-[#0c1a15] p-6">
           <NumberMark
             value={String(unsupportedCount + CLAIMS_TO_AVOID.length)}
             label="Claims to avoid"
@@ -222,7 +222,7 @@ function SellContent() {
         <SectionTitle
           eyebrow="Approved proof"
           title="Snippets that are safe to send into a deal."
-          description="Every item here is source-traced. Restricted items show their permitted audience."
+          description="Restricted items show their permitted audience."
         />
         <Pane className="overflow-hidden p-0">
           {SELL_PROOF.map((p, i) => (
@@ -370,7 +370,7 @@ function PresenceContent() {
               </div>
               <p className="text-[13.5px] leading-relaxed text-white/65">{n.detail}</p>
               {n.internalOnly && (
-                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.02] px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
                   <Shield className="h-2.5 w-2.5" />
                   Internal guidance only
                 </div>
@@ -444,7 +444,7 @@ function PresenceContent() {
                 <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
                   {o.owner}
                 </span>
-                <span className="rounded-full border border-white/[0.08] bg-white/[0.02] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+                <span className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
                   Internal · Briefing-grade
                 </span>
               </div>

@@ -74,8 +74,8 @@ export default function FutureBriefingOpportunities() {
                 key={ev.id}
                 data-testid={`future-event-${ev.id}`}
                 className={cn(
-                  "flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] px-3.5 py-3 transition",
-                  ev.isUrgent ? "border-[#d5b46b]/20 bg-[#d5b46b]/[0.04]" : "hover:bg-white/[0.025]"
+                  "flex items-start gap-3 rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-3 transition",
+                  ev.isUrgent ? "border-[#d5b46b]/20 bg-[#d5b46b]/[0.04]" : "hover:bg-[#1a5540]/[0.20]"
                 )}
               >
                 {/* Days pill */}

@@ -138,14 +138,12 @@ export default function BriefingComposer() {
             />
           </div>
 
-          <p className="mb-4 text-[12px] leading-relaxed text-white/45">
-            Uploads are parsed for verbatim slide text and tagged to{" "}
-            <span className="text-white/70">{playbook.house}</span>. Tick decks to reuse their content in the
-            composed briefing — every reused slide carries its source filename and slide number.
+          <p className="mb-4 text-[13px] leading-relaxed text-white/50">
+            Tick decks to reuse their slides in the composed briefing.
           </p>
 
           {decks.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/[0.12] bg-white/[0.01] px-4 py-8 text-center">
+            <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#1a5540]/[0.12] px-4 py-8 text-center">
               <div className="text-[12.5px] font-medium text-white/55">No decks ingested yet.</div>
               <div className="mt-1 text-[11.5px] text-white/35">
                 Upload previous analyst briefing decks (.pptx) to build the reuse library.
@@ -158,7 +156,7 @@ export default function BriefingComposer() {
                 return (
                   <li
                     key={d.id}
-                    className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5"
+                    className="flex items-center gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
                   >
                     <input
                       type="checkbox"
@@ -190,10 +188,6 @@ export default function BriefingComposer() {
               })}
             </ul>
           )}
-
-          <div className="mt-4 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30">
-            Extraction is verbatim — no rewriting. Demo host resets the library on cold start.
-          </div>
         </Pane>
 
         {/* Right — variables + compose */}
@@ -213,7 +207,7 @@ export default function BriefingComposer() {
                 className={
                   p.id === houseId
                     ? "rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-3 py-1.5 text-[11.5px] font-medium text-[#f0dca8]"
-                    : "rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[11.5px] text-white/55 transition hover:text-white/85"
+                    : "rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 text-[11.5px] text-white/55 transition hover:text-white/85"
                 }
               >
                 {p.house}
@@ -254,7 +248,7 @@ export default function BriefingComposer() {
                     className={
                       m === lengthMins
                         ? "rounded-full border border-[#00a7b7]/40 bg-[#00a7b7]/[0.08] px-3.5 py-1.5 text-[11.5px] font-medium text-[#63d7de]"
-                        : "rounded-full border border-white/[0.08] px-3.5 py-1.5 text-[11.5px] text-white/55 transition hover:text-white/85"
+                        : "rounded-full border border-[#3d8f6d]/[0.20] px-3.5 py-1.5 text-[11.5px] text-white/55 transition hover:text-white/85"
                     }
                   >
                     {m} min
@@ -318,20 +312,14 @@ export default function BriefingComposer() {
 
           <HairLine className="my-5" />
 
-          {/* Composition contents — honest layer summary */}
-          <ul className="mb-5 space-y-1.5 text-[12px] leading-relaxed text-white/55">
+          {/* What the composed deck contains */}
+          <ul className="mb-5 space-y-1.5 text-[12.5px] leading-relaxed text-white/55">
+            <li>· {playbook.house} targeting structure</li>
+            <li>· Live signal, competitive and gap-analysis slides</li>
             <li>
-              · {playbook.house} targeting structure{" "}
-              {playbook.status === "pending" && (
-                <span className="text-white/35">(guidance slots await the playbook document)</span>
-              )}
+              · {selectedDecks.length} prior deck{selectedDecks.length === 1 ? "" : "s"} reused
             </li>
-            <li>· Live AnalystGenius signal, competitive and gap-analysis slides</li>
-            <li>
-              · {selectedDecks.length} prior deck{selectedDecks.length === 1 ? "" : "s"} selected for verbatim reuse
-              (topic-ranked, provenance-tagged)
-            </li>
-            <li>· Explicit OPEN INPUT slides for client evidence, roadmap and commercial proof</li>
+            <li>· Open-input slides for client evidence &amp; roadmap</li>
           </ul>
 
           {error && (
@@ -345,7 +333,7 @@ export default function BriefingComposer() {
             data-testid="button-compose"
             onClick={() => void handleCompose()}
             disabled={!canCompose}
-            className="inline-flex items-center gap-2 rounded-full bg-[#a88945] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0a0d14] transition hover:bg-[#d5b46b] disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-[#a88945] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0c1a15] transition hover:bg-[#d5b46b] disabled:opacity-40"
           >
             {composing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
             Compose {playbook.house} briefing deck
@@ -357,7 +345,7 @@ export default function BriefingComposer() {
 }
 
 const inputCls =
-  "h-9 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#a88945]/40 focus:outline-none";
+  "h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#a88945]/40 focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

@@ -51,7 +51,7 @@ function ApprovalBadge({ approval }: { approval: DeliverableTemplate["approval"]
   const tones: Record<string, string> = {
     "Source-traced": "border-[#a5d8ab]/30 text-[#a5d8ab] bg-[#a5d8ab]/[0.05]",
     "NDA controls": "border-[#e5c989]/30 text-[#e5c989] bg-[#e5c989]/[0.05]",
-    "Internal-only": "border-white/[0.12] text-white/55 bg-white/[0.02]",
+    "Internal-only": "border-white/[0.12] text-white/55 bg-[#1a5540]/[0.18]",
   };
   return (
     <span
@@ -134,7 +134,7 @@ function DeliverableCard({
           {template.composedFrom.map((c) => (
             <span
               key={c}
-              className="rounded-full border border-white/[0.08] bg-white/[0.015] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
+              className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.16] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
             >
               {c}
             </span>
@@ -205,7 +205,7 @@ function ExportButton({
         type="button"
         onClick={() => onExport(template.id, format)}
         data-testid={`export-${template.id}-${format}`}
-        className="group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0a0d14] transition"
+        className="group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0c1a15] transition"
         style={{ background: accentLight }}
       >
         <Download className="h-3 w-3" />
@@ -220,7 +220,7 @@ function ExportButton({
       onClick={() => onExport(template.id, format)}
       data-testid={`export-${template.id}-${format}`}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition hover:bg-white/[0.04]",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition hover:bg-[#1a5540]/[0.26]",
         meta.ring,
         meta.tone
       )}
@@ -297,7 +297,7 @@ export function DeliverablesPanel({
       {toast && (
         <div
           data-testid="deliverable-toast"
-          className="pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/[0.12] bg-[#0a0d14]/95 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur"
+          className="pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/[0.12] bg-[#0c1a15]/95 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur"
         >
           <span className="inline-flex items-center gap-2">
             <Check className="h-3.5 w-3.5 text-[#a5d8ab]" />

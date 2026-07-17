@@ -35,8 +35,8 @@ const SEVERITY: Record<
   LOW: {
     dot: "bg-white/30",
     label: "text-white/55",
-    chip: "border-white/12 bg-white/[0.03] text-white/55",
-    rowHover: "hover:bg-white/[0.025]",
+    chip: "border-[#3d8f6d]/26 bg-[#1a5540]/[0.22] text-white/55",
+    rowHover: "hover:bg-[#1a5540]/[0.20]",
   },
 };
 
@@ -121,7 +121,7 @@ export default function CurrentBriefingOpportunities() {
                     onClick={() => setSelected(f)}
                     data-testid={`current-finding-${f.id}`}
                     className={cn(
-                      "w-full rounded-xl border border-white/[0.05] bg-white/[0.015] px-3.5 py-3 text-left transition",
+                      "w-full rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-3 text-left transition",
                       cfg.rowHover
                     )}
                   >
@@ -168,7 +168,7 @@ export default function CurrentBriefingOpportunities() {
               type="button"
               onClick={() => setShowOlder((v) => !v)}
               data-testid="current-briefing-older-toggle"
-              className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-left transition hover:bg-white/[0.02]"
+              className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-left transition hover:bg-[#1a5540]/[0.18]"
             >
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
                 Older signals — background context ({older.length})
@@ -216,7 +216,7 @@ export default function CurrentBriefingOpportunities() {
 
       {/* Detail modal */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-xl border-white/10 bg-[#0a0d14] text-[#e7e3d8]" data-testid="current-finding-modal">
+        <DialogContent className="max-w-xl border-[#3d8f6d]/24 bg-[#0c1a15] text-[#e7e3d8]" data-testid="current-finding-modal">
           {selected && (
             <>
               <DialogHeader>
@@ -224,7 +224,7 @@ export default function CurrentBriefingOpportunities() {
                   <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]", SEVERITY[selected.severity].chip)}>
                     {selected.category}
                   </span>
-                  <span className="rounded-full border border-white/12 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/45">
+                  <span className="rounded-full border border-[#3d8f6d]/26 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/45">
                     {formatDate(selected.date)}
                   </span>
                   <span className={cn("rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]", SEVERITY[selected.severity].chip)}>

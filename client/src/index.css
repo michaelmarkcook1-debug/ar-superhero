@@ -215,8 +215,8 @@
       radial-gradient(circle at 18% 22%, rgba(168, 137, 69, 0.36) 0 1px, transparent 1.7px),
       radial-gradient(circle at 78% 28%, rgba(0, 167, 183, 0.34) 0 1px, transparent 1.8px),
       radial-gradient(circle at 70% 72%, rgba(168, 137, 69, 0.24) 0 1px, transparent 1.8px),
-      linear-gradient(90deg, rgba(6, 21, 41, 0.06) 1px, transparent 1px),
-      linear-gradient(rgba(6, 21, 41, 0.05) 1px, transparent 1px);
+      linear-gradient(90deg, rgba(18, 61, 44, 0.06) 1px, transparent 1px),
+      linear-gradient(rgba(18, 61, 44, 0.05) 1px, transparent 1px);
     background-size: 96px 96px, 132px 132px, 118px 118px, 46px 46px, 46px 46px;
   }
 
@@ -317,7 +317,7 @@
 
   .mission-light ::selection {
     background: rgba(168, 137, 69, 0.26);
-    color: #061529;
+    color: #123d2c;
   }
 
   input[type='search']::-webkit-search-cancel-button {

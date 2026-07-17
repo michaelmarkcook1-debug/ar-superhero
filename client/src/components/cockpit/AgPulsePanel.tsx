@@ -74,7 +74,7 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
       {ga.topDivergences.length > 0 && (
         <div className="mb-6 space-y-4">
           {ga.topDivergences.map((d) => (
-            <div key={d.theme} className="rounded-xl border border-white/[0.05] bg-white/[0.015] p-4">
+            <div key={d.theme} className="rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] p-4">
               <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-2">
                 <div className="text-[13.5px] font-semibold text-white/90">{d.theme}</div>
                 <div className="font-mono text-[11px] text-white/40 tabular-nums">
@@ -103,7 +103,7 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
             {ga.narrativeSignals.map((s) => (
               <div
                 key={s.source}
-                className="rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5"
+                className="rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
                 title={s.themes.join(", ")}
               >
                 <div className="text-[12px] font-medium text-white/80">
@@ -126,26 +126,19 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
         </div>
       )}
 
-      {/* AG Pulse insight — verbatim analysis */}
       {ga.agInsight && (
         <>
           <HairLine className="mb-4" />
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 shrink-0 rounded-md border border-[#a88945]/30 bg-[#a88945]/[0.08] px-2 py-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#d5b46b]">
-              AG Pulse insight
-            </div>
-            <p className="text-[13px] leading-relaxed text-white/70">{ga.agInsight}</p>
-          </div>
+          <p className="border-l-2 border-[#a88945]/50 pl-4 text-[13px] leading-relaxed text-white/70">
+            {ga.agInsight}
+          </p>
         </>
       )}
 
-      <div className="mt-5 flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
-          Source: AG narrative-reality-gap + providers/snapshot · values verbatim
-        </span>
+      <div className="mt-5 flex justify-end">
         <Link
           href="/admin/platform/competitive"
-          className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] text-white/50 transition hover:text-[#d5b46b]"
+          className="inline-flex items-center gap-1 text-[12px] font-medium text-white/50 transition hover:text-[#d5b46b]"
           data-testid="link-full-pulse"
         >
           Full analysis <ArrowUpRight className="h-3 w-3" />
@@ -170,7 +163,7 @@ function ScoreBar({
       <span className="w-[72px] shrink-0 text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/40">
         {label}
       </span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#1a5540]/[0.34]">
         <div
           className={tone === "gold" ? "h-full rounded-full bg-[#d5b46b]" : "h-full rounded-full bg-white/35"}
           style={{ width: `${pct}%` }}
@@ -237,13 +230,8 @@ export function CompetitivePanel({
   return (
     <Pane className="p-7" as="section" data-testid="competitive-panel">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <Eyebrow tone="teal" className="mb-2">
-            Competitive read · Live core metrics
-          </Eyebrow>
-          <div className="text-[16px] font-semibold tracking-tight text-[#e7e3d8]">
-            {focal.name} vs your selected set
-          </div>
+        <div className="text-[17px] font-semibold tracking-tight text-[#e7e3d8]">
+          {focal.name} vs your set
         </div>
         <div className="flex items-center gap-2">
           {competitors.length > 0 && (
@@ -251,9 +239,9 @@ export function CompetitivePanel({
               type="button"
               onClick={() => onChange([])}
               data-testid="button-reset-competitors"
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/50 transition hover:text-white/80"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/24 px-3 py-1.5 text-[12px] font-medium text-white/50 transition hover:text-white/80"
             >
-              <RotateCcw className="h-3 w-3" /> Default set
+              <RotateCcw className="h-3 w-3" /> Reset
             </button>
           )}
           <button
@@ -261,7 +249,7 @@ export function CompetitivePanel({
             onClick={() => setPickerOpen((o) => !o)}
             data-testid="button-add-competitor"
             disabled={activeTickers.length >= MAX_COMPETITORS}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-3 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#63d7de] transition hover:bg-[#00a7b7]/[0.14] disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-3 py-1.5 text-[12px] font-medium text-[#63d7de] transition hover:bg-[#00a7b7]/[0.14] disabled:opacity-40"
           >
             <Plus className="h-3 w-3" /> Add competitor
           </button>
@@ -275,7 +263,7 @@ export function CompetitivePanel({
           return (
             <span
               key={t}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[11.5px] text-white/75"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/26 bg-[#1a5540]/[0.26] px-2.5 py-1 text-[12px] text-white/75"
             >
               {read?.name ?? t}
               <button
@@ -291,13 +279,13 @@ export function CompetitivePanel({
           );
         })}
         {competitors.length === 0 && (
-          <span className="text-[11px] text-white/35">Default set — pick your own to re-cut every metric below.</span>
+          <span className="text-[12px] text-white/35">Default set — add competitors to re-cut every metric below.</span>
         )}
       </div>
 
       {/* Picker */}
       {pickerOpen && (
-        <div className="mb-5 rounded-xl border border-white/[0.08] bg-[#0a0d14] p-3">
+        <div className="mb-5 rounded-xl border border-[#3d8f6d]/[0.20] bg-[#0c1a15] p-3">
           <input
             autoFocus
             type="search"
@@ -305,7 +293,7 @@ export function CompetitivePanel({
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search 65 tracked providers…"
             data-testid="input-competitor-search"
-            className="mb-2 h-9 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#00a7b7]/40 focus:outline-none"
+            className="mb-2 h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#00a7b7]/40 focus:outline-none"
           />
           <ul className="max-h-56 overflow-y-auto">
             {options.map((p) => (
@@ -318,7 +306,7 @@ export function CompetitivePanel({
                     setSearch("");
                     setPickerOpen(false);
                   }}
-                  className="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-2 text-left transition hover:bg-white/[0.05]"
+                  className="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-2 text-left transition hover:bg-[#1a5540]/[0.30]"
                 >
                   <span className="text-[13px] text-white/85">{p.displayName ?? p.name}</span>
                   <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/35">
@@ -338,7 +326,7 @@ export function CompetitivePanel({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-white/[0.08]">
+            <tr className="border-b border-[#3d8f6d]/[0.20]">
               <Th>Provider</Th>
               <Th className="text-right">Assessment</Th>
               <Th className="text-right">AI readiness</Th>
@@ -352,8 +340,8 @@ export function CompetitivePanel({
                 key={r.ticker}
                 className={
                   r.isFocal
-                    ? "border-b border-white/[0.05] bg-[#a88945]/[0.06]"
-                    : "border-b border-white/[0.05]"
+                    ? "border-b border-[#3d8f6d]/[0.14] bg-[#a88945]/[0.06]"
+                    : "border-b border-[#3d8f6d]/[0.14]"
                 }
               >
                 <td className="py-2.5 pr-3 text-[13px] font-medium text-white/85">{r.name}</td>
@@ -376,8 +364,8 @@ export function CompetitivePanel({
         </table>
       </div>
 
-      <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
-        Source: AG providers/snapshot + narrative-reality-gap per ticker · selection feeds decks too
+      <div className="mt-3 text-[12px] text-white/35">
+        Your selection also shapes every composed briefing deck.
       </div>
     </Pane>
   );

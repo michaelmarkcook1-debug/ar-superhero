@@ -197,9 +197,9 @@ export default function Succeed() {
       </section>
 
       {/* Headline numbers */}
-      <section className="mb-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.04] md:grid-cols-5">
+      <section className="mb-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.26] md:grid-cols-5">
         {(["Strong", "Adequate", "Weak", "Missing", "Unsupported"] as const).map((band) => (
-          <div key={band} className="bg-[#0a0d14] p-6">
+          <div key={band} className="bg-[#0c1a15] p-6">
             <NumberMark
               value={String(exposureCounts[band])}
               label={band}
@@ -232,7 +232,7 @@ export default function Succeed() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
           {/* List */}
           <Pane className="overflow-hidden p-0">
-            <div className="border-b border-white/[0.06] px-5 py-4">
+            <div className="border-b border-[#3d8f6d]/[0.16] px-5 py-4">
               <Eyebrow>Assessment models</Eyebrow>
             </div>
             <ul>
@@ -242,7 +242,7 @@ export default function Succeed() {
                   <li
                     key={m.id}
                     className={`group flex items-stretch border-b border-white/[0.04] last:border-0 ${
-                      active ? "bg-[#a88945]/[0.05]" : "hover:bg-white/[0.02]"
+                      active ? "bg-[#a88945]/[0.05]" : "hover:bg-[#1a5540]/[0.18]"
                     }`}
                   >
                     <button
@@ -351,7 +351,7 @@ export default function Succeed() {
           description="Every gap has a status: safe to reuse, restricted to certain audiences, or unsupported and must not be claimed."
         />
         <Pane className="overflow-hidden p-0">
-          <div className="grid grid-cols-12 gap-4 border-b border-white/[0.06] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
+          <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
             <div className="col-span-5">Gap</div>
             <div className="col-span-2">Severity</div>
             <div className="col-span-2">Status</div>
@@ -421,7 +421,7 @@ export default function Succeed() {
             {HFS_GUIDANCE.baseline.map((line, i) => (
               <li
                 key={i}
-                className="flex gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3.5 py-2.5"
+                className="flex gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-2.5"
               >
                 <span className="font-mono text-[10px] tracking-[0.22em] text-[#63d7de]">
                   {String(i + 1).padStart(2, "0")}
@@ -459,7 +459,7 @@ export default function Succeed() {
                   <button
                     type="button"
                     data-testid="button-open-session"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[#a88945] px-4 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#0a0d14] transition hover:bg-[#d5b46b]"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#a88945] px-4 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#0c1a15] transition hover:bg-[#d5b46b]"
                   >
                     Open readiness session
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -650,7 +650,7 @@ function PrepBlock({
   return (
     <div>
       <div className="mb-3 flex items-center gap-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-[#d5b46b]">
+        <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.22] text-[#d5b46b]">
           {icon}
         </span>
         <div className="min-w-0 flex-1">

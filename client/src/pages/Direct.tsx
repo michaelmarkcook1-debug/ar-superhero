@@ -152,7 +152,7 @@ export default function Direct() {
                 className={`group relative flex shrink-0 flex-col items-start gap-1 rounded-2xl border px-5 py-4 text-left transition-all duration-300 ${
                   active
                     ? "border-[#a88945]/40 bg-gradient-to-b from-[#a88945]/[0.10] to-[#a88945]/[0.02] shadow-[0_0_40px_-16px_rgba(168,137,69,0.5)]"
-                    : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.14] hover:bg-white/[0.03]"
+                    : "border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.16] hover:border-[#3d8f6d]/30 hover:bg-[#1a5540]/[0.22]"
                 }`}
               >
                 <div
@@ -214,7 +214,7 @@ export default function Direct() {
             {selected.risks.map((r, i) => (
               <li
                 key={i}
-                className="flex items-start gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3.5 py-3"
+                className="flex items-start gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-3"
               >
                 {r.tone === "risk" ? (
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#e89797]" />
@@ -256,7 +256,7 @@ export default function Direct() {
             onClick={() => downloadPersonaDeck([selected.id], selected.id)}
             disabled={downloading !== null}
             data-testid="button-generate-brief"
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#a88945] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[#0a0d14] transition hover:bg-[#d5b46b] disabled:cursor-wait disabled:opacity-60"
+            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#a88945] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[#0c1a15] transition hover:bg-[#d5b46b] disabled:cursor-wait disabled:opacity-60"
           >
             {downloading === selected.id ? "Generating deck…" : selected.briefing.cta}
             {downloading === selected.id ? (
@@ -270,7 +270,7 @@ export default function Direct() {
             onClick={() => downloadPersonaDeck(LENSES.map((l) => l.id), "__all__")}
             disabled={downloading !== null}
             data-testid="button-generate-all-personas"
-            className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.02] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 transition hover:border-[#d5b46b]/45 hover:text-[#f0dca8] disabled:cursor-wait disabled:opacity-60"
+            className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-[#1a5540]/[0.18] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 transition hover:border-[#d5b46b]/45 hover:text-[#f0dca8] disabled:cursor-wait disabled:opacity-60"
           >
             {downloading === "__all__" ? "Generating combined pack…" : "Download combined persona pack"}
             <FileDown className="h-3.5 w-3.5" />
@@ -308,7 +308,7 @@ export default function Direct() {
           accent="gold"
           eyebrow="Direct decision model"
           title="From upload to leader briefing."
-          description="Five stages turn raw internal material into lens-routed brief inputs, action asks, and risks or opportunities by lens. Output is a briefing-ready summary, source-traced, with NDA controls applied."
+          description="Five stages turn raw internal material into lens-routed brief inputs, action asks, and risks or opportunities by lens — a briefing-ready summary with NDA controls applied."
           stages={DIRECT_DECISION_STAGES}
           impacts={DIRECT_MODEL_IMPACTS}
           finalNote="Brief summaries surface what AR observes. Leader relationship stance is held back unless AR chooses to include it."
@@ -319,8 +319,8 @@ export default function Direct() {
       <section className="mb-16">
         <DeliverablesPanel
           eyebrow={`Deliverables · ${selected.label}`}
-          title="Stakeholder-specific outputs, source-traced."
-          description={`AnalystGenius templates for the ${selected.label} lens. Each output composes from analyst signals, uploaded material, and briefing context. Click a format to queue the export.`}
+          title="Stakeholder-specific outputs."
+          description={`Templates for the ${selected.label} lens. Click a format to queue the export.`}
           templates={DIRECT_DELIVERABLES[selectedId]}
           accent="gold"
           guardrailNote={DIRECT_DELIVERABLES_NOTE}
@@ -352,7 +352,7 @@ export default function Direct() {
                 className={`group flex items-start gap-4 rounded-xl border p-5 text-left transition ${
                   active
                     ? "border-[#a88945]/30 bg-[#a88945]/[0.05]"
-                    : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.14] hover:bg-white/[0.03]"
+                    : "border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.16] hover:border-[#3d8f6d]/30 hover:bg-[#1a5540]/[0.22]"
                 }`}
               >
                 <div className="flex-1">

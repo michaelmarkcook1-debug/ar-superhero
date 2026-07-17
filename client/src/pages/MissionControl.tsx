@@ -69,30 +69,26 @@ export default function MissionControl() {
               AR Superhero Brief.
             </h1>
             <p className="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-white/60 md:text-[16.5px]">
-              What changed in the analyst world, where the business is exposed,
-              who needs a briefing, and what AR can prove right now — composed
-              from the AnalystGenius intelligence layer and your active moments.
-              {live && arBrief?.focal && (
-                <span className="mt-2 block text-[13px] text-[#d5b46b]/90">
-                  Live signals for {arBrief.focal.name} — every item names the AnalystGenius field it is derived from.
-                </span>
-              )}
+              What changed, where you're exposed, and who needs a briefing
+              {live && arBrief?.focal ? ` — live for ${arBrief.focal.name}.` : "."}
             </p>
           </div>
-          <div className="hidden shrink-0 text-right md:block">
-            <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/40">
-              {live ? "Live brief · AnalystGenius" : "Briefing generated"}
+          <div
+            className="hidden shrink-0 text-right md:block"
+            title={live ? arBrief?.sourceNote : "Demo content — no live AnalystGenius connection."}
+          >
+            <div className="text-[12px] font-medium text-white/40">
+              {live ? "Live" : "Demo view"}
             </div>
-            <div className="mt-1.5 font-mono text-[12px] text-[#d5b46b]">
+            <div className="mt-1 font-mono text-[12px] text-[#d5b46b]">
               {live && arBrief
                 ? new Date(arBrief.generatedAt).toLocaleString("en-GB", {
                     day: "numeric",
                     month: "short",
-                    year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
                   })
-                : "Demo view · seeded content"}
+                : "seeded"}
             </div>
           </div>
         </div>
@@ -202,7 +198,7 @@ export default function MissionControl() {
             {MOMENTS.slice(0, 4).map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5"
+                className="flex items-center justify-between gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
               >
                 <div className="min-w-0">
                   <div className="truncate text-[12.5px] font-medium text-white/85">
@@ -296,7 +292,7 @@ export default function MissionControl() {
             {SELL_PROOF.slice(0, 4).map((p) => (
               <li
                 key={p.id}
-                className="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5"
+                className="flex items-center gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
               >
                 <StatusDot status={p.status} />
                 <div className="min-w-0 flex-1">
@@ -323,29 +319,22 @@ export default function MissionControl() {
         <SectionTitle
           eyebrow="AR Impact · Last 90 days"
           title="What AR has shipped."
-          description="Numbers AR can point to in any internal forum. Pulled from the cockpit ledger — every entry is source-traced."
+          description="Numbers AR can point to in any internal forum."
         />
         <Pane className="p-8">
           <div className="grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-4">
             {IMPACT_STATS.map((s) => (
-              <div key={s.label} className="border-l border-white/[0.06] pl-5 first:border-l-0 first:pl-0 md:border-l">
+              <div key={s.label} className="border-l border-[#3d8f6d]/[0.16] pl-5 first:border-l-0 first:pl-0 md:border-l">
                 <NumberMark value={s.value} label={s.label} sub={s.delta} />
               </div>
             ))}
           </div>
           <HairLine className="my-7" />
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 text-[12px] text-white/50">
-              <Activity className="h-3.5 w-3.5 text-[#a88945]" />
-              <span>
-                Source: AnalystGenius intelligence layer + AR Superhero ledger.
-                External signals are clearly labelled where shown.
-              </span>
-            </div>
+          <div className="flex justify-end">
             <Link
               href="/admin"
               data-testid="link-impact-admin"
-              className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/35 transition hover:text-white/70"
+              className="text-[12px] font-medium text-white/45 transition hover:text-[#d5b46b]"
             >
               View ledger ›
             </Link>
@@ -401,21 +390,25 @@ function BriefBucket({
         </span>
       </div>
 
+      {/* Provenance rides on the item's tooltip, not the page. Severity is the
+          only thing that earns pixels here — it changes what AR does next. */}
       <ul className="space-y-3.5">
         {items.map((item) => (
-          <li key={item.id} className="border-l-2 border-white/[0.07] pl-4">
+          <li
+            key={item.id}
+            title={item.source}
+            className={
+              item.severity === "HIGH"
+                ? "border-l-2 border-[#d5b46b]/70 pl-4"
+                : "border-l-2 border-[#3d8f6d]/[0.28] pl-4"
+            }
+          >
             <div className="text-[13.5px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
               {item.title}
             </div>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/55">
               {item.detail}
             </p>
-            <div className="mt-2 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
-              <span className="truncate">{item.source}</span>
-              {item.severity === "HIGH" && (
-                <span className="shrink-0 rounded-sm border border-[#d5b46b]/40 px-1 py-px text-[#d5b46b]">high</span>
-              )}
-            </div>
           </li>
         ))}
       </ul>
@@ -433,7 +426,7 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
     <Link
       href={`/${mode.id}`}
       data-testid={`mode-card-${mode.id}`}
-      className="group relative block overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0a0d14] p-7 transition-all duration-500 hover:border-white/[0.16] hover:bg-[#0c1018]"
+      className="group relative block overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.18] bg-[#0c1a15] p-7 transition-all duration-500 hover:border-[#3d8f6d]/32 hover:bg-[#0c1018]"
       style={{
         backgroundImage: `radial-gradient(circle at ${index === 1 ? "85%" : "15%"} 0%, ${accent}22, transparent 55%)`,
       }}
@@ -469,7 +462,7 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
           {mode.oneLiner}
         </p>
 
-        <div className="grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-5">
+        <div className="grid grid-cols-3 gap-3 border-t border-[#3d8f6d]/[0.16] pt-5">
           {mode.metrics.map((metric) => (
             <div key={metric.label}>
               <div

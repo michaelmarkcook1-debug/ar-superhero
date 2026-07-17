@@ -132,7 +132,7 @@ export function UploadPanel<T extends string>({
             {subtitle}
           </p>
         </div>
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 md:inline-flex">
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 md:inline-flex">
           <ShieldCheck className="h-3 w-3" />
           Source-traced
         </div>
@@ -156,8 +156,8 @@ export function UploadPanel<T extends string>({
                     className={cn(
                       "group flex w-full items-start gap-3 rounded-xl border px-3.5 py-2.5 text-left transition",
                       active
-                        ? "border-white/[0.12] bg-white/[0.04]"
-                        : "border-white/[0.04] bg-white/[0.01] hover:border-white/[0.10] hover:bg-white/[0.025]"
+                        ? "border-white/[0.12] bg-[#1a5540]/[0.26]"
+                        : "border-white/[0.04] bg-[#1a5540]/[0.12] hover:border-white/[0.10] hover:bg-[#1a5540]/[0.20]"
                     )}
                     style={
                       active
@@ -214,8 +214,8 @@ export function UploadPanel<T extends string>({
             className={cn(
               "relative flex min-h-[200px] flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-8 text-center transition",
               dragOver
-                ? "border-white/30 bg-white/[0.04]"
-                : "border-white/[0.10] bg-white/[0.012] hover:border-white/[0.18] hover:bg-white/[0.025]"
+                ? "border-white/30 bg-[#1a5540]/[0.26]"
+                : "border-white/[0.10] bg-white/[0.012] hover:border-white/[0.18] hover:bg-[#1a5540]/[0.20]"
             )}
             style={
               dragOver
@@ -282,7 +282,7 @@ export function UploadPanel<T extends string>({
                       {phase === "uploading" ? `${Math.round(progress)}%` : "Analysing"}
                     </span>
                   </div>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#1a5540]/[0.34]">
                     <div
                       className="h-full transition-all"
                       style={{
@@ -313,7 +313,7 @@ export function UploadPanel<T extends string>({
                     e.stopPropagation();
                     reset();
                   }}
-                  className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-white/[0.02] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/65 hover:border-white/20 hover:text-white/85"
+                  className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-[#1a5540]/[0.18] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/65 hover:border-[#3d8f6d]/36 hover:text-white/85"
                 >
                   Upload another
                 </button>
@@ -374,7 +374,7 @@ export function UploadedItemsList({
 }) {
   return (
     <Pane className="overflow-hidden p-0" data-testid="uploaded-items-list">
-      <div className="grid grid-cols-12 gap-4 border-b border-white/[0.06] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
+      <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
         <div className="col-span-5">File · type</div>
         <div className="col-span-3">Captured signals</div>
         <div className="col-span-2">Uploaded</div>
@@ -393,7 +393,7 @@ export function UploadedItemsList({
               )}
             >
               <div className="col-span-5 flex items-start gap-3">
-                <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.02] text-white/55">
+                <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] text-white/55">
                   <FileText className="h-3.5 w-3.5" />
                 </span>
                 <div className="min-w-0">
@@ -443,7 +443,7 @@ export function UploadedItemsList({
                 <span
                   className={cn(
                     "inline-flex items-center rounded-full border px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em]",
-                    STATE_TONES[it.state] || "border-white/[0.12] bg-white/[0.02] text-white/55"
+                    STATE_TONES[it.state] || "border-white/[0.12] bg-[#1a5540]/[0.18] text-white/55"
                   )}
                 >
                   {it.state}
@@ -542,7 +542,7 @@ export function DecisionModel<F extends string>({
                 {s.feeds.slice(0, 4).map((f) => (
                   <span
                     key={String(f)}
-                    className="rounded-full border border-white/[0.08] bg-white/[0.02] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
+                    className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
                   >
                     {String(f)}
                   </span>

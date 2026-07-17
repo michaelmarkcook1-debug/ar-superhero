@@ -106,7 +106,7 @@ export default function Admin() {
                 key={item.href}
                 href={item.href}
                 data-testid={`admin-link-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                className="group flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-5 transition hover:border-white/[0.14] hover:bg-white/[0.03]"
+                className="group flex items-start gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-5 transition hover:border-[#3d8f6d]/30 hover:bg-white/[0.03]"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.03] text-white/55 transition group-hover:text-[#d5b46b]">
                   <Icon className="h-4 w-4" />
