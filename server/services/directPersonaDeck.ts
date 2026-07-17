@@ -399,7 +399,8 @@ export function listDirectPersonaIds(): PersonaId[] {
 
 export async function createDirectPersonaDeck(
   personaIds: PersonaId[],
-  vendorId = "capgemini"
+  vendorId = "capgemini",
+  competitorTickers?: string[]
 ): Promise<Buffer> {
   const ids = personaIds.length ? personaIds : ["executive" as PersonaId];
   const personas = ids.map(personaById);
@@ -447,7 +448,7 @@ export async function createDirectPersonaDeck(
     });
   }
 
-  await addAgIntelligenceSlides(pptx, brand, idx);
+  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
 
   for (const persona of personas) {
     addPersonaSection(pptx, brand, persona, idx);

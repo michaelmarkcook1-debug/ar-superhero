@@ -21,6 +21,12 @@ import {
   getEndpoint,
 } from "./services/agApi";
 import { getArBrief } from "./services/agIntelligence";
+import express from "express";
+import { randomUUID } from "node:crypto";
+import { ingestPptx } from "./services/deckIngest";
+import { deckLibrary } from "./storage";
+import { composeBriefingDeck, composerFilename } from "./services/briefingComposer";
+import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
 // ============================================================================
 // API routes for the AR Superhero backend.
@@ -50,10 +56,13 @@ export async function registerRoutes(
     });
   });
 
-  // Derived AR brief: emergencies, highlights, stakeholder actions.
+  // Derived AR brief: emergencies, highlights, stakeholder actions, gap
+  // analysis. ?competitors=ACN,IBM selects the competitive set (validated,
+  // capped at 5; unknown tickers simply return no data and are skipped).
   // Registered before the generic :key proxy so "ar-brief" is not shadowed.
-  app.get("/api/ag/ar-brief", async (_req, res) => {
-    const brief = await getArBrief();
+  app.get("/api/ag/ar-brief", async (req, res) => {
+    const raw = typeof req.query.competitors === "string" ? req.query.competitors.split(",") : undefined;
+    const brief = await getArBrief({ competitors: raw });
     res.json(brief);
   });
 
@@ -267,6 +276,7 @@ export async function registerRoutes(
   const briefingDeckSchema = z.object({
     momentId: z.string().min(1),
     vendorId: z.string().optional(),
+    competitorTickers: z.array(z.string()).max(8).optional(),
   });
 
   app.post("/api/briefing-decks/generate", async (req: Request, res: Response) => {
@@ -274,7 +284,11 @@ export async function registerRoutes(
     if (!parse.success) return res.status(400).json({ error: parse.error.issues });
 
     try {
-      const buffer = await createBriefingDeck(parse.data.momentId, parse.data.vendorId);
+      const buffer = await createBriefingDeck(
+        parse.data.momentId,
+        parse.data.vendorId,
+        parse.data.competitorTickers
+      );
       const filename = getBriefingDeckFilename(parse.data.momentId, parse.data.vendorId);
       res.setHeader(
         "Content-Type",
@@ -293,6 +307,7 @@ export async function registerRoutes(
   const directPersonaSchema = z.object({
     personaIds: z.array(z.string().min(1)).min(1),
     vendorId: z.string().optional(),
+    competitorTickers: z.array(z.string()).max(8).optional(),
   });
 
   app.post("/api/persona-decks/generate", async (req: Request, res: Response) => {
@@ -304,13 +319,104 @@ export async function registerRoutes(
     if (!personaIds.length) return res.status(400).json({ error: "No valid personaIds supplied." });
 
     try {
-      const buffer = await createDirectPersonaDeck(personaIds, parse.data.vendorId);
+      const buffer = await createDirectPersonaDeck(
+        personaIds,
+        parse.data.vendorId,
+        parse.data.competitorTickers
+      );
       const filename = getDirectPersonaDeckFilename(personaIds, parse.data.vendorId);
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
       );
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.send(buffer);
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Deck library — ingest prior briefing decks (verbatim per-slide text)
+  // --------------------------------------------------------------------------
+
+  const HOUSE_IDS = new Set(HOUSE_PLAYBOOKS.map((p) => p.id as string));
+
+  app.post(
+    "/api/deck-library/upload",
+    express.raw({ type: () => true, limit: "25mb" }),
+    (req: Request, res: Response) => {
+      const filename = String(req.query.filename ?? "").trim() || "untitled.pptx";
+      const house = String(req.query.house ?? "").trim().toLowerCase();
+      if (!HOUSE_IDS.has(house)) {
+        return res.status(400).json({ error: `house must be one of: ${[...HOUSE_IDS].join(", ")}` });
+      }
+      const body = req.body as Buffer;
+      if (!Buffer.isBuffer(body) || body.length < 100) {
+        return res.status(400).json({ error: "Upload the .pptx file as the raw request body." });
+      }
+      try {
+        const parsed = ingestPptx(body);
+        const row = {
+          id: randomUUID(),
+          filename,
+          house,
+          uploadedAt: Date.now(),
+          slideCount: parsed.slideCount,
+          slides: parsed.slides,
+        };
+        deckLibrary.insert(row);
+        res.json({
+          id: row.id,
+          filename: row.filename,
+          house: row.house,
+          slideCount: row.slideCount,
+          extractedTextSlides: parsed.slides.filter((s) => s.texts.length > 0).length,
+        });
+      } catch (err) {
+        res.status(422).json({ error: (err as Error).message });
+      }
+    }
+  );
+
+  app.get("/api/deck-library", (_req, res) => {
+    res.json({ decks: deckLibrary.list() });
+  });
+
+  app.delete("/api/deck-library/:id", (req, res) => {
+    const removed = deckLibrary.remove(req.params.id);
+    res.status(removed ? 200 : 404).json({ removed });
+  });
+
+  // --------------------------------------------------------------------------
+  // Briefing composer — house-targeted deck from playbook + reuse + AG + vars
+  // --------------------------------------------------------------------------
+
+  const composeSchema = z.object({
+    houseId: z.string().refine((h) => HOUSE_IDS.has(h), "unknown analyst house"),
+    deckIds: z.array(z.string()).max(20).default([]),
+    variables: z.object({
+      topic: z.string().min(2).max(160),
+      region: z.string().max(80).optional(),
+      briefingLengthMins: z.number().int().min(15).max(120),
+      executives: z.array(z.object({ name: z.string().min(1).max(80), title: z.string().min(1).max(120) })).max(8).default([]),
+      objectives: z.array(z.string().max(200)).max(6).optional(),
+    }),
+    vendorName: z.string().max(80).optional(),
+    competitorTickers: z.array(z.string()).max(8).optional(),
+  });
+
+  app.post("/api/briefing-composer/generate", async (req: Request, res: Response) => {
+    const parse = composeSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const request = { ...parse.data, houseId: parse.data.houseId as AnalystHouseId };
+      const buffer = await composeBriefingDeck(request);
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      );
+      res.setHeader("Content-Disposition", `attachment; filename="${composerFilename(request)}"`);
       res.send(buffer);
     } catch (err) {
       res.status(500).json({ error: (err as Error).message });

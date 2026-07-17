@@ -36,9 +36,10 @@ function dateLabel(iso: string): string {
 export async function addAgIntelligenceSlides(
   pptx: pptxgen,
   brand: Brand,
-  idx: () => string
+  idx: () => string,
+  competitorTickers?: string[]
 ): Promise<ArBrief> {
-  const brief = await getArBrief();
+  const brief = await getArBrief({ competitors: competitorTickers });
 
   if (!brief.live || !brief.focal) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
@@ -195,6 +196,84 @@ export async function addAgIntelligenceSlides(
         w: 5.8,
         h: 2.6,
         fontSize: 9.5,
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Slide 3 — narrative–reality gap analysis (AG Pulse)
+  // -------------------------------------------------------------------------
+  const ga = brief.gapAnalysis;
+  if (ga) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      title: `Narrative–reality gap analysis — ${f.name}`,
+      note: ga.headline ?? undefined,
+    });
+
+    // Divergence table: where the story and the measured reality split.
+    if (ga.topDivergences.length) {
+      addSectionLabel(slide, "Top divergences — narrative vs measured reality", { x: 0.6, y: contentTop + 0.1, w: 12.1 });
+      addTable(slide, {
+        x: 0.6,
+        y: contentTop + 0.42,
+        w: 12.1,
+        colW: [3.3, 1.5, 1.5, 1.1, 4.7],
+        headers: ["Theme", "Narrative", "Reality", "Δ", "AG interpretation"],
+        rows: ga.topDivergences.slice(0, 3).map((d) => ({
+          cells: [
+            d.theme,
+            d.narrativeScore == null ? "—" : String(d.narrativeScore),
+            d.realityScore == null ? "—" : String(d.realityScore),
+            d.delta == null ? "—" : String(d.delta),
+            d.interpretation ?? "—",
+          ],
+          tone: (d.delta ?? 0) < 0 ? ("warn" as RowTone) : ("default" as RowTone),
+        })),
+        fontSize: 9.5,
+      });
+    }
+
+    const rowsUsed = Math.min(ga.topDivergences.length, 3);
+    const midY = contentTop + 0.42 + 0.4 + rowsUsed * 0.36 + 0.3;
+
+    // Per-house narrative read.
+    if (ga.narrativeSignals.length) {
+      addSectionLabel(slide, "Who is telling the story — per-house narrative signals", { x: 0.6, y: midY, w: 6.4 });
+      addTable(slide, {
+        x: 0.6,
+        y: midY + 0.32,
+        w: 6.4,
+        colW: [1.7, 1.2, 1.0, 2.5],
+        headers: ["Source", "Sentiment", "Volume", "Themes"],
+        rows: ga.narrativeSignals.slice(0, 6).map((s) => ({
+          cells: [
+            s.source,
+            s.sentiment == null ? "—" : s.sentiment.toFixed(2),
+            s.volume == null ? "—" : String(s.volume),
+            s.themes.join(", ") || "—",
+          ],
+        })),
+        fontSize: 8.5,
+        headerFontSize: 8.5,
+      });
+    }
+
+    // AG Pulse insight — verbatim analysis text.
+    if (ga.agInsight) {
+      addSectionLabel(slide, "AG Pulse insight", { x: 7.3, y: midY, w: 5.4 });
+      slide.addText(ga.agInsight, {
+        x: 7.3,
+        y: midY + 0.32,
+        w: 5.4,
+        h: 2.9,
+        fontFace: FONT_BODY,
+        fontSize: 9.5,
+        color: PALETTE.ink,
+        lineSpacingMultiple: 1.12,
+        valign: "top",
+        margin: 0,
+        fit: "shrink",
       });
     }
   }

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Activity, AlertTriangle, Users, Sparkles } from "lucide-react";
+import { useArBrief, useCompetitorSelection } from "@/lib/agBrief";
+import { NarrativeGapPanel, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
 import {
   MODES,
   BRIEF_ITEMS,
@@ -25,26 +26,9 @@ import {
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
 
-type ArBriefItem = {
-  id: string;
-  title: string;
-  detail: string;
-  source: string;
-  severity?: "HIGH" | "MEDIUM" | "LOW";
-  metric?: string;
-};
-type ArBrief = {
-  live: boolean;
-  generatedAt: string;
-  focal?: { ticker: string; name: string };
-  emergencies: ArBriefItem[];
-  highlights: ArBriefItem[];
-  actions: ArBriefItem[];
-  sourceNote: string;
-};
-
 export default function MissionControl() {
-  const { data: arBrief } = useQuery<ArBrief>({ queryKey: ["/api/ag/ar-brief"] });
+  const { competitors, setCompetitors } = useCompetitorSelection();
+  const { data: arBrief } = useArBrief(competitors);
   const live = Boolean(arBrief?.live);
 
   // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
@@ -137,6 +121,22 @@ export default function MissionControl() {
           />
         </div>
       </section>
+
+      {/* ====================================================================
+          AG Pulse — narrative gap analysis + competitive read (live)
+      ==================================================================== */}
+      {live && arBrief && (
+        <section className="mb-14 space-y-5">
+          <div className="flex items-baseline justify-between">
+            <Eyebrow className="text-white/45">AG Pulse · Live intelligence</Eyebrow>
+            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+              Narrative gap · Competitive read
+            </div>
+          </div>
+          <NarrativeGapPanel brief={arBrief} />
+          <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
+        </section>
+      )}
 
       {/* ====================================================================
           Intelligence Monitor — briefing opportunity feeds

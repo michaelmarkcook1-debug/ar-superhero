@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, ChevronRight, AlertTriangle, Sparkles, FileDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { storedCompetitorTickers } from "@/lib/agBrief";
 import {
   LENSES,
   DIRECT_UPLOADS,
@@ -42,6 +43,7 @@ export default function Direct() {
       const response = await apiRequest("POST", "/api/persona-decks/generate", {
         personaIds,
         vendorId: PERSONA_DECK_VENDOR,
+        competitorTickers: storedCompetitorTickers(),
       });
       const blob = await response.blob();
       const disposition = response.headers.get("Content-Disposition") ?? "";

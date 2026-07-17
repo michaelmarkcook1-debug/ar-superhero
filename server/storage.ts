@@ -234,6 +234,15 @@ function ensureSchema() {
       band TEXT NOT NULL,
       note TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS deck_library (
+      id TEXT PRIMARY KEY,
+      filename TEXT NOT NULL,
+      house TEXT NOT NULL,
+      uploaded_at INTEGER NOT NULL,
+      slide_count INTEGER NOT NULL,
+      slides_json TEXT NOT NULL
+    );
   `);
 }
 
@@ -810,5 +819,60 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(assessment_profiles).all();
   }
 }
+
+
+// ----------------------------------------------------------------------------
+// Deck library — ingested prior briefing decks (verbatim per-slide text).
+// Raw sqlite access; the JSON payload holds IngestedSlide[].
+// ----------------------------------------------------------------------------
+
+export interface DeckLibraryRow {
+  id: string;
+  filename: string;
+  house: string;
+  uploadedAt: number;
+  slideCount: number;
+  slides: { index: number; texts: string[] }[];
+}
+
+export const deckLibrary = {
+  list(): Omit<DeckLibraryRow, "slides">[] {
+    return (
+      sqlite
+        .prepare("SELECT id, filename, house, uploaded_at, slide_count FROM deck_library ORDER BY uploaded_at DESC")
+        .all() as { id: string; filename: string; house: string; uploaded_at: number; slide_count: number }[]
+    ).map((r) => ({
+      id: r.id,
+      filename: r.filename,
+      house: r.house,
+      uploadedAt: r.uploaded_at,
+      slideCount: r.slide_count,
+    }));
+  },
+  get(id: string): DeckLibraryRow | null {
+    const r = sqlite.prepare("SELECT * FROM deck_library WHERE id = ?").get(id) as
+      | { id: string; filename: string; house: string; uploaded_at: number; slide_count: number; slides_json: string }
+      | undefined;
+    if (!r) return null;
+    return {
+      id: r.id,
+      filename: r.filename,
+      house: r.house,
+      uploadedAt: r.uploaded_at,
+      slideCount: r.slide_count,
+      slides: JSON.parse(r.slides_json),
+    };
+  },
+  insert(row: DeckLibraryRow): void {
+    sqlite
+      .prepare(
+        "INSERT INTO deck_library (id, filename, house, uploaded_at, slide_count, slides_json) VALUES (?, ?, ?, ?, ?, ?)"
+      )
+      .run(row.id, row.filename, row.house, row.uploadedAt, row.slideCount, JSON.stringify(row.slides));
+  },
+  remove(id: string): boolean {
+    return sqlite.prepare("DELETE FROM deck_library WHERE id = ?").run(id).changes > 0;
+  },
+};
 
 export const storage = new DatabaseStorage();

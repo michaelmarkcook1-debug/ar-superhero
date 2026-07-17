@@ -203,7 +203,11 @@ export function getBriefingDeckFilename(momentId: string, vendorId = "capgemini"
   return `${slugify(vendor.name)}--${slugify(moment.model)}--defence-pack.pptx`;
 }
 
-export async function createBriefingDeck(momentId: string, vendorId = "capgemini"): Promise<Buffer> {
+export async function createBriefingDeck(
+  momentId: string,
+  vendorId = "capgemini",
+  competitorTickers?: string[]
+): Promise<Buffer> {
   const moment = MOMENTS.find((m) => m.id === momentId) ?? MOMENTS[0];
   const vendor = getVendor(vendorId);
   const gaps = EVIDENCE_GAPS.filter((g) => g.momentId === moment.id);
@@ -234,7 +238,7 @@ export async function createBriefingDeck(momentId: string, vendorId = "capgemini
       "AnalystGenius-driven readiness and evidence view. Built from AG demo data; missing fields are shown as open inputs, not inferred. No predicted rating, rank, or outcome.",
   });
 
-  await addAgIntelligenceSlides(pptx, brand, idx);
+  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
   addReadinessSummary(pptx, brand, moment, gaps, idx);
   addWhyMatters(pptx, brand, moment, idx);
   addReadinessSnapshot(pptx, brand, moment, idx);

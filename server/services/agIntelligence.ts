@@ -13,12 +13,29 @@ import { agConfigured, agFetch } from "./agApi";
 // ============================================================================
 
 const FOCAL_TICKER = process.env.AG_FOCAL_TICKER ?? "CGEMY";
-const COMPETITOR_TICKERS = (process.env.AG_COMPETITOR_TICKERS ?? "ACN,CTSH,IBM")
+const DEFAULT_COMPETITOR_TICKERS = (process.env.AG_COMPETITOR_TICKERS ?? "ACN,CTSH,IBM")
   .split(",")
   .map((t) => t.trim().toUpperCase())
   .filter(Boolean);
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_COMPETITORS = 5;
+const TICKER_RE = /^[A-Z0-9.]{1,12}$/;
+
+/** Sanitise a caller-supplied competitor list: uppercase, well-formed, no focal, capped. */
+export function normaliseCompetitors(raw: string[] | undefined): string[] {
+  if (!raw?.length) return DEFAULT_COMPETITOR_TICKERS;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of raw) {
+    const up = t.trim().toUpperCase();
+    if (!TICKER_RE.test(up) || up === FOCAL_TICKER || seen.has(up)) continue;
+    seen.add(up);
+    out.push(up);
+    if (out.length >= MAX_COMPETITORS) break;
+  }
+  return out.length ? out : DEFAULT_COMPETITOR_TICKERS;
+}
 
 export interface ArBriefItem {
   id: string;
@@ -39,6 +56,25 @@ export interface ArCompetitorRead {
   gapScore: number | null;
 }
 
+// Raw-but-typed passthrough of the AG Pulse narrative–reality gap analysis.
+// Values are relayed verbatim from the API; nulls stay null (rendered as "—").
+export interface ArGapAnalysis {
+  headline: string | null;
+  gapScore: number | null;
+  direction: string | null;
+  agInsight: string | null;
+  narrativeSignals: { source: string; sentiment: number | null; volume: number | null; themes: string[] }[];
+  realitySignals: { metric: string; label: string; value: number | null }[];
+  topDivergences: {
+    theme: string;
+    narrativeScore: number | null;
+    realityScore: number | null;
+    delta: number | null;
+    interpretation: string | null;
+  }[];
+  generatedAt: string | null;
+}
+
 export interface ArBrief {
   live: boolean;
   reason?: string;
@@ -56,6 +92,8 @@ export interface ArBrief {
     reputationInsightTitle: string | null;
     reputationInsightBody: string | null;
   };
+  gapAnalysis?: ArGapAnalysis;
+  competitorTickers: string[];
   emergencies: ArBriefItem[];
   highlights: ArBriefItem[];
   actions: ArBriefItem[];
@@ -69,7 +107,7 @@ interface SentimentSeries {
   data: number[];
 }
 
-let _cache: { brief: ArBrief; at: number } | null = null;
+const _cache = new Map<string, { brief: ArBrief; at: number }>();
 
 function ok(r: { status: number; body: unknown }): any | null {
   if (r.status < 200 || r.status >= 300) return null;
@@ -102,11 +140,12 @@ function deriveLensMoves(series: SentimentSeries[], quarters: string[]) {
   return moves;
 }
 
-async function buildBrief(): Promise<ArBrief> {
+async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
   const generatedAt = new Date().toISOString();
   const empty: ArBrief = {
     live: false,
     generatedAt,
+    competitorTickers,
     emergencies: [],
     highlights: [],
     actions: [],
@@ -122,7 +161,7 @@ async function buildBrief(): Promise<ArBrief> {
     agFetch("providers/snapshot", { ticker: FOCAL_TICKER }),
     agFetch("narrative-reality-gap", { ticker: FOCAL_TICKER }),
     agFetch("reputation-tracker/trends", { ticker: FOCAL_TICKER }),
-    ...COMPETITOR_TICKERS.flatMap((t) => [
+    ...competitorTickers.flatMap((t) => [
       agFetch("providers/snapshot", { ticker: t }),
       agFetch("narrative-reality-gap", { ticker: t }),
     ]),
@@ -251,12 +290,12 @@ async function buildBrief(): Promise<ArBrief> {
 
   // ---- Competitor reads ----
   const competitors: ArCompetitorRead[] = [];
-  for (let i = 0; i < COMPETITOR_TICKERS.length; i++) {
+  for (let i = 0; i < competitorTickers.length; i++) {
     const cSnap = ok(compRs[i * 2])?.snapshot ?? null;
     const cGap = ok(compRs[i * 2 + 1])?.gap ?? null;
     if (!cSnap && !cGap) continue;
     competitors.push({
-      ticker: COMPETITOR_TICKERS[i],
+      ticker: competitorTickers[i],
       name: cSnap?.displayName ?? cSnap?.name ?? cGap?.providerName ?? COMPETITOR_TICKERS[i],
       assessmentScore: cSnap?.assessmentScore ?? null,
       aiReadinessScore: cSnap?.aiReadinessScore ?? null,
@@ -301,6 +340,34 @@ async function buildBrief(): Promise<ArBrief> {
       reputationInsightTitle: rep?.insightTitle ?? null,
       reputationInsightBody: rep?.insightBody ?? null,
     },
+    gapAnalysis: gap
+      ? {
+          headline: gap.headline ?? null,
+          gapScore: gap.gapScore ?? null,
+          direction: gap.direction ?? null,
+          agInsight: snap?.agInsight ?? null,
+          narrativeSignals: (gap.narrativeSignals ?? []).map((s: any) => ({
+            source: String(s.source ?? "unknown"),
+            sentiment: typeof s.sentiment === "number" ? s.sentiment : null,
+            volume: typeof s.volume === "number" ? s.volume : null,
+            themes: Array.isArray(s.themes) ? s.themes.map(String) : [],
+          })),
+          realitySignals: (gap.realitySignals ?? []).map((s: any) => ({
+            metric: String(s.metric ?? ""),
+            label: String(s.label ?? s.metric ?? ""),
+            value: typeof s.value === "number" ? s.value : null,
+          })),
+          topDivergences: (gap.topDivergences ?? []).map((d: any) => ({
+            theme: String(d.theme ?? ""),
+            narrativeScore: typeof d.narrativeScore === "number" ? d.narrativeScore : null,
+            realityScore: typeof d.realityScore === "number" ? d.realityScore : null,
+            delta: typeof d.delta === "number" ? d.delta : null,
+            interpretation: d.interpretation ? String(d.interpretation) : null,
+          })),
+          generatedAt: gap.generatedAt ?? null,
+        }
+      : undefined,
+    competitorTickers,
     emergencies: emergencies.slice(0, 5),
     highlights: highlights.slice(0, 5),
     actions: actions.slice(0, 5),
@@ -311,19 +378,25 @@ async function buildBrief(): Promise<ArBrief> {
   };
 }
 
-export async function getArBrief(force = false): Promise<ArBrief> {
+export async function getArBrief(
+  opts: { competitors?: string[]; force?: boolean } = {}
+): Promise<ArBrief> {
+  const competitorTickers = normaliseCompetitors(opts.competitors);
+  const cacheKey = competitorTickers.join(",");
   const now = Date.now();
-  if (!force && _cache && now - _cache.at < CACHE_TTL_MS) return _cache.brief;
+  const hit = _cache.get(cacheKey);
+  if (!opts.force && hit && now - hit.at < CACHE_TTL_MS) return hit.brief;
   try {
-    const brief = await buildBrief();
+    const brief = await buildBrief(competitorTickers);
     // Only cache successful live builds; keep retrying failures on next call.
-    if (brief.live) _cache = { brief, at: now };
+    if (brief.live) _cache.set(cacheKey, { brief, at: now });
     return brief;
   } catch (err) {
     return {
       live: false,
       reason: err instanceof Error ? err.message : "derivation failed",
       generatedAt: new Date().toISOString(),
+      competitorTickers,
       emergencies: [],
       highlights: [],
       actions: [],

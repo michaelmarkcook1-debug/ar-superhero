@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { ChevronRight, FileDown, FileText, Calendar, Target } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { storedCompetitorTickers } from "@/lib/agBrief";
+import AssessmentPlaybooks from "@/components/cockpit/AssessmentPlaybooks";
+import BriefingComposer from "@/components/cockpit/BriefingComposer";
 import {
   MOMENTS,
   EVIDENCE_GAPS,
@@ -129,6 +132,7 @@ export default function Succeed() {
       const response = await apiRequest("POST", "/api/briefing-decks/generate", {
         momentId: moment.id,
         vendorId: selectedVendorId,
+        competitorTickers: storedCompetitorTickers(),
       });
       const blob = await response.blob();
       const contentDisposition = response.headers.get("Content-Disposition") ?? "";
@@ -386,6 +390,10 @@ export default function Succeed() {
           ))}
         </Pane>
       </section>
+
+      <AssessmentPlaybooks />
+
+      <BriefingComposer />
 
       {/* HFS OneEcosystem guidance demo + RFI/briefing prep */}
       <section className="mb-14 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
