@@ -14,7 +14,8 @@ import {
   type Brand,
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
-import { deckLibrary, type DeckLibraryRow } from "../storage";
+import { type DeckLibraryRow } from "../storage";
+import { deckStore } from "./deckStore";
 import {
   CONFIDENCE_FACTOR,
   ENGAGEMENT_STAGES,
@@ -126,9 +127,9 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
   const vendorName = req.vendorName?.trim() || "Capgemini";
   const { reusedMax } = slideBudget(vars.briefingLengthMins);
 
-  const decks = req.deckIds
-    .map((id) => deckLibrary.get(id))
-    .filter((d): d is DeckLibraryRow => d !== null);
+  const decks = (await Promise.all(req.deckIds.map((id) => deckStore.get(id)))).filter(
+    (d): d is DeckLibraryRow => d !== null
+  );
   const reused = pickReusedSlides(decks, vars, reusedMax);
 
   const brand: Brand = {

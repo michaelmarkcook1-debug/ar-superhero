@@ -24,7 +24,7 @@ import { getArBrief } from "./services/agIntelligence";
 import express from "express";
 import { randomUUID } from "node:crypto";
 import { ingestPptx } from "./services/deckIngest";
-import { deckLibrary } from "./storage";
+import { deckStore } from "./services/deckStore";
 import { composeBriefingDeck, composerFilename } from "./services/briefingComposer";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
@@ -345,7 +345,7 @@ export async function registerRoutes(
   app.post(
     "/api/deck-library/upload",
     express.raw({ type: () => true, limit: "25mb" }),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
       const filename = String(req.query.filename ?? "").trim() || "untitled.pptx";
       const house = String(req.query.house ?? "").trim().toLowerCase();
       if (!HOUSE_IDS.has(house)) {
@@ -365,7 +365,7 @@ export async function registerRoutes(
           slideCount: parsed.slideCount,
           slides: parsed.slides,
         };
-        deckLibrary.insert(row);
+        await deckStore.insert(row);
         res.json({
           id: row.id,
           filename: row.filename,
@@ -379,13 +379,21 @@ export async function registerRoutes(
     }
   );
 
-  app.get("/api/deck-library", (_req, res) => {
-    res.json({ decks: deckLibrary.list() });
+  app.get("/api/deck-library", async (_req, res) => {
+    try {
+      res.json({ decks: await deckStore.list(), backend: deckStore.kind });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: deckStore.kind });
+    }
   });
 
-  app.delete("/api/deck-library/:id", (req, res) => {
-    const removed = deckLibrary.remove(req.params.id);
-    res.status(removed ? 200 : 404).json({ removed });
+  app.delete("/api/deck-library/:id", async (req, res) => {
+    try {
+      const removed = await deckStore.remove(req.params.id);
+      res.status(removed ? 200 : 404).json({ removed });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
   // --------------------------------------------------------------------------
