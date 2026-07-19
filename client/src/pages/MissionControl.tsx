@@ -29,7 +29,10 @@ import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOppo
 export default function MissionControl() {
   const { competitors, setCompetitors } = useCompetitorSelection();
   const { data: arBrief } = useArBrief(competitors);
-  const live = Boolean(arBrief?.live);
+  // A degraded brief (focal snapshot failed → blank scores) is treated as
+  // not-fully-live so the cockpit shows complete labelled demo content rather
+  // than half-empty live panels.
+  const live = Boolean(arBrief?.live) && !arBrief?.degraded;
 
   // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
   const changed = live

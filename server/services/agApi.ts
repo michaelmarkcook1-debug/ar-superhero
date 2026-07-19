@@ -49,6 +49,18 @@ export interface AgFetchResult {
   body: unknown;
 }
 
+// The dev AG instance scales to zero and cold-starts on the first request
+// after idle — that first hit can hang past a single timeout while the machine
+// wakes. We use a shorter per-attempt timeout and retry, so a cold start
+// costs a retry rather than a blank result. Only network/5xx failures are
+// retried; a clean 4xx (e.g. unknown ticker) returns immediately.
+const PER_ATTEMPT_TIMEOUT_MS = 12_000;
+const MAX_ATTEMPTS = 3;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 export async function agFetch(
   path: string,
   query?: Record<string, string>
@@ -69,31 +81,43 @@ export async function agFetch(
     url.searchParams.set(k, v);
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20_000);
-  try {
-    const res = await fetch(url, {
-      headers: { "X-API-Key": AG_API_KEY, Accept: "application/json" },
-      signal: controller.signal,
-    });
-    const text = await res.text();
-    let body: unknown;
+  let last: AgFetchResult = { status: 502, body: { success: false, error: "no attempt made" } };
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PER_ATTEMPT_TIMEOUT_MS);
     try {
-      body = JSON.parse(text);
-    } catch {
-      body = { success: false, error: "Upstream returned non-JSON response", raw: text.slice(0, 500) };
+      const res = await fetch(url, {
+        headers: { "X-API-Key": AG_API_KEY, Accept: "application/json" },
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      let body: unknown;
+      try {
+        body = JSON.parse(text);
+      } catch {
+        body = { success: false, error: "Upstream returned non-JSON response", raw: text.slice(0, 500) };
+      }
+      // Retry only transient upstream errors (5xx). 2xx/4xx are final.
+      if (res.status >= 500 && attempt < MAX_ATTEMPTS) {
+        last = { status: res.status, body };
+        await sleep(400 * attempt);
+        continue;
+      }
+      return { status: res.status, body };
+    } catch (err) {
+      // Network error or per-attempt timeout (likely a cold start) — retry.
+      last = {
+        status: 502,
+        body: {
+          success: false,
+          error: err instanceof Error ? err.message : "Upstream request failed",
+          code: "AG_UPSTREAM_ERROR",
+        },
+      };
+      if (attempt < MAX_ATTEMPTS) await sleep(500 * attempt);
+    } finally {
+      clearTimeout(timer);
     }
-    return { status: res.status, body };
-  } catch (err) {
-    return {
-      status: 502,
-      body: {
-        success: false,
-        error: err instanceof Error ? err.message : "Upstream request failed",
-        code: "AG_UPSTREAM_ERROR",
-      },
-    };
-  } finally {
-    clearTimeout(timer);
   }
+  return last;
 }

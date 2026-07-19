@@ -100,6 +100,10 @@ export interface ArBrief {
   competitors: ArCompetitorRead[];
   suggestedQuestions: string[];
   sourceNote: string;
+  // True when the focal snapshot (the source of the core scores) did NOT load.
+  // A degraded brief is never cached, so the next request retries fresh rather
+  // than serving blank scores for the whole cache window.
+  degraded?: boolean;
 }
 
 interface SentimentSeries {
@@ -172,6 +176,11 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
   const rep = ok(repR);
 
   if (!snap && !gap && !rep) return { ...empty, reason: `no live data for ${FOCAL_TICKER}` };
+
+  // The focal snapshot carries the core scores (assessment, AI readiness,
+  // revenue, gap). If it failed to load we still return what we have, but flag
+  // the brief degraded so it is NOT cached — the next request retries fresh.
+  const degraded = !snap;
 
   const emergencies: ArBriefItem[] = [];
   const highlights: ArBriefItem[] = [];
@@ -296,7 +305,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
     if (!cSnap && !cGap) continue;
     competitors.push({
       ticker: competitorTickers[i],
-      name: cSnap?.displayName ?? cSnap?.name ?? cGap?.providerName ?? COMPETITOR_TICKERS[i],
+      name: cSnap?.displayName ?? cSnap?.name ?? cGap?.providerName ?? competitorTickers[i],
       assessmentScore: cSnap?.assessmentScore ?? null,
       aiReadinessScore: cSnap?.aiReadinessScore ?? null,
       revenueGrowthYoy: cSnap?.revenueGrowthYoy ?? null,
@@ -326,6 +335,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
 
   return {
     live: true,
+    degraded,
     generatedAt,
     focal: {
       ticker: FOCAL_TICKER,
@@ -388,8 +398,10 @@ export async function getArBrief(
   if (!opts.force && hit && now - hit.at < CACHE_TTL_MS) return hit.brief;
   try {
     const brief = await buildBrief(competitorTickers);
-    // Only cache successful live builds; keep retrying failures on next call.
-    if (brief.live) _cache.set(cacheKey, { brief, at: now });
+    // Cache only a COMPLETE live build. A degraded brief (focal snapshot
+    // failed → blank scores) is returned but never cached, so the next request
+    // retries fresh instead of serving blanks for the whole cache window.
+    if (brief.live && !brief.degraded) _cache.set(cacheKey, { brief, at: now });
     return brief;
   } catch (err) {
     return {

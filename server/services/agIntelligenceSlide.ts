@@ -39,9 +39,13 @@ export async function addAgIntelligenceSlides(
   idx: () => string,
   competitorTickers?: string[]
 ): Promise<ArBrief> {
-  const brief = await getArBrief({ competitors: competitorTickers });
+  // A deck is a one-shot artifact — it can't self-heal like the website. If the
+  // first read is degraded (focal snapshot failed), force one fresh retry
+  // rather than baking blank scores into the download.
+  let brief = await getArBrief({ competitors: competitorTickers });
+  if (brief.degraded) brief = await getArBrief({ competitors: competitorTickers, force: true });
 
-  if (!brief.live || !brief.focal) {
+  if (!brief.live || !brief.focal || brief.degraded) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
       title: "Live AnalystGenius signals — unavailable at generation time",

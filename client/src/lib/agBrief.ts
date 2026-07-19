@@ -47,6 +47,7 @@ export type ArGapAnalysis = {
 
 export type ArBrief = {
   live: boolean;
+  degraded?: boolean;
   reason?: string;
   generatedAt: string;
   focal?: {
