@@ -26,6 +26,7 @@ import { randomUUID } from "node:crypto";
 import { ingestPptx } from "./services/deckIngest";
 import { deckStore } from "./services/deckStore";
 import { composeBriefingDeck, composerFilename } from "./services/briefingComposer";
+import { addResult, houseLearnings, listResults, removeResult } from "./services/resultsLearning";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
 // ============================================================================
@@ -390,6 +391,62 @@ export async function registerRoutes(
   app.delete("/api/deck-library/:id", async (req, res) => {
     try {
       const removed = await deckStore.remove(req.params.id);
+      res.status(removed ? 200 : 404).json({ removed });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Assessment results — verified outcomes + the evidence-vs-result learning
+  // --------------------------------------------------------------------------
+
+  const resultSchema = z.object({
+    house: z.string().refine((h) => HOUSE_IDS.has(h), "unknown analyst house"),
+    segment: z.string().min(2).max(160),
+    cycleLabel: z.string().min(2).max(60),
+    publishedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "publishedAt must be YYYY-MM-DD"),
+    position: z.string().min(2).max(60),
+    priorPosition: z.string().max(60).optional(),
+    strengths: z.array(z.string().min(3).max(400)).max(12).default([]),
+    cautions: z.array(z.string().min(3).max(400)).max(12).default([]),
+    linkedDeckIds: z.array(z.string()).max(20).default([]),
+    notes: z.string().max(1000).optional(),
+  });
+
+  app.post("/api/assessment-results", async (req: Request, res: Response) => {
+    const parse = resultSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const stored = await addResult({ ...parse.data, house: parse.data.house as AnalystHouseId });
+      res.json(stored);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.get("/api/assessment-results", async (_req, res) => {
+    try {
+      res.json({ results: await listResults() });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.get("/api/assessment-results/learnings", async (req, res) => {
+    try {
+      const house = typeof req.query.house === "string" && HOUSE_IDS.has(req.query.house)
+        ? (req.query.house as AnalystHouseId)
+        : undefined;
+      res.json({ learnings: await houseLearnings(house) });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.delete("/api/assessment-results/:id", async (req, res) => {
+    try {
+      const removed = await removeResult(req.params.id);
       res.status(removed ? 200 : 404).json({ removed });
     } catch (err) {
       res.status(503).json({ error: (err as Error).message });

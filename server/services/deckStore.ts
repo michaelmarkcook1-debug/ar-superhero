@@ -49,10 +49,20 @@ const sqliteStore: DeckStore = {
 // Postgres store — postgres.js with pgbouncer-safe settings.
 // ---------------------------------------------------------------------------
 
-function makePgStore(url: string): DeckStore {
-  // Supabase's pooled endpoint runs pgbouncer in transaction mode — prepared
-  // statements must stay off. Small pool: serverless instances are many.
-  const sql = postgres(url, { prepare: false, max: 3, idle_timeout: 20, connect_timeout: 15 });
+// One shared client per process — deck library and results store both ride it.
+// Supabase's pooled endpoint runs pgbouncer in transaction mode — prepared
+// statements must stay off. Small pool: serverless instances are many.
+let _pgSql: ReturnType<typeof postgres> | null = null;
+export function getPgSql(): ReturnType<typeof postgres> | null {
+  const url = process.env.DECK_DB_URL ?? "";
+  if (!url) return null;
+  if (!_pgSql) {
+    _pgSql = postgres(url, { prepare: false, max: 3, idle_timeout: 20, connect_timeout: 15 });
+  }
+  return _pgSql;
+}
+
+function makePgStore(sql: ReturnType<typeof postgres>): DeckStore {
 
   let ensured: Promise<void> | null = null;
   function ensureTable(): Promise<void> {
@@ -129,6 +139,6 @@ function makePgStore(url: string): DeckStore {
   };
 }
 
-const DECK_DB_URL = process.env.DECK_DB_URL ?? "";
+const _sharedSql = getPgSql();
 
-export const deckStore: DeckStore = DECK_DB_URL ? makePgStore(DECK_DB_URL) : sqliteStore;
+export const deckStore: DeckStore = _sharedSql ? makePgStore(_sharedSql) : sqliteStore;

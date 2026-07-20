@@ -16,6 +16,7 @@ import {
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
 import { type DeckLibraryRow } from "../storage";
 import { deckStore } from "./deckStore";
+import { houseLearnings } from "./resultsLearning";
 import {
   CONFIDENCE_FACTOR,
   ENGAGEMENT_STAGES,
@@ -131,6 +132,7 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
     (d): d is DeckLibraryRow => d !== null
   );
   const reused = pickReusedSlides(decks, vars, reusedMax);
+  const learnings = (await houseLearnings(req.houseId).catch(() => []))[0];
 
   const brand: Brand = {
     vendorName,
@@ -227,8 +229,25 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
       );
     }
 
+    // Learned-from-results lines — observational, augmenting the playbook.
+    if (learnings?.lines.length) {
+      addSectionLabel(slide, `Learned from your ${playbook.house} results (${learnings.cycles} cycle${learnings.cycles === 1 ? "" : "s"}) — observational`, {
+        x: 0.6,
+        y: contentTop + 2.35,
+        w: 12.1,
+      });
+      addBulletList(slide, learnings.lines.slice(0, 2).map((l) => l.line), {
+        x: 0.6,
+        y: contentTop + 2.67,
+        w: 12.1,
+        h: 0.85,
+        fontSize: 9,
+        color: PALETTE.slate,
+      });
+    }
+
     // Engagement moments strip.
-    const stripY = contentTop + 3.3;
+    const stripY = contentTop + 3.55;
     addSectionLabel(slide, "Engagement moments this deck serves", { x: 0.6, y: stripY, w: 12.1 });
     slide.addText(
       ENGAGEMENT_STAGES.map((s) => s.label).join("   →   "),

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ChevronRight, FileText } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronRight, FileText, Sparkle } from "lucide-react";
 import { Pane, Eyebrow, HairLine } from "./atoms";
 import {
   CONFIDENCE_FACTOR,
@@ -33,6 +34,11 @@ export default function AssessmentPlaybooks() {
   const [houseId, setHouseId] = useState<AnalystHouseId>("gartner");
   const [stageId, setStageId] = useState<EngagementStageId>("rfi");
   const [showBoundary, setShowBoundary] = useState(false);
+
+  const { data: learningsData } = useQuery<{
+    learnings: { house: string; cycles: number; lines: { line: string; source: string }[] }[];
+  }>({ queryKey: ["/api/assessment-results/learnings"] });
+  const learning = learningsData?.learnings.find((l) => l.house === houseId);
 
   const playbook = playbookById(houseId);
   const stage = playbook.stages.find((s) => s.stage === stageId) ?? playbook.stages[0];
@@ -186,6 +192,25 @@ export default function AssessmentPlaybooks() {
           )}
 
           <StageGuidancePanel playbook={playbook} guidance={stage} />
+
+          {learning && learning.lines.length > 0 && (
+            <div className="mt-5 rounded-xl border border-[#63d7de]/25 bg-[#00a7b7]/[0.05] p-4" data-testid="house-learnings">
+              <div className="mb-2 flex items-center gap-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#63d7de]">
+                <Sparkle className="h-3 w-3" />
+                Learned from your results · {learning.cycles} cycle{learning.cycles === 1 ? "" : "s"}
+              </div>
+              <ul className="space-y-2">
+                {learning.lines.map((l, i) => (
+                  <li key={i} className="text-[12px] leading-relaxed text-white/75" title={l.source}>
+                    · {l.line}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2.5 text-[10.5px] leading-relaxed text-white/35">
+                Observations from your logged results vs your linked submissions — they augment the playbook, they don't override it.
+              </p>
+            </div>
+          )}
         </Pane>
       </div>
     </section>

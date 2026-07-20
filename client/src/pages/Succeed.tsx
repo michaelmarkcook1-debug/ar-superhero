@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { storedCompetitorTickers } from "@/lib/agBrief";
 import AssessmentPlaybooks from "@/components/cockpit/AssessmentPlaybooks";
 import BriefingComposer from "@/components/cockpit/BriefingComposer";
+import AssessmentResults from "@/components/cockpit/AssessmentResults";
 import {
   MOMENTS,
   EVIDENCE_GAPS,
@@ -390,6 +391,8 @@ export default function Succeed() {
           ))}
         </Pane>
       </section>
+
+      <AssessmentResults />
 
       <AssessmentPlaybooks />
 

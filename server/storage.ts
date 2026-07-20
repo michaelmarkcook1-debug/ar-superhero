@@ -243,6 +243,21 @@ function ensureSchema() {
       slide_count INTEGER NOT NULL,
       slides_json TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS assessment_results (
+      id TEXT PRIMARY KEY,
+      house TEXT NOT NULL,
+      segment TEXT NOT NULL,
+      cycle_label TEXT NOT NULL,
+      published_at TEXT NOT NULL,
+      position TEXT NOT NULL,
+      prior_position TEXT,
+      strengths_json TEXT NOT NULL,
+      cautions_json TEXT NOT NULL,
+      linked_deck_ids_json TEXT NOT NULL,
+      notes TEXT,
+      created_at INTEGER NOT NULL
+    );
   `);
 }
 
@@ -834,6 +849,61 @@ export interface DeckLibraryRow {
   slideCount: number;
   slides: { index: number; texts: string[] }[];
 }
+
+
+// ----------------------------------------------------------------------------
+// Assessment results — verified quadrant/ranking outcomes logged by the user.
+// ----------------------------------------------------------------------------
+
+export interface AssessmentResultRow {
+  id: string;
+  house: string;
+  segment: string;
+  cycleLabel: string;
+  publishedAt: string; // ISO date, user-entered
+  position: string;
+  priorPosition: string | null;
+  strengths: string[]; // verbatim from the published report
+  cautions: string[]; // verbatim from the published report
+  linkedDeckIds: string[];
+  notes: string | null;
+  createdAt: number;
+}
+
+export const assessmentResultsLocal = {
+  list(): AssessmentResultRow[] {
+    return (
+      sqlite.prepare("SELECT * FROM assessment_results ORDER BY published_at DESC, created_at DESC").all() as any[]
+    ).map((r) => ({
+      id: r.id,
+      house: r.house,
+      segment: r.segment,
+      cycleLabel: r.cycle_label,
+      publishedAt: r.published_at,
+      position: r.position,
+      priorPosition: r.prior_position ?? null,
+      strengths: JSON.parse(r.strengths_json),
+      cautions: JSON.parse(r.cautions_json),
+      linkedDeckIds: JSON.parse(r.linked_deck_ids_json),
+      notes: r.notes ?? null,
+      createdAt: r.created_at,
+    }));
+  },
+  insert(row: AssessmentResultRow): void {
+    sqlite
+      .prepare(
+        "INSERT INTO assessment_results (id, house, segment, cycle_label, published_at, position, prior_position, strengths_json, cautions_json, linked_deck_ids_json, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      )
+      .run(
+        row.id, row.house, row.segment, row.cycleLabel, row.publishedAt, row.position,
+        row.priorPosition, JSON.stringify(row.strengths), JSON.stringify(row.cautions),
+        JSON.stringify(row.linkedDeckIds), row.notes, row.createdAt
+      );
+  },
+  remove(id: string): boolean {
+    return sqlite.prepare("DELETE FROM assessment_results WHERE id = ?").run(id).changes > 0;
+  },
+};
 
 export const deckLibrary = {
   list(): Omit<DeckLibraryRow, "slides">[] {
