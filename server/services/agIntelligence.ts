@@ -93,6 +93,8 @@ export interface ArBrief {
     reputationInsightBody: string | null;
   };
   gapAnalysis?: ArGapAnalysis;
+  /** Reputation lens movement (last two periods), verbatim from AG trends. */
+  reputationLenses?: { name: string; prev: number; last: number; delta: number; span: string }[];
   competitorTickers: string[];
   emergencies: ArBriefItem[];
   highlights: ArBriefItem[];
@@ -190,8 +192,10 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
 
   // ---- Reputation lens movement → emergencies / highlights / actions ----
   const trend = rep?.sentimentTrend;
+  let reputationLenses: ArBrief["reputationLenses"];
   if (trend?.series?.length) {
     const moves = deriveLensMoves(trend.series, trend.quarters ?? []);
+    reputationLenses = moves.map((m) => ({ name: m.name, prev: m.prev, last: m.last, delta: m.delta, span: m.span }));
     for (const m of moves.sort((a, b) => a.delta - b.delta)) {
       if (m.delta <= -5) {
         emergencies.push({
@@ -377,6 +381,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
           generatedAt: gap.generatedAt ?? null,
         }
       : undefined,
+    reputationLenses,
     competitorTickers,
     emergencies: emergencies.slice(0, 5),
     highlights: highlights.slice(0, 5),

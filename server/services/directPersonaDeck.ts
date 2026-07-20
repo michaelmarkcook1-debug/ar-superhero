@@ -15,6 +15,7 @@ import {
   type Brand,
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
+import { derivePersonaView, type PersonaView } from "./personaLens";
 
 // ============================================================================
 // Direct tab — persona analyst-influence briefing packs.
@@ -448,9 +449,11 @@ export async function createDirectPersonaDeck(
     });
   }
 
-  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
+  const brief = await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
 
   for (const persona of personas) {
+    const view = derivePersonaView(brief, persona.id);
+    if (view) addPersonaAgSlides(pptx, brand, persona, view, idx);
     addPersonaSection(pptx, brand, persona, idx);
   }
 
@@ -468,6 +471,111 @@ export async function createDirectPersonaDeck(
   addCeoBioSlide(pptx);
 
   return deckToBuffer(pptx);
+}
+
+// ---------------------------------------------------------------------------
+// Per-persona live AG slides — the role-scoped market read and advice.
+// Every value is a verbatim AG field; every advice line names its signal.
+// ---------------------------------------------------------------------------
+function addPersonaAgSlides(
+  pptx: pptxgen,
+  brand: Brand,
+  p: Persona,
+  view: PersonaView,
+  idx: () => string
+) {
+  // Slide 1 — the role's market read.
+  {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      title: `${p.label} — your AG market read`,
+      note: `Live AnalystGenius signals scoped to ${view.roleTitle}. Values are verbatim API fields.`,
+    });
+
+    const cardW = 3.95;
+    view.metrics.slice(0, 3).forEach((m, i) => {
+      addMetricCard(slide, {
+        x: 0.6 + i * (cardW + 0.12),
+        y: contentTop + 0.1,
+        w: cardW,
+        label: m.label,
+        value: m.value,
+        caption: m.caption,
+      });
+    });
+
+    const colTop = contentTop + 1.55;
+
+    // Reputation lenses this role owns.
+    if (view.lenses.length) {
+      addSectionLabel(slide, "Reputation lenses you own", { x: 0.6, y: colTop, w: 5.9 });
+      addTable(slide, {
+        x: 0.6,
+        y: colTop + 0.32,
+        w: 5.9,
+        colW: [2.7, 1.7, 1.5],
+        headers: ["Lens", "Movement", "Δ"],
+        rows: view.lenses.map((l) => ({
+          cells: [l.name, `${l.prev} → ${l.last}`, `${l.delta > 0 ? "+" : ""}${l.delta}`],
+          tone: l.delta <= -5 ? ("warn" as const) : ("default" as const),
+        })),
+        fontSize: 10,
+      });
+    }
+
+    const rightX = view.lenses.length ? 6.9 : 0.6;
+    const rightW = view.lenses.length ? 5.8 : 12.1;
+    const signals = [
+      ...view.emergencies.map((e) => `Exposure — ${e.title}: ${e.detail}`),
+      ...view.highlights.map((h) => `Lead with — ${h.title}: ${h.detail}`),
+    ];
+    if (signals.length) {
+      addSectionLabel(slide, "Signals on your desk", { x: rightX, y: colTop, w: rightW });
+      addBulletList(slide, signals.slice(0, 5), {
+        x: rightX,
+        y: colTop + 0.32,
+        w: rightW,
+        h: 3.9,
+        fontSize: 9.5,
+      });
+    }
+  }
+
+  // Slide 2 — role advice + the questions this role should personally own.
+  if (view.advice.length || view.questions.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      title: `${p.label} — AG advice for your role`,
+      note: "Derived readings of live AG signals — each line names the signal it comes from. No outcome prediction.",
+    });
+
+    if (view.advice.length) {
+      addSectionLabel(slide, "What the signals mean for you", { x: 0.6, y: contentTop + 0.1, w: 12.1 });
+      slide.addText(
+        view.advice.flatMap((a) => [
+          { text: a.line, options: { bullet: { code: "2022", indent: 14 }, breakLine: true, fontSize: 11, color: PALETTE.ink } },
+          { text: `     ${a.source}`, options: { breakLine: true, fontSize: 8, color: PALETTE.slate, italic: true } },
+        ]),
+        {
+          x: 0.6,
+          y: contentTop + 0.45,
+          w: 12.1,
+          h: 3.6,
+          lineSpacingMultiple: 1.08,
+          paraSpaceAfter: 4,
+          valign: "top",
+          margin: 0,
+          fit: "shrink",
+        }
+      );
+    }
+
+    if (view.questions.length) {
+      const qTop = contentTop + (view.advice.length ? 4.25 : 0.1);
+      addSectionLabel(slide, "Questions you should personally be ready for", { x: 0.6, y: qTop, w: 12.1 });
+      addBulletList(slide, view.questions, { x: 0.6, y: qTop + 0.32, w: 12.1, h: 1.4, fontSize: 10.5 });
+    }
+  }
 }
 
 function addPersonaSection(pptx: pptxgen, brand: Brand, p: Persona, idx: () => string) {
