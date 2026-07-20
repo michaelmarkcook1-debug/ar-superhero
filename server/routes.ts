@@ -27,6 +27,8 @@ import { ingestPptx } from "./services/deckIngest";
 import { deckStore } from "./services/deckStore";
 import { composeBriefingDeck, composerFilename } from "./services/briefingComposer";
 import { addResult, houseLearnings, listResults, removeResult } from "./services/resultsLearning";
+import { composeScenarioDeck, scenarioDeckFilename } from "./services/scenarioDeck";
+import { scenarioById } from "@shared/briefingScenarios";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
 // ============================================================================
@@ -394,6 +396,42 @@ export async function registerRoutes(
       res.status(removed ? 200 : 404).json({ removed });
     } catch (err) {
       res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Scenario persona decks — persona x scenario market-update briefings
+  // --------------------------------------------------------------------------
+
+  const scenarioDeckSchema = z.object({
+    personaId: z.string().min(1),
+    scenarioId: z.string().refine((s) => Boolean(scenarioById(s)), "unknown scenario"),
+    houseId: z.string().refine((h) => HOUSE_IDS.has(h), "unknown analyst house").optional(),
+    competitorTickers: z.array(z.string()).max(8).optional(),
+  });
+
+  app.post("/api/persona-decks/scenario", async (req: Request, res: Response) => {
+    const parse = scenarioDeckSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    const valid = new Set(listDirectPersonaIds() as string[]);
+    if (!valid.has(parse.data.personaId)) return res.status(400).json({ error: "unknown personaId" });
+    const scenario = scenarioById(parse.data.scenarioId)!;
+    if (!scenario.personas.includes(parse.data.personaId as (typeof scenario.personas)[number])) {
+      return res.status(400).json({ error: `Scenario '${scenario.id}' does not apply to persona '${parse.data.personaId}'` });
+    }
+    try {
+      const request = {
+        personaId: parse.data.personaId as PersonaId,
+        scenarioId: parse.data.scenarioId,
+        houseId: parse.data.houseId as AnalystHouseId | undefined,
+        competitorTickers: parse.data.competitorTickers,
+      };
+      const buffer = await composeScenarioDeck(request);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+      res.setHeader("Content-Disposition", `attachment; filename="${scenarioDeckFilename(request)}"`);
+      res.send(buffer);
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
     }
   });
 

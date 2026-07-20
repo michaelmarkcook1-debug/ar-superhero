@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { ArrowRight, ChevronRight, AlertTriangle, Sparkles, FileDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { storedCompetitorTickers } from "@/lib/agBrief";
+import { scenariosForPersona, type PersonaScenarioId } from "@shared/briefingScenarios";
+import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 import {
   LENSES,
   DIRECT_UPLOADS,
@@ -35,7 +37,35 @@ export default function Direct() {
   const [selectedId, setSelectedId] = useState<LensId>("executive");
   const [extraUploads, setExtraUploads] = useState<DirectUpload[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [contextOpen, setContextOpen] = useState(false);
+  const [scenarioId, setScenarioId] = useState<PersonaScenarioId | "standard">("standard");
+  const [scenarioHouse, setScenarioHouse] = useState<AnalystHouseId>("gartner");
   const selected = LENSES.find((l) => l.id === selectedId) || LENSES[0];
+
+  async function downloadScenarioDeck(personaId: LensId, scenario: PersonaScenarioId, houseId: AnalystHouseId) {
+    setDownloading("__scenario__");
+    try {
+      const response = await apiRequest("POST", "/api/persona-decks/scenario", {
+        personaId,
+        scenarioId: scenario,
+        houseId,
+        competitorTickers: storedCompetitorTickers(),
+      });
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = match?.[1] ?? `${personaId}-${scenario}-briefing.pptx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(null);
+    }
+  }
 
   async function downloadPersonaDeck(personaIds: LensId[], key: string) {
     setDownloading(key);
@@ -253,18 +283,110 @@ export default function Direct() {
 
           <button
             type="button"
-            onClick={() => downloadPersonaDeck([selected.id], selected.id)}
+            onClick={() => setContextOpen((v) => !v)}
             disabled={downloading !== null}
             data-testid="button-generate-brief"
             className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#a88945] px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] text-[#0c1a15] transition hover:bg-[#d5b46b] disabled:cursor-wait disabled:opacity-60"
           >
-            {downloading === selected.id ? "Generating deck…" : selected.briefing.cta}
-            {downloading === selected.id ? (
+            {downloading !== null ? "Generating deck…" : selected.briefing.cta}
+            {downloading !== null ? (
               <FileDown className="h-4 w-4" />
             ) : (
-              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              <ArrowRight className={`h-4 w-4 transition ${contextOpen ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
             )}
           </button>
+
+          {contextOpen && (
+            <div className="mt-3 rounded-xl border border-[#3d8f6d]/[0.20] bg-[#0c1a15] p-4" data-testid="further-context">
+              <div className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
+                Further context — what should this briefing serve?
+              </div>
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  data-testid="scenario-standard"
+                  onClick={() => setScenarioId("standard")}
+                  className={`flex w-full items-start gap-2.5 rounded-lg border px-3 py-2 text-left transition ${
+                    scenarioId === "standard"
+                      ? "border-[#a88945]/45 bg-[#a88945]/[0.10]"
+                      : "border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.12] hover:border-[#3d8f6d]/30"
+                  }`}
+                >
+                  <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${scenarioId === "standard" ? "bg-[#d5b46b]" : "bg-white/25"}`} />
+                  <span>
+                    <span className="block text-[12.5px] font-medium text-white/85">Standard persona pack</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-white/40">
+                      The full analyst-influence briefing for this lens.
+                    </span>
+                  </span>
+                </button>
+                {scenariosForPersona(selected.id).map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    data-testid={`scenario-${s.id}`}
+                    onClick={() => setScenarioId(s.id)}
+                    className={`flex w-full items-start gap-2.5 rounded-lg border px-3 py-2 text-left transition ${
+                      scenarioId === s.id
+                        ? "border-[#a88945]/45 bg-[#a88945]/[0.10]"
+                        : "border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.12] hover:border-[#3d8f6d]/30"
+                    }`}
+                  >
+                    <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${scenarioId === s.id ? "bg-[#d5b46b]" : "bg-white/25"}`} />
+                    <span className="min-w-0">
+                      <span className="block text-[12.5px] font-medium text-white/85">{s.label}</span>
+                      <span className="mt-0.5 block text-[11px] leading-snug text-white/40">{s.when}</span>
+                      {scenarioId === s.id && (
+                        <span className="mt-1 block text-[10px] leading-snug text-[#63d7de]/80">
+                          Draws on: {s.intel.join(" · ")}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {scenarioId !== "standard" && scenariosForPersona(selected.id).find((s) => s.id === scenarioId)?.houseScoped && (
+                <div className="mt-3">
+                  <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+                    Analyst house context
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {HOUSE_PLAYBOOKS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        data-testid={`scenario-house-${p.id}`}
+                        onClick={() => setScenarioHouse(p.id)}
+                        className={
+                          p.id === scenarioHouse
+                            ? "rounded-full border border-[#00a7b7]/45 bg-[#00a7b7]/[0.1] px-2.5 py-1 text-[11px] text-[#9fe3e8]"
+                            : "rounded-full border border-[#3d8f6d]/24 px-2.5 py-1 text-[11px] text-white/50 transition hover:text-white/80"
+                        }
+                      >
+                        {p.house}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="button"
+                data-testid="button-generate-scenario"
+                disabled={downloading !== null}
+                onClick={() =>
+                  scenarioId === "standard"
+                    ? downloadPersonaDeck([selected.id], selected.id)
+                    : void downloadScenarioDeck(selected.id, scenarioId, scenarioHouse)
+                }
+                className="mt-3.5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#a88945]/50 bg-[#a88945]/[0.14] px-5 py-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#f0dca8] transition hover:bg-[#a88945]/[0.22] disabled:cursor-wait disabled:opacity-60"
+              >
+                {downloading !== null ? "Generating…" : "Generate this briefing"}
+                <FileDown className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => downloadPersonaDeck(LENSES.map((l) => l.id), "__all__")}
