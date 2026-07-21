@@ -11,7 +11,7 @@ const PptxGenJSCtor = ((pptxgen as any)?.default ?? pptxgen) as typeof pptxgen;
 // ============================================================================
 // Board-pack PPT toolkit
 //
-// Shared layout primitives for AnalystGenius AR Superhero decks, modelled on
+// Shared layout primitives for AnalystGenius AR SuperHero decks, modelled on
 // the AnalystGenius board/C-suite "Defence Pack" house style:
 //   - 16:9, dark navy cover and closing slides
 //   - clean white body slides with a small "AnalystGenius · <deck>" header and
@@ -66,7 +66,7 @@ export function newDeck(meta: { title: string; subject: string }): pptxgen {
   const pptx = new PptxGenJSCtor();
   pptx.defineLayout({ name: "AR_WIDE", width: SLIDE_W, height: SLIDE_H });
   pptx.layout = "AR_WIDE";
-  pptx.author = "AnalystGenius AR Superhero";
+  pptx.author = "AnalystGenius AR SuperHero";
   pptx.company = "AnalystGenius";
   pptx.title = meta.title;
   pptx.subject = meta.subject;

@@ -311,7 +311,7 @@ export default function CommandCentre() {
             id="evidence"
             eyebrow="Evidence Readiness"
             title="Candidate and approved evidence by readiness band"
-            description="Candidates are AR Superhero suggestions. Approve, approve with restrictions, or reject. Approved evidence is reusable across workstreams."
+            description="Candidates are AR SuperHero suggestions. Approve, approve with restrictions, or reject. Approved evidence is reusable across workstreams."
           >
             <Card noPadding>
               <div className="divide-y divide-card-border">

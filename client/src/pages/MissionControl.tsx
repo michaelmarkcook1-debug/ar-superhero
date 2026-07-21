@@ -57,7 +57,7 @@ export default function MissionControl() {
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
       {/* ====================================================================
-          AR Superhero Brief — top of cockpit
+          AR SuperHero Brief — top of cockpit
       ==================================================================== */}
       <section className="mb-14">
         <div className="mb-8 flex items-end justify-between gap-6">
@@ -69,7 +69,7 @@ export default function MissionControl() {
               </span>
             </Eyebrow>
             <h1 className="text-[44px] font-semibold leading-[0.98] tracking-[-0.035em] text-[#f4eed8] md:text-[56px] lg:text-[64px]">
-              AR Superhero Brief.
+              AR SuperHero Brief.
             </h1>
             <p className="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-white/60 md:text-[16.5px]">
               What changed, where you're exposed, and who needs a briefing

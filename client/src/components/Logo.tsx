@@ -1,4 +1,4 @@
-// AR Superhero logomark — geometric "A" with crossbar that doubles as a
+// AR SuperHero logomark — geometric "A" with crossbar that doubles as a
 // horizon line / signal-pulse. Inline SVG, currentColor for theming.
 export function Logo({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
@@ -8,7 +8,7 @@ export function Logo({ size = 28, className = "" }: { size?: number; className?:
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="AR Superhero"
+      aria-label="AR SuperHero"
       className={className}
     >
       <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" stroke="currentColor" strokeOpacity="0.25" />
@@ -36,7 +36,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
       <Logo size={28} className="text-primary" />
       <div className="leading-none">
         <div className="text-[15px] font-semibold tracking-tight text-foreground">
-          AR Superhero
+          AR SuperHero
         </div>
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
           by AnalystGenius

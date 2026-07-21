@@ -88,7 +88,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                   lightMode ? "text-[#123d2c]/45" : "text-white/40"
                 )}
               >
-                AR Superhero
+                AR SuperHero
               </span>
             </Link>
 

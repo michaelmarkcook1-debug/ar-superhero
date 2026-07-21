@@ -67,7 +67,7 @@ export const MODES: ModeDef[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// AR Superhero Brief — what changed, where exposed, who needs action
+// AR SuperHero Brief — what changed, where exposed, who needs action
 // ---------------------------------------------------------------------------
 
 export type BriefItem = {
@@ -95,7 +95,7 @@ export const BRIEF_ITEMS: BriefItem[] = [
     title: "Two BFSI references reused across three active moments",
     detail:
       "Reference concentration risk: a single client withdrawal would dent readiness on three submissions simultaneously.",
-    source: "AR Superhero portfolio scan",
+    source: "AR SuperHero portfolio scan",
     tag: "internal",
   },
   {
@@ -104,7 +104,7 @@ export const BRIEF_ITEMS: BriefItem[] = [
     title: "Generative enterprise services — OneEcosystem narrative is Weak",
     detail:
       "Submission references two hyperscaler partners only. Multi-tier ecosystem narrative (hyperscaler + ISV + regional) is missing.",
-    source: "AR Superhero readiness scan",
+    source: "AR SuperHero readiness scan",
     tag: "internal",
   },
   {
@@ -113,7 +113,7 @@ export const BRIEF_ITEMS: BriefItem[] = [
     title: "AI-assisted developer co-pilot evidence is Unsupported",
     detail:
       "Two BFSI deals could close the gap with named references; both are still pre-disclosure.",
-    source: "Sales pipeline · AR Superhero",
+    source: "Sales pipeline · AR SuperHero",
     tag: "internal",
   },
   {
@@ -139,7 +139,7 @@ export const BRIEF_ITEMS: BriefItem[] = [
     category: "impact",
     title: "Evidence gaps closed this quarter",
     detail: "11 closed · 4 opened · net +7. AI-assisted dev tooling remains the top open gap.",
-    source: "AR Superhero ledger",
+    source: "AR SuperHero ledger",
     tag: "internal",
   },
   {
@@ -1596,7 +1596,7 @@ export const DIRECT_DELIVERABLES: Record<LensId, DeliverableTemplate[]> = {
       primaryFormat: "PPTX",
       templateState: "AG curated · v2",
       approval: "Source-traced",
-      composedFrom: ["Active moments", "Readiness exposure", "AR Superhero Brief", "Impact ledger"],
+      composedFrom: ["Active moments", "Readiness exposure", "AR SuperHero Brief", "Impact ledger"],
     },
     {
       id: "dir-exec-memo",

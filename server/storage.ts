@@ -294,7 +294,7 @@ function bootstrap() {
       name: "Northstar Digital Services",
       meta: JSON.stringify({
         domains: ["northstar.example"],
-        notes: "Demo customer for AR Superhero MVP.",
+        notes: "Demo customer for AR SuperHero MVP.",
       }),
     }).run();
   }

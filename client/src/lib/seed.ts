@@ -1123,7 +1123,7 @@ export const EVIDENCE: EvidenceItem[] = [
     readiness: "Weak",
     reuse: "Internal only",
     status: "Suggested",
-    provenance: "Drafted by AR Superhero from public partner page + 3 internal QBRs",
+    provenance: "Drafted by AR SuperHero from public partner page + 3 internal QBRs",
     confidence: 0.61,
   },
   {

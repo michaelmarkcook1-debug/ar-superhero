@@ -25,7 +25,7 @@ export default function LeaderLens() {
           Internal AR lead briefings
         </h1>
         <p className="mt-2 text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
-          Aggregation across all AnalystGenius and AR Superhero data — not per-document summaries. P0 lenses are below. Country and Industry are P1.
+          Aggregation across all AnalystGenius and AR SuperHero data — not per-document summaries. P0 lenses are below. Country and Industry are P1.
         </p>
       </div>
 

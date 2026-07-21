@@ -24,7 +24,7 @@ type NavItem = {
 
 const NAV: { group: string; items: NavItem[] }[] = [
   {
-    group: "AR Superhero",
+    group: "AR SuperHero",
     items: [
       { href: "/admin/command-centre", label: "Command Centre", icon: LayoutGrid },
       { href: "/admin/workstreams", label: "Workstreams", icon: Activity, badge: "5" },
@@ -198,7 +198,7 @@ function WorkspaceTabs({ location }: { location: string }) {
     <div className="max-w-full overflow-hidden border-t border-border/70 bg-background/72">
       <div className="max-w-full px-4 lg:px-8">
         <div className="flex max-w-full items-center gap-3 overflow-x-auto py-2.5">
-          <TabGroup label="AR Superhero" tabs={WORKSPACE_TABS} location={location} />
+          <TabGroup label="AR SuperHero" tabs={WORKSPACE_TABS} location={location} />
           <div className="h-6 w-px shrink-0 bg-border" />
           <TabGroup label="AnalystGenius" tabs={PLATFORM_TABS} location={location} compact />
         </div>
@@ -278,7 +278,7 @@ function Breadcrumb({ location }: { location: string }) {
   const label = map[location] || "Command Centre";
   return (
     <div className="flex items-center gap-1.5 text-[12.5px]">
-      <span className="text-muted-foreground">AR Superhero</span>
+      <span className="text-muted-foreground">AR SuperHero</span>
       <ChevronRight className="h-3 w-3 text-muted-foreground/60" />
       <span className="font-medium text-foreground">{label}</span>
     </div>

@@ -9,7 +9,7 @@ export default function Placeholder({ title, description, eyebrow }: { title: st
       <Card className="mt-8 p-8 text-center">
         <div className="text-[12px] uppercase tracking-[0.16em] text-muted-foreground">Prototype scope</div>
         <p className="mt-2 text-[13.5px] text-foreground/90 max-w-md mx-auto">
-          This area exists in the wider AnalystGenius platform. The AR Superhero MVP focuses on the
+          This area exists in the wider AnalystGenius platform. The AR SuperHero MVP focuses on the
           Command Centre, Workstreams, Analyst Landscape, Evidence Library, Leader Lens, Learning Queue,
           and Integrations.
         </p>

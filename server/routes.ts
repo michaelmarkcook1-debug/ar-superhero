@@ -32,7 +32,7 @@ import { scenarioById } from "@shared/briefingScenarios";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
 // ============================================================================
-// API routes for the AR Superhero backend.
+// API routes for the AR SuperHero backend.
 // All routes are read-only or import-first as required by the MVP brief.
 // ============================================================================
 

@@ -88,8 +88,9 @@ export default function Landing() {
                 : "text-[#123d2c] drop-shadow-[0_1px_16px_rgba(253,246,235,0.85)]"
             }`}>
               <span className="inline-block">AR</span>
-              <span className="inline-block">Super</span>
-              <span className="inline-block text-[#a88945]">Hero</span>
+              <span className="inline-block">
+                Super<span className="text-[#a88945]">Hero</span>
+              </span>
             </h1>
             <div className="mt-5 h-px w-16 bg-[#a88945]/70" />
 
