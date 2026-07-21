@@ -275,3 +275,62 @@ export function Glyph({ children, className }: { children: React.ReactNode; clas
     </span>
   );
 }
+
+// In-page side sub-nav — distils each mode page to a core view with the
+// document-management / tracking functions moved behind their own tabs.
+export type SubNavItem<T extends string> = {
+  id: T;
+  label: string;
+  hint?: string;
+  icon?: React.ReactNode;
+};
+
+export function SubNav<T extends string>({
+  items,
+  active,
+  onChange,
+  className,
+}: {
+  items: SubNavItem<T>[];
+  active: T;
+  onChange: (id: T) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "mb-10 flex flex-wrap items-center gap-1.5 border-b border-[#3d8f6d]/[0.16] pb-3",
+        className
+      )}
+      role="tablist"
+    >
+      {items.map((it) => {
+        const on = it.id === active;
+        return (
+          <button
+            key={it.id}
+            type="button"
+            role="tab"
+            aria-selected={on}
+            data-testid={`subnav-${it.id}`}
+            onClick={() => onChange(it.id)}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[12.5px] font-medium tracking-wide transition",
+              on
+                ? "border-[#a88945]/45 bg-[#a88945]/[0.12] text-[#f0dca8] shadow-[0_0_24px_-14px_rgba(168,137,69,0.7)]"
+                : "border-[#3d8f6d]/24 bg-[#1a5540]/[0.18] text-white/60 hover:border-[#3d8f6d]/36 hover:text-white/90"
+            )}
+          >
+            {it.icon && <span className={on ? "text-[#d5b46b]" : "text-white/40"}>{it.icon}</span>}
+            {it.label}
+            {it.hint && (
+              <span className={cn("font-mono text-[9.5px] uppercase tracking-[0.16em]", on ? "text-[#d5b46b]/70" : "text-white/30")}>
+                {it.hint}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

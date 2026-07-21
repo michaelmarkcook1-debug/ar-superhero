@@ -22,7 +22,9 @@ import {
   SectionTitle,
   HairLine,
   Glyph,
+  SubNav,
 } from "@/components/cockpit/atoms";
+import { Users, FolderOpen, GitBranch } from "lucide-react";
 import {
   UploadPanel,
   UploadedItemsList,
@@ -34,6 +36,7 @@ import { DeliverablesPanel } from "@/components/cockpit/deliverables";
 const PERSONA_DECK_VENDOR = "capgemini";
 
 export default function Direct() {
+  const [tab, setTab] = useState<"briefings" | "documents" | "pipeline">("briefings");
   const [selectedId, setSelectedId] = useState<LensId>("executive");
   const [extraUploads, setExtraUploads] = useState<DirectUpload[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -146,6 +149,18 @@ export default function Direct() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
+      <SubNav
+        items={[
+          { id: "briefings", label: "Briefings", icon: <Users className="h-3.5 w-3.5" /> },
+          { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
+          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "briefings" && (
+        <>
       {/* Hero */}
       <section className="mb-12">
         <Eyebrow tone="gold" className="mb-3">
@@ -402,7 +417,11 @@ export default function Direct() {
           </div>
         </Pane>
       </section>
+        </>
+      )}
 
+      {tab === "documents" && (
+        <>
       {/* Upload internal material */}
       <section className="mb-14" id="upload-material">
         <UploadPanel<DirectMaterialType>
@@ -424,7 +443,10 @@ export default function Direct() {
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
       </section>
+        </>
+      )}
 
+      {tab === "pipeline" && (
       <section className="mb-16">
         <DecisionModel<DirectMaterialType>
           accent="gold"
@@ -436,7 +458,10 @@ export default function Direct() {
           finalNote="Brief summaries surface what AR observes. Leader relationship stance is held back unless AR chooses to include it."
         />
       </section>
+      )}
 
+      {tab === "briefings" && (
+        <>
       {/* Deliverables — per stakeholder lens */}
       <section className="mb-16">
         <DeliverablesPanel
@@ -498,6 +523,8 @@ export default function Direct() {
           })}
         </div>
       </section>
+        </>
+      )}
     </div>
   );
 }

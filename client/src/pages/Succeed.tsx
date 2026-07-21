@@ -34,7 +34,9 @@ import {
   HairLine,
   Glyph,
   NumberMark,
+  SubNav,
 } from "@/components/cockpit/atoms";
+import { Target as TargetIcon, FolderOpen, GitBranch } from "lucide-react";
 
 const VENDOR_OPTIONS = [
   { id: "capgemini", label: "Capgemini" },
@@ -55,6 +57,7 @@ export default function Succeed() {
     () => EVIDENCE_GAPS.filter((gap) => liveMomentIds.has(gap.momentId)),
     [liveMomentIds]
   );
+  const [tab, setTab] = useState<"readiness" | "documents" | "pipeline">("readiness");
   const [selectedId, setSelectedId] = useState<string>(liveMoments[0].id);
   const [showHfsDetail, setShowHfsDetail] = useState(false);
   const [extraUploads, setExtraUploads] = useState<SucceedUpload[]>([]);
@@ -156,6 +159,18 @@ export default function Succeed() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
+      <SubNav
+        items={[
+          { id: "readiness", label: "Readiness", icon: <TargetIcon className="h-3.5 w-3.5" /> },
+          { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
+          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "readiness" && (
+        <>
       {/* Hero */}
       <section className="mb-14">
         <Eyebrow tone="gold" className="mb-3">
@@ -308,7 +323,11 @@ export default function Succeed() {
           </Pane>
         </div>
       </section>
+        </>
+      )}
 
+      {tab === "documents" && (
+        <>
       {/* Upload analyst moment material */}
       <section className="mb-14" id="upload-material">
         <UploadPanel<SucceedMaterialType>
@@ -331,7 +350,10 @@ export default function Succeed() {
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
       </section>
+        </>
+      )}
 
+      {tab === "pipeline" && (
       <section className="mb-16">
         <DecisionModel<SucceedMaterialType>
           accent="gold"
@@ -343,7 +365,10 @@ export default function Succeed() {
           finalNote="AnalystGenius learning uses validated patterns only. Third-party analyst text, scoring rationale, or methodology IP is never republished across clients."
         />
       </section>
+      )}
 
+      {tab === "readiness" && (
+        <>
       {/* Evidence gaps */}
       <section className="mb-14">
         <SectionTitle
@@ -526,6 +551,8 @@ export default function Succeed() {
           ))}
         </div>
       </section>
+        </>
+      )}
     </div>
   );
 }

@@ -25,7 +25,9 @@ import {
   HairLine,
   Glyph,
   NumberMark,
+  SubNav,
 } from "@/components/cockpit/atoms";
+import { Megaphone, FolderOpen, GitBranch } from "lucide-react";
 import {
   UploadPanel,
   UploadedItemsList,
@@ -37,6 +39,7 @@ import { DeliverablesPanel } from "@/components/cockpit/deliverables";
 type Tab = "sell" | "presence";
 
 export default function Enable() {
+  const [view, setView] = useState<"enablement" | "documents" | "pipeline">("enablement");
   const [tab, setTab] = useState<Tab>("sell");
   const [extraUploads, setExtraUploads] = useState<EnableUpload[]>([]);
 
@@ -91,6 +94,18 @@ export default function Enable() {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
+      <SubNav
+        items={[
+          { id: "enablement", label: "Enablement", icon: <Megaphone className="h-3.5 w-3.5" /> },
+          { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
+          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
+        ]}
+        active={view}
+        onChange={setView}
+      />
+
+      {view === "enablement" && (
+        <>
       {/* Hero */}
       <section className="mb-12">
         <Eyebrow tone="gold" className="mb-3">
@@ -110,6 +125,11 @@ export default function Enable() {
         </p>
       </section>
 
+        </>
+      )}
+
+      {view === "documents" && (
+        <>
       {/* Upload commercial / presence material */}
       <section className="mb-12" id="upload-material">
         <UploadPanel<EnableMaterialType>
@@ -122,7 +142,11 @@ export default function Enable() {
           permissionNote="Outputs are internal-only. Sales-safe proof is cleared for buyer-facing reuse; restricted proof shows its permitted audience. No public campaign generation in this release."
         />
       </section>
+        </>
+      )}
 
+      {view === "enablement" && (
+        <>
       {/* Sub-tabs */}
       <section className="mb-10">
         <div
@@ -135,8 +159,10 @@ export default function Enable() {
       </section>
 
       {tab === "sell" ? <SellContent /> : <PresenceContent />}
+        </>
+      )}
 
-      {/* Uploaded items library */}
+      {view === "documents" && (
       <section className="mb-14 mt-14">
         <SectionTitle
           eyebrow="Enablement material library"
@@ -145,7 +171,9 @@ export default function Enable() {
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
       </section>
+      )}
 
+      {view === "pipeline" && (
       <section className="mb-4">
         <DecisionModel<EnableMaterialType>
           accent="gold"
@@ -157,6 +185,7 @@ export default function Enable() {
           finalNote="All outputs are internal-only. Sellers see sales-safe proof; marketing sees restricted claims to avoid. Public campaign generation is out of scope for the MVP."
         />
       </section>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowUpRight, Activity, AlertTriangle, Sparkles } from "lucide-react";
+import { ArrowUpRight, Activity, AlertTriangle, Sparkles, LayoutGrid, Radar } from "lucide-react";
 import { useArBrief, useCompetitorSelection } from "@/lib/agBrief";
 import { NarrativeGapPanel, CompetitivePanel, ScoreBar } from "@/components/cockpit/AgPulsePanel";
 import {
@@ -19,6 +20,7 @@ import {
   ReadinessBar,
   HairLine,
   Glyph,
+  SubNav,
 } from "@/components/cockpit/atoms";
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
@@ -73,8 +75,21 @@ export default function MissionControl() {
   const restrictedClaims = CLAIMS_TO_AVOID.length;
   const presenceGapCount = PRESENCE_GAPS.length;
 
+  const [tab, setTab] = useState<"overview" | "tracking">("overview");
+
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
+      <SubNav
+        items={[
+          { id: "overview", label: "Overview", icon: <LayoutGrid className="h-3.5 w-3.5" /> },
+          { id: "tracking", label: "Tracking", hint: "Briefing opportunities", icon: <Radar className="h-3.5 w-3.5" /> },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
+
+      {tab === "overview" && (
+        <>
       {/* ====================================================================
           AR SuperHero Brief — top of cockpit
       ==================================================================== */}
@@ -170,10 +185,13 @@ export default function MissionControl() {
           <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
         </section>
       )}
+        </>
+      )}
 
       {/* ====================================================================
-          Intelligence Monitor — briefing opportunity feeds
+          Intelligence Monitor — briefing opportunity feeds (Tracking tab)
       ==================================================================== */}
+      {tab === "tracking" && (
       <section className="mb-14" data-testid="intelligence-monitor">
         <div className="mb-7 flex items-baseline justify-between">
           <Eyebrow className="text-white/45">Briefing opportunities</Eyebrow>
@@ -186,7 +204,10 @@ export default function MissionControl() {
           <FutureBriefingOpportunities />
         </div>
       </section>
+      )}
 
+      {tab === "overview" && (
+        <>
       {/* ====================================================================
           Tri-mode cockpit
       ==================================================================== */}
@@ -348,6 +369,8 @@ export default function MissionControl() {
           </div>
         </Pane>
       </section>
+        </>
+      )}
     </div>
   );
 }
