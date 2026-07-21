@@ -51,8 +51,13 @@ export default function Landing() {
       <header className="relative z-20 flex items-center justify-between px-5 md:px-8 py-5">
         <div className="flex items-center gap-2.5" data-testid="landing-brand">
           <Logo size={26} className={dark ? "text-white" : "text-[#123d2c]"} />
-          <span className={`text-[15px] font-semibold tracking-tight ${dark ? "text-white" : "text-[#123d2c]"}`}>
-            Analyst<span className="text-[#a88945]">Genius</span>
+<span className="leading-none">
+            <span className={`block text-[15px] font-semibold tracking-tight ${dark ? "text-white" : "text-[#123d2c]"}`}>
+              AR Super<span className="text-[#a88945]">Hero</span>
+            </span>
+            <span className={`mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em] ${dark ? "text-white/45" : "text-[#123d2c]/45"}`}>
+              by AnalystGenius
+            </span>
           </span>
         </div>
         <button

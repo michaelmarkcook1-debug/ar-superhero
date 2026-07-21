@@ -74,21 +74,23 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                   lightMode ? "text-[#123d2c]" : "text-[#e7e3d8]"
                 )}
               />
-              <span
-                className={cn(
-                  "text-[14px] font-semibold tracking-tight",
-                  lightMode ? "text-[#123d2c]" : "text-[#e7e3d8]"
-                )}
-              >
-                Analyst<span className="text-[#a88945]">Genius</span>
-              </span>
-              <span
-                className={cn(
-                  "ml-2 hidden text-[10px] font-medium uppercase tracking-[0.22em] md:inline",
-                  lightMode ? "text-[#123d2c]/45" : "text-white/40"
-                )}
-              >
-                AR SuperHero
+              <span className="leading-none">
+                <span
+                  className={cn(
+                    "block text-[14px] font-semibold tracking-tight",
+                    lightMode ? "text-[#123d2c]" : "text-[#e7e3d8]"
+                  )}
+                >
+                  AR Super<span className="text-[#a88945]">Hero</span>
+                </span>
+                <span
+                  className={cn(
+                    "mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em]",
+                    lightMode ? "text-[#123d2c]/45" : "text-white/40"
+                  )}
+                >
+                  by AnalystGenius
+                </span>
               </span>
             </Link>
 
