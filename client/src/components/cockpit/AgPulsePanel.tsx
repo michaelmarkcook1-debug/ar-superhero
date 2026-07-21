@@ -70,29 +70,6 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
         </div>
       </div>
 
-      {/* Divergences — narrative vs measured reality, bar pairs */}
-      {ga.topDivergences.length > 0 && (
-        <div className="mb-6 space-y-4">
-          {ga.topDivergences.map((d) => (
-            <div key={d.theme} className="rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] p-4">
-              <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-2">
-                <div className="text-[13.5px] font-semibold text-white/90">{d.theme}</div>
-                <div className="font-mono text-[11px] text-white/40 tabular-nums">
-                  Δ {d.delta ?? "—"}
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <ScoreBar label="Narrative" value={d.narrativeScore} tone="muted" />
-                <ScoreBar label="Reality" value={d.realityScore} tone="gold" />
-              </div>
-              {d.interpretation && (
-                <p className="mt-2.5 text-[12px] leading-relaxed text-white/55">{d.interpretation}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Per-house narrative signals */}
       {ga.narrativeSignals.length > 0 && (
         <div className="mb-6">
@@ -148,7 +125,7 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
   );
 }
 
-function ScoreBar({
+export function ScoreBar({
   label,
   value,
   tone,

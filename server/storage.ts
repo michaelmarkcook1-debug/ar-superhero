@@ -258,6 +258,14 @@ function ensureSchema() {
       notes TEXT,
       created_at INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS signal_history (
+      id TEXT PRIMARY KEY,
+      ticker TEXT NOT NULL,
+      captured_at INTEGER NOT NULL,
+      signals_json TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_signal_history_ticker ON signal_history (ticker, captured_at);
   `);
 }
 
@@ -869,6 +877,49 @@ export interface AssessmentResultRow {
   notes: string | null;
   createdAt: number;
 }
+
+
+// ----------------------------------------------------------------------------
+// Signal history — periodic snapshots of live AG signals per ticker, so the
+// cockpit can report REAL movement over time (nothing reconstructed).
+// ----------------------------------------------------------------------------
+
+export interface SignalSnapshotRow {
+  id: string;
+  ticker: string;
+  capturedAt: number;
+  signals: {
+    assessmentScore: number | null;
+    aiReadinessScore: number | null;
+    gapScore: number | null;
+    gapDirection: string | null;
+    lenses: Record<string, number>;
+  };
+}
+
+export const signalHistoryLocal = {
+  latest(ticker: string): SignalSnapshotRow | null {
+    const r = sqlite
+      .prepare("SELECT * FROM signal_history WHERE ticker = ? ORDER BY captured_at DESC LIMIT 1")
+      .get(ticker) as any;
+    return r ? { id: r.id, ticker: r.ticker, capturedAt: r.captured_at, signals: JSON.parse(r.signals_json) } : null;
+  },
+  baselineBefore(ticker: string, beforeMs: number): SignalSnapshotRow | null {
+    // Newest capture at or before the cutoff; else the oldest capture overall.
+    const r = (sqlite
+      .prepare("SELECT * FROM signal_history WHERE ticker = ? AND captured_at <= ? ORDER BY captured_at DESC LIMIT 1")
+      .get(ticker, beforeMs) ??
+      sqlite
+        .prepare("SELECT * FROM signal_history WHERE ticker = ? ORDER BY captured_at ASC LIMIT 1")
+        .get(ticker)) as any;
+    return r ? { id: r.id, ticker: r.ticker, capturedAt: r.captured_at, signals: JSON.parse(r.signals_json) } : null;
+  },
+  insert(row: SignalSnapshotRow): void {
+    sqlite
+      .prepare("INSERT INTO signal_history (id, ticker, captured_at, signals_json) VALUES (?, ?, ?, ?)")
+      .run(row.id, row.ticker, row.capturedAt, JSON.stringify(row.signals));
+  },
+};
 
 export const assessmentResultsLocal = {
   list(): AssessmentResultRow[] {

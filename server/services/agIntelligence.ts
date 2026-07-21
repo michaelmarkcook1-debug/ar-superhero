@@ -1,4 +1,5 @@
 import { agConfigured, agFetch } from "./agApi";
+import { captureSignals, deriveMovement, type MovementReport } from "./signalHistory";
 
 // ============================================================================
 // AG intelligence → AR brief derivation.
@@ -93,6 +94,8 @@ export interface ArBrief {
     reputationInsightBody: string | null;
   };
   gapAnalysis?: ArGapAnalysis;
+  /** Real captured movement over the tracking window (our own snapshots). */
+  movement?: MovementReport;
   /** Reputation lens movement (last two periods), verbatim from AG trends. */
   reputationLenses?: { name: string; prev: number; last: number; delta: number; span: string }[];
   competitorTickers: string[];
@@ -403,6 +406,12 @@ export async function getArBrief(
   if (!opts.force && hit && now - hit.at < CACHE_TTL_MS) return hit.brief;
   try {
     const brief = await buildBrief(competitorTickers);
+    if (brief.live && !brief.degraded) {
+      // Persist a history snapshot (throttled, fire-and-forget) and attach
+      // the real movement report before caching.
+      void captureSignals(brief);
+      brief.movement = await deriveMovement(brief).catch(() => undefined);
+    }
     // Cache only a COMPLETE live build. A degraded brief (focal snapshot
     // failed → blank scores) is returned but never cached, so the next request
     // retries fresh instead of serving blanks for the whole cache window.

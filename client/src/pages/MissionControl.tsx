@@ -1,7 +1,7 @@
 import { Link } from "wouter";
-import { ArrowUpRight, Activity, AlertTriangle, Users, Sparkles } from "lucide-react";
+import { ArrowUpRight, Activity, AlertTriangle, Sparkles } from "lucide-react";
 import { useArBrief, useCompetitorSelection } from "@/lib/agBrief";
-import { NarrativeGapPanel, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
+import { NarrativeGapPanel, CompetitivePanel, ScoreBar } from "@/components/cockpit/AgPulsePanel";
 import {
   MODES,
   BRIEF_ITEMS,
@@ -35,15 +35,37 @@ export default function MissionControl() {
   const live = Boolean(arBrief?.live) && !arBrief?.degraded;
 
   // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
+  // "What changed" = REAL captured movement over the last 14 days (our own
+  // snapshots of the live signals). Until the window fills, quarter-on-quarter
+  // lens movement (AG's own series) carries the section with an honest note.
+  const movement = arBrief?.movement;
+  const quarterMoves = (arBrief?.reputationLenses ?? [])
+    .filter((l) => l.delta !== 0)
+    .map((l) => ({
+      id: `qm-${l.name}`,
+      title: `${l.name} lens ${l.delta > 0 ? "up" : "down"} ${Math.abs(l.delta)} pts`,
+      detail: `${l.prev} → ${l.last} (${l.span}) — AG's own quarter-on-quarter series.`,
+      source: "AG reputation-tracker/trends · sentimentTrend",
+      severity: Math.abs(l.delta) >= 5 ? ("HIGH" as const) : ("MEDIUM" as const),
+    }));
   const changed = live
-    ? arBrief!.highlights
+    ? movement?.items.length
+      ? movement.items
+      : quarterMoves
     : BRIEF_ITEMS.filter((b) => b.category === "changed");
+  const changedNote = live
+    ? movement?.items.length
+      ? `Captured movement, last ${movement.windowDays} days`
+      : movement?.trackingSince
+        ? `14-day tracking active since ${new Date(movement.trackingSince).toLocaleDateString("en-GB")} — quarter-on-quarter movement shown meanwhile`
+        : "14-day tracking just started — quarter-on-quarter movement shown meanwhile"
+    : undefined;
+  // Divergences render as bars in the bucket's top slot, so drop their
+  // duplicate list items from the exposure feed.
   const exposed = live
-    ? arBrief!.emergencies
+    ? arBrief!.emergencies.filter((e) => !e.id.startsWith("div-"))
     : BRIEF_ITEMS.filter((b) => b.category === "exposed");
-  const action = live
-    ? arBrief!.actions
-    : BRIEF_ITEMS.filter((b) => b.category === "action");
+  const divergences = live ? (arBrief?.gapAnalysis?.topDivergences ?? []).slice(0, 2) : [];
 
   const exposedMoments = MOMENTS.filter((m) =>
     ["Weak", "Missing", "Unsupported"].includes(m.readiness)
@@ -96,11 +118,12 @@ export default function MissionControl() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <BriefBucket
             glyph="01"
             tone="gold"
             label="What changed"
+            note={changedNote}
             items={changed}
             icon={<Sparkles className="h-3.5 w-3.5" />}
           />
@@ -110,13 +133,27 @@ export default function MissionControl() {
             label="Where exposed"
             items={exposed}
             icon={<AlertTriangle className="h-3.5 w-3.5" />}
-          />
-          <BriefBucket
-            glyph="03"
-            tone="gold"
-            label="Who needs action"
-            items={action}
-            icon={<Users className="h-3.5 w-3.5" />}
+            topSlot={
+              divergences.length > 0 ? (
+                <div className="space-y-3">
+                  {divergences.map((d) => (
+                    <div key={d.theme} className="rounded-lg border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.14] p-3.5">
+                      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="text-[12.5px] font-semibold text-white/90">{d.theme}</span>
+                        <span className="font-mono text-[10.5px] text-white/40 tabular-nums">Δ {d.delta ?? "—"}</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        <ScoreBar label="Narrative" value={d.narrativeScore} tone="muted" />
+                        <ScoreBar label="Reality" value={d.realityScore} tone="gold" />
+                      </div>
+                      {d.interpretation && (
+                        <p className="mt-2 text-[12px] leading-relaxed text-white/55">{d.interpretation}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : undefined
+            }
           />
         </div>
       </section>
@@ -366,12 +403,16 @@ function BriefBucket({
   label,
   items,
   icon,
+  note,
+  topSlot,
 }: {
   glyph: string;
   tone: "gold" | "teal";
   label: string;
   items: BucketItem[];
   icon: React.ReactNode;
+  note?: string;
+  topSlot?: React.ReactNode;
 }) {
   return (
     <Pane glow={tone} className="flex flex-col gap-4 p-6">
@@ -392,6 +433,9 @@ function BriefBucket({
           {glyph}
         </span>
       </div>
+
+      {note && <div className="text-[12px] leading-snug text-white/40">{note}</div>}
+      {topSlot}
 
       {/* Provenance rides on the item's tooltip, not the page. Severity is the
           only thing that earns pixels here — it changes what AR does next. */}

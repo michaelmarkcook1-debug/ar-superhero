@@ -45,6 +45,13 @@ export type ArGapAnalysis = {
   generatedAt: string | null;
 };
 
+export type MovementReport = {
+  windowDays: number;
+  trackingSince: string | null;
+  baselineIsFullWindow: boolean;
+  items: ArBriefItem[];
+};
+
 export type ArBrief = {
   live: boolean;
   degraded?: boolean;
@@ -64,6 +71,7 @@ export type ArBrief = {
     reputationInsightBody: string | null;
   };
   gapAnalysis?: ArGapAnalysis;
+  movement?: MovementReport;
   competitorTickers: string[];
   emergencies: ArBriefItem[];
   highlights: ArBriefItem[];
