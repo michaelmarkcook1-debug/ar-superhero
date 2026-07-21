@@ -11,15 +11,12 @@ import {
   SELL_PROOF,
   CLAIMS_TO_AVOID,
   PRESENCE_GAPS,
-  IMPACT_STATS,
 } from "@/lib/cockpit";
 import {
   Pane,
   Eyebrow,
-  SectionTitle,
   StatusDot,
   ReadinessBar,
-  NumberMark,
   HairLine,
   Glyph,
 } from "@/components/cockpit/atoms";
@@ -348,36 +345,6 @@ export default function MissionControl() {
             <MiniStat value={String(SELL_PROOF.filter((p) => p.status === "safe").length)} label="Safe" />
             <MiniStat value={String(restrictedClaims)} label="Avoid" />
             <MiniStat value={String(presenceGapCount)} label="Presence gaps" />
-          </div>
-        </Pane>
-      </section>
-
-      {/* ====================================================================
-          AR Impact ledger
-      ==================================================================== */}
-      <section>
-        <SectionTitle
-          eyebrow="AR Impact · Last 90 days"
-          title="What AR has shipped."
-          description="Numbers AR can point to in any internal forum."
-        />
-        <Pane className="p-8">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-8 md:grid-cols-4">
-            {IMPACT_STATS.map((s) => (
-              <div key={s.label} className="border-l border-[#3d8f6d]/[0.16] pl-5 first:border-l-0 first:pl-0 md:border-l">
-                <NumberMark value={s.value} label={s.label} sub={s.delta} />
-              </div>
-            ))}
-          </div>
-          <HairLine className="my-7" />
-          <div className="flex justify-end">
-            <Link
-              href="/admin"
-              data-testid="link-impact-admin"
-              className="text-[12px] font-medium text-white/45 transition hover:text-[#d5b46b]"
-            >
-              View ledger ›
-            </Link>
           </div>
         </Pane>
       </section>
