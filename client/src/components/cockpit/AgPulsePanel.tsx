@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
-import { ArrowUpRight, Plus, RotateCcw, X } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Plus, RotateCcw, X, TrendingUp, TrendingDown } from "lucide-react";
 import { Pane, Eyebrow, HairLine } from "./atoms";
 import {
   MAX_COMPETITORS,
@@ -113,6 +113,178 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
       )}
 
       <div className="mt-5 flex justify-end">
+        <Link
+          href="/admin/platform/competitive"
+          className="inline-flex items-center gap-1 text-[12px] font-medium text-white/50 transition hover:text-[#d5b46b]"
+          data-testid="link-full-pulse"
+        >
+          Full analysis <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      </div>
+    </Pane>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Narrative–reality gap HERO — the headline function of Mission Control.
+//
+// Answers the question an AR leader opens the app with: "Where is my business
+// under- or over-represented in the analyst/market narrative, and why?"
+//   · delta < 0  → reality ahead of the story → UNDER-REPRESENTED (under-told)
+//   · delta > 0  → story ahead of the substance → OVER-REPRESENTED (over-claimed)
+// Every value is verbatim AG Pulse; nulls render as "—".
+// ---------------------------------------------------------------------------
+
+function directionRead(direction: string | null): { plain: string; tone: "under" | "over" | "aligned" } {
+  const d = (direction ?? "").toLowerCase();
+  if (d.includes("under")) return { plain: "Reality is running ahead of the story — your market position is under-told.", tone: "under" };
+  if (d.includes("over")) return { plain: "The story is running ahead of the substance — claims are exposed to challenge.", tone: "over" };
+  return { plain: "Narrative and measured reality are broadly aligned.", tone: "aligned" };
+}
+
+export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
+  const ga = brief.gapAnalysis;
+  if (!brief.live || !ga || !brief.focal) return null;
+  const read = directionRead(ga.direction);
+  const reality = ga.realitySignals.filter((s) => s.value != null);
+
+  return (
+    <Pane glow="gold" className="p-8" as="section" data-testid="narrative-gap-hero">
+      {/* Headline row */}
+      <div className="flex flex-wrap items-start justify-between gap-6">
+        <div className="min-w-0 max-w-3xl">
+          <Eyebrow tone="gold" className="mb-3">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#a88945] shadow-[0_0_10px_rgba(168,137,69,0.7)]" />
+              Narrative vs reality · {brief.focal.name}
+            </span>
+          </Eyebrow>
+          <h1 className="text-[30px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#f4eed8] md:text-[38px]">
+            {ga.headline ?? "Where the narrative and the reality diverge."}
+          </h1>
+          <p className="mt-3 text-[14.5px] leading-relaxed text-white/65">{read.plain}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-4">
+          <div className="text-right">
+            <div className="font-mono text-[46px] font-medium leading-none text-[#f0dca8] tabular-nums">
+              {ga.gapScore ?? "—"}
+            </div>
+            <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+              Gap score
+            </div>
+          </div>
+          <span className="rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[#d5b46b]">
+            {ga.direction ?? "—"}
+          </span>
+        </div>
+      </div>
+
+      {/* Under / over-represented functions — the hero content */}
+      {ga.topDivergences.length > 0 && (
+        <div className="mt-7">
+          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+            Where your business is under- or over-represented
+          </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {ga.topDivergences.map((d) => {
+              const under = (d.delta ?? 0) < 0;
+              return (
+                <div
+                  key={d.theme}
+                  className="rounded-xl border border-[#3d8f6d]/[0.18] bg-[#1a5540]/[0.18] p-4"
+                >
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                    <span className="text-[14px] font-semibold text-white/90">{d.theme}</span>
+                    <span
+                      className={
+                        under
+                          ? "inline-flex items-center gap-1.5 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#f0dca8]"
+                          : "inline-flex items-center gap-1.5 rounded-full border border-[#c97a4a]/40 bg-[#c97a4a]/[0.1] px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#e0a280]"
+                      }
+                    >
+                      {under ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                      {under ? "Under-represented" : "Over-represented"}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <ScoreBar label="Narrative" value={d.narrativeScore} tone="muted" />
+                    <ScoreBar label="Reality" value={d.realityScore} tone="gold" />
+                  </div>
+                  <div className="mt-2.5 flex items-baseline justify-between gap-3">
+                    <p className="text-[12.5px] leading-relaxed text-white/60">{d.interpretation ?? ""}</p>
+                    <span className="shrink-0 font-mono text-[11px] text-white/40 tabular-nums">
+                      Δ {d.delta ?? "—"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* The reasoning + the measured reality anchor */}
+      <div className="mt-7 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        {ga.agInsight && (
+          <div>
+            <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
+              Why — the AG Pulse read
+            </div>
+            <p className="border-l-2 border-[#a88945]/50 pl-4 text-[13.5px] leading-relaxed text-white/72">
+              {ga.agInsight}
+            </p>
+          </div>
+        )}
+        {reality.length > 0 && (
+          <div>
+            <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+              Measured reality — the anchor
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {reality.map((s) => (
+                <div key={s.metric} className="rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5">
+                  <div className="font-mono text-[15px] text-[#f0dca8] tabular-nums">
+                    {s.value}
+                    {/growth|margin|retention|rate/i.test(s.metric) ? "%" : ""}
+                  </div>
+                  <div className="mt-0.5 text-[10.5px] leading-tight text-white/45">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Who is telling the story */}
+      {ga.narrativeSignals.length > 0 && (
+        <>
+          <HairLine className="my-6" />
+          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+            Who is telling the story — per-house signals
+          </div>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {ga.narrativeSignals.map((s) => (
+              <div
+                key={s.source}
+                className="rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
+                title={s.themes.join(", ")}
+              >
+                <div className="text-[12px] font-medium text-white/80">{HOUSE_LABEL[s.source] ?? s.source}</div>
+                <div className="mt-1 flex items-baseline justify-between gap-2">
+                  <span className="font-mono text-[13px] text-[#d5b46b] tabular-nums">{fmtSentiment(s.sentiment)}</span>
+                  <span className="font-mono text-[10px] text-white/35 tabular-nums">vol {s.volume ?? "—"}</span>
+                </div>
+                {s.themes.length > 0 && <div className="mt-1 truncate text-[10.5px] text-white/40">{s.themes.join(" · ")}</div>}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="mt-6 flex items-center justify-between">
+        <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30">
+          AG narrative-reality-gap · values verbatim
+        </span>
         <Link
           href="/admin/platform/competitive"
           className="inline-flex items-center gap-1 text-[12px] font-medium text-white/50 transition hover:text-[#d5b46b]"

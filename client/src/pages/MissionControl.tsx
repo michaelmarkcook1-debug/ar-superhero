@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowUpRight, Activity, AlertTriangle, Sparkles, LayoutGrid, Radar } from "lucide-react";
 import { useArBrief, useCompetitorSelection } from "@/lib/agBrief";
-import { NarrativeGapPanel, CompetitivePanel, ScoreBar } from "@/components/cockpit/AgPulsePanel";
+import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
 import {
   MODES,
   BRIEF_ITEMS,
@@ -59,12 +59,11 @@ export default function MissionControl() {
         ? `14-day tracking active since ${new Date(movement.trackingSince).toLocaleDateString("en-GB")} — quarter-on-quarter movement shown meanwhile`
         : "14-day tracking just started — quarter-on-quarter movement shown meanwhile"
     : undefined;
-  // Divergences render as bars in the bucket's top slot, so drop their
-  // duplicate list items from the exposure feed.
+  // Divergences now lead as the hero, so drop their duplicate list items from
+  // the exposure feed.
   const exposed = live
     ? arBrief!.emergencies.filter((e) => !e.id.startsWith("div-"))
     : BRIEF_ITEMS.filter((b) => b.category === "exposed");
-  const divergences = live ? (arBrief?.gapAnalysis?.topDivergences ?? []).slice(0, 2) : [];
 
   const exposedMoments = MOMENTS.filter((m) =>
     ["Weak", "Missing", "Unsupported"].includes(m.readiness)
@@ -91,45 +90,44 @@ export default function MissionControl() {
       {tab === "overview" && (
         <>
       {/* ====================================================================
-          AR SuperHero Brief — top of cockpit
+          HERO — Narrative vs reality gap (the headline function)
+      ==================================================================== */}
+      {live && arBrief ? (
+        <section className="mb-12">
+          <NarrativeGapHero brief={arBrief} />
+        </section>
+      ) : (
+        <section className="mb-12">
+          <Eyebrow tone="gold" className="mb-3">
+            <span className="inline-flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#a88945] shadow-[0_0_10px_rgba(168,137,69,0.7)]" />
+              Mission Control
+            </span>
+          </Eyebrow>
+          <h1 className="text-[38px] font-semibold leading-[1.0] tracking-[-0.03em] text-[#f4eed8] md:text-[48px]">
+            Narrative vs reality.
+          </h1>
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/55">
+            Live AnalystGenius connection unavailable — showing labelled demo content below.
+          </p>
+        </section>
+      )}
+
+      {/* ====================================================================
+          What changed / Where exposed — supporting the hero
       ==================================================================== */}
       <section className="mb-14">
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <div className="min-w-0">
-            <Eyebrow tone="gold" className="mb-3">
-              <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#a88945] shadow-[0_0_10px_rgba(168,137,69,0.7)]" />
-                Mission Control · Live brief
-              </span>
-            </Eyebrow>
-            <h1 className="text-[44px] font-semibold leading-[0.98] tracking-[-0.035em] text-[#f4eed8] md:text-[56px] lg:text-[64px]">
-              AR SuperHero Brief.
-            </h1>
-            <p className="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-white/60 md:text-[16.5px]">
-              What changed, where you're exposed, and who needs a briefing
-              {live && arBrief?.focal ? ` — live for ${arBrief.focal.name}.` : "."}
-            </p>
-          </div>
+        <div className="mb-6 flex items-baseline justify-between">
+          <Eyebrow className="text-white/45">The brief · What changed &amp; where exposed</Eyebrow>
           <div
-            className="hidden shrink-0 text-right md:block"
+            className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30"
             title={live ? arBrief?.sourceNote : "Demo content — no live AnalystGenius connection."}
           >
-            <div className="text-[12px] font-medium text-white/40">
-              {live ? "Live" : "Demo view"}
-            </div>
-            <div className="mt-1 font-mono text-[12px] text-[#d5b46b]">
-              {live && arBrief
-                ? new Date(arBrief.generatedAt).toLocaleString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "seeded"}
-            </div>
+            {live && arBrief
+              ? `Live · ${new Date(arBrief.generatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
+              : "Demo view · seeded"}
           </div>
         </div>
-
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <BriefBucket
             glyph="01"
@@ -145,43 +143,21 @@ export default function MissionControl() {
             label="Where exposed"
             items={exposed}
             icon={<AlertTriangle className="h-3.5 w-3.5" />}
-            topSlot={
-              divergences.length > 0 ? (
-                <div className="space-y-3">
-                  {divergences.map((d) => (
-                    <div key={d.theme} className="rounded-lg border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.14] p-3.5">
-                      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                        <span className="text-[12.5px] font-semibold text-white/90">{d.theme}</span>
-                        <span className="font-mono text-[10.5px] text-white/40 tabular-nums">Δ {d.delta ?? "—"}</span>
-                      </div>
-                      <div className="space-y-1.5">
-                        <ScoreBar label="Narrative" value={d.narrativeScore} tone="muted" />
-                        <ScoreBar label="Reality" value={d.realityScore} tone="gold" />
-                      </div>
-                      {d.interpretation && (
-                        <p className="mt-2 text-[12px] leading-relaxed text-white/55">{d.interpretation}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : undefined
-            }
           />
         </div>
       </section>
 
       {/* ====================================================================
-          AG Pulse — narrative gap analysis + competitive read (live)
+          AG Pulse — competitive read (live). Gap analysis now leads as hero.
       ==================================================================== */}
       {live && arBrief && (
         <section className="mb-14 space-y-5">
           <div className="flex items-baseline justify-between">
-            <Eyebrow className="text-white/45">AG Pulse · Live intelligence</Eyebrow>
+            <Eyebrow className="text-white/45">AG Pulse · Competitive read</Eyebrow>
             <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
-              Narrative gap · Competitive read
+              Your set vs the field
             </div>
           </div>
-          <NarrativeGapPanel brief={arBrief} />
           <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
         </section>
       )}
