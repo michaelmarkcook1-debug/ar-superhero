@@ -89,9 +89,17 @@ export async function analyzeRfp(input: AnalyzeRfpInput): Promise<AnalyzeRfpResu
       : "",
   ].filter(Boolean);
 
-  const result = await generateText({
-    model: anthropic("claude-sonnet-5"),
-    system: `You are reviewing a draft RFP/RFI response for an analyst-relations and bid team. Find concrete, specific improvements — do not rewrite the document, and do not invent facts.
+  // Structured generation occasionally comes back empty on a single attempt
+  // (cold start / transient API hiccup, not a schema or prompt problem —
+  // observed directly during testing). One retry is cheap and matches the
+  // resilience pattern already used for the AG API calls (agApi.ts).
+  const MAX_ATTEMPTS = 2;
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const result = await generateText({
+        model: anthropic("claude-sonnet-5"),
+        system: `You are reviewing a draft RFP/RFI response for an analyst-relations and bid team. Find concrete, specific improvements — do not rewrite the document, and do not invent facts.
 
 Rules, followed exactly:
 1. Every suggestion must trace either to something explicit in the document text, or to one of the real data points given to you. Never invent a statistic, client name, score, or competitor detail not provided to you.
@@ -99,14 +107,18 @@ Rules, followed exactly:
 3. If a suggestion is a general clarity/structure point not tied to a specific data point, set groundedIn to null rather than fabricating a source.
 4. If live market intelligence is marked unavailable, say so plainly in your suggestions rather than guessing at scores or positioning.
 5. Be specific and actionable: "add evidence" is not useful; "insert the named proof point in the cost section to support the reduction claim" is useful.`,
-    prompt: `${contextBlocks.join("\n\n")}\n\n---\n\nDRAFT RFP/RFI RESPONSE (from ${input.filename}):\n\n${input.documentText}`,
-    output: Output.object({ schema: RfpAnalysisSchema }),
-    maxOutputTokens: 4096,
-  });
-
-  return {
-    ...result.output,
-    usedLiveData,
-    liveDataReason: usedLiveData ? null : brief.reason ?? "unavailable",
-  };
+        prompt: `${contextBlocks.join("\n\n")}\n\n---\n\nDRAFT RFP/RFI RESPONSE (from ${input.filename}):\n\n${input.documentText}`,
+        output: Output.object({ schema: RfpAnalysisSchema }),
+        maxOutputTokens: 4096,
+      });
+      return {
+        ...result.output,
+        usedLiveData,
+        liveDataReason: usedLiveData ? null : brief.reason ?? "unavailable",
+      };
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("RFP analysis failed after retry.");
 }
