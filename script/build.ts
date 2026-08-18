@@ -5,7 +5,9 @@ import { rm, readFile } from "node:fs/promises";
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
 const allowlist = [
+  "@ai-sdk/anthropic",
   "@google/generative-ai",
+  "ai",
   "axios",
   "cors",
   "date-fns",
@@ -29,6 +31,14 @@ const allowlist = [
   "zod",
   "zod-validation-error",
 ];
+
+// ai / @ai-sdk/anthropic ship ESM-only builds. The serverless bundle below is
+// CommonJS, so these two must be bundled inline (like the allowlist above) —
+// left external, Node's CJS loader hits ERR_REQUIRE_ESM trying to require()
+// them at runtime. Their own sub-dependencies are transitive (not direct
+// deps of this package.json) so they're not in `externalAll` either and
+// bundle automatically.
+const ESM_ONLY = ["ai", "@ai-sdk/anthropic"];
 
 async function buildAll() {
   await rm("dist", { recursive: true, force: true });
@@ -65,7 +75,9 @@ async function buildAll() {
   // the @shared alias) is inlined into a single file. This guarantees no
   // build-time path alias leaks to the Node runtime as a bare specifier.
   console.log("building serverless app bundle...");
-  const externalAll = allDeps.flatMap((dep) => [dep, `${dep}/*`]);
+  const externalAll = allDeps
+    .filter((dep) => !ESM_ONLY.includes(dep))
+    .flatMap((dep) => [dep, `${dep}/*`]);
   await esbuild({
     entryPoints: ["server/serverless.ts"],
     platform: "node",
