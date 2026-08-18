@@ -27,7 +27,7 @@ import {
   NumberMark,
   SubNav,
 } from "@/components/cockpit/atoms";
-import { Megaphone, FolderOpen, GitBranch } from "lucide-react";
+import { Megaphone, FolderOpen, GitBranch, FileSearch } from "lucide-react";
 import {
   UploadPanel,
   UploadedItemsList,
@@ -35,11 +35,12 @@ import {
   type GenericUploadedItem,
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
+import RfpAnalyzer from "@/components/cockpit/RfpAnalyzer";
 
 type Tab = "sell" | "presence";
 
 export default function Enable() {
-  const [view, setView] = useState<"enablement" | "documents" | "pipeline">("enablement");
+  const [view, setView] = useState<"enablement" | "documents" | "rfp" | "pipeline">("enablement");
   const [tab, setTab] = useState<Tab>("sell");
   const [extraUploads, setExtraUploads] = useState<EnableUpload[]>([]);
 
@@ -98,11 +99,14 @@ export default function Enable() {
         items={[
           { id: "enablement", label: "Enablement", icon: <Megaphone className="h-3.5 w-3.5" /> },
           { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
+          { id: "rfp", label: "RFP / RFI", hint: "AI-reviewed", icon: <FileSearch className="h-3.5 w-3.5" /> },
           { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
         ]}
         active={view}
         onChange={setView}
       />
+
+      {view === "rfp" && <RfpAnalyzer />}
 
       {view === "enablement" && (
         <>

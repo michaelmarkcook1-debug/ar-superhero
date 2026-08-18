@@ -30,6 +30,8 @@ import { addResult, houseLearnings, listResults, removeResult } from "./services
 import { composeScenarioDeck, scenarioDeckFilename } from "./services/scenarioDeck";
 import { scenarioById } from "@shared/briefingScenarios";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
+import { ingestDocument } from "./services/docIngest";
+import { analyzeRfp } from "./services/rfpAnalyzer";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -460,6 +462,66 @@ export async function registerRoutes(
       res.status(500).json({ error: (err as Error).message });
     }
   });
+
+  // --------------------------------------------------------------------------
+  // Enable — RFP/RFI analysis. Uploads a draft response document, extracts
+  // its text, and reviews it against live AG market intelligence + the
+  // caller's own proof-point/claims-to-avoid library. See rfpAnalyzer.ts for
+  // the grounding rules the model is bound to.
+  // --------------------------------------------------------------------------
+
+  const proofPointSchema = z.object({
+    title: z.string().max(300),
+    status: z.enum(["safe", "restricted", "unsupported"]),
+    reuse: z.string().max(200),
+  });
+  const claimToAvoidSchema = z.object({
+    claim: z.string().max(300),
+    reason: z.string().max(300),
+  });
+
+  app.post(
+    "/api/enable/rfp-analyze",
+    express.raw({ type: () => true, limit: "10mb" }),
+    async (req: Request, res: Response) => {
+      const filename = String(req.query.filename ?? "").trim() || "untitled.docx";
+      const body = req.body as Buffer;
+      if (!Buffer.isBuffer(body) || body.length < 10) {
+        return res.status(400).json({ error: "Upload the document as the raw request body." });
+      }
+
+      let proofPoints: z.infer<typeof proofPointSchema>[] = [];
+      let claimsToAvoid: z.infer<typeof claimToAvoidSchema>[] = [];
+      let competitorTickers: string[] | undefined;
+      try {
+        if (req.query.proofPoints) {
+          proofPoints = z.array(proofPointSchema).max(30).parse(JSON.parse(String(req.query.proofPoints)));
+        }
+        if (req.query.claimsToAvoid) {
+          claimsToAvoid = z.array(claimToAvoidSchema).max(30).parse(JSON.parse(String(req.query.claimsToAvoid)));
+        }
+        if (req.query.competitorTickers) {
+          competitorTickers = z.array(z.string()).max(8).parse(JSON.parse(String(req.query.competitorTickers)));
+        }
+      } catch {
+        return res.status(400).json({ error: "proofPoints/claimsToAvoid/competitorTickers must be valid JSON arrays." });
+      }
+
+      try {
+        const doc = ingestDocument(body, filename);
+        const analysis = await analyzeRfp({
+          documentText: doc.text,
+          filename,
+          competitorTickers,
+          proofPoints,
+          claimsToAvoid,
+        });
+        res.json({ ...analysis, truncated: doc.truncated });
+      } catch (err) {
+        res.status(422).json({ error: (err as Error).message });
+      }
+    }
+  );
 
   // --------------------------------------------------------------------------
   // Assessment results — verified outcomes + the evidence-vs-result learning
