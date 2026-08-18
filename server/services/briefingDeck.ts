@@ -15,6 +15,7 @@ import {
   type Brand,
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
+import { vendorById, type VendorContext } from "./vendors";
 
 // ============================================================================
 // Succeed tab — AR analyst assessment "defence pack".
@@ -52,49 +53,6 @@ type EvidenceGap = {
   status: string;
   rationale: string;
 };
-
-type VendorContext = {
-  id: string;
-  name: string;
-  mark: string;
-  accent: string;
-  thesis: string;
-};
-
-const VENDORS: VendorContext[] = [
-  {
-    id: "capgemini",
-    name: "Capgemini",
-    mark: "C",
-    accent: "0070AD",
-    thesis:
-      "Lead with technology and engineering breadth, client co-innovation, industry execution, trust, and sustainable transformation.",
-  },
-  {
-    id: "cognizant",
-    name: "Cognizant",
-    mark: "C",
-    accent: "1F70C1",
-    thesis:
-      "Lead with industry operating model depth, AI-enabled delivery modernisation, engineering execution, and measurable client transformation outcomes.",
-  },
-  {
-    id: "accenture",
-    name: "Accenture",
-    mark: "A",
-    accent: "A100FF",
-    thesis:
-      "Lead with transformation scale, industry depth, platform partnerships, and measurable reinvention outcomes.",
-  },
-  {
-    id: "ibm",
-    name: "IBM",
-    mark: "IBM",
-    accent: "0F62FE",
-    thesis:
-      "Lead with hybrid cloud, AI, consulting execution, ecosystem leverage, and enterprise-grade delivery proof.",
-  },
-];
 
 const MOMENTS: AnalystMoment[] = [
   {
@@ -173,7 +131,7 @@ const EVIDENCE_GAPS: EvidenceGap[] = [
 ];
 
 function getVendor(vendorId?: string): VendorContext {
-  return VENDORS.find((v) => v.id === (vendorId ?? "capgemini").toLowerCase()) ?? VENDORS[0];
+  return vendorById(vendorId);
 }
 
 function slugify(value: string): string {
@@ -238,7 +196,7 @@ export async function createBriefingDeck(
       "AnalystGenius-driven readiness and evidence view. Built from AG demo data; missing fields are shown as open inputs, not inferred. No predicted rating, rank, or outcome.",
   });
 
-  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
+  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers, vendor.agTicker);
   addReadinessSummary(pptx, brand, moment, gaps, idx);
   addWhyMatters(pptx, brand, moment, idx);
   addReadinessSnapshot(pptx, brand, moment, idx);

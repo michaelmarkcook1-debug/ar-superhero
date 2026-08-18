@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FileDown, FileUp, Loader2, Plus, Trash2, X } from "lucide-react";
+import { Download, FileDown, FileUp, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Pane, Eyebrow, HairLine } from "./atoms";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { storedCompetitorTickers } from "@/lib/agBrief";
@@ -19,6 +19,7 @@ type LibraryDeck = {
   house: string;
   uploadedAt: number;
   slideCount: number;
+  isDemo: boolean;
 };
 
 type Executive = { name: string; title: string };
@@ -168,12 +169,31 @@ export default function BriefingComposer() {
                       className="h-3.5 w-3.5 accent-[#a88945]"
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[12.5px] font-medium text-white/85">{d.filename}</div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="truncate text-[12.5px] font-medium text-white/85">{d.filename}</div>
+                        {d.isDemo && (
+                          <span
+                            className="shrink-0 rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]"
+                            data-testid={`badge-demo-${d.id}`}
+                          >
+                            demo
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
                         {HOUSE_PLAYBOOKS.find((p) => p.id === d.house)?.house ?? d.house} · {d.slideCount} slides ·{" "}
                         {new Date(d.uploadedAt).toLocaleDateString("en-GB")}
                       </div>
                     </div>
+                    <a
+                      href={`/api/deck-library/${d.id}/download`}
+                      download
+                      aria-label={`Download ${d.filename}`}
+                      data-testid={`link-download-deck-${d.id}`}
+                      className="text-white/30 transition hover:text-white/70"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </a>
                     <button
                       type="button"
                       aria-label={`Delete ${d.filename}`}

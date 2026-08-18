@@ -15,7 +15,7 @@ import { deckLibrary, type DeckLibraryRow } from "../storage";
 // feature works offline. The two backends share one async interface.
 // ============================================================================
 
-export type DeckSummary = Omit<DeckLibraryRow, "slides">;
+export type DeckSummary = Omit<DeckLibraryRow, "slides" | "fileBlob">;
 
 export interface DeckStore {
   readonly kind: "postgres" | "sqlite";
@@ -74,12 +74,17 @@ function makePgStore(sql: ReturnType<typeof postgres>): DeckStore {
           house text NOT NULL,
           uploaded_at bigint NOT NULL,
           slide_count integer NOT NULL,
-          slides_json jsonb NOT NULL
+          slides_json jsonb NOT NULL,
+          file_blob bytea,
+          is_demo boolean NOT NULL DEFAULT false
         )
       `.then(async () => {
         // Belt-and-braces: RLS on means the public REST API cannot reach this
         // table even if API keys leak; our direct connection bypasses RLS.
         await sql`ALTER TABLE ar_superhero_deck_library ENABLE ROW LEVEL SECURITY`.catch(() => {});
+        // Additive migration for tables created before these columns existed.
+        await sql`ALTER TABLE ar_superhero_deck_library ADD COLUMN IF NOT EXISTS file_blob bytea`.catch(() => {});
+        await sql`ALTER TABLE ar_superhero_deck_library ADD COLUMN IF NOT EXISTS is_demo boolean NOT NULL DEFAULT false`.catch(() => {});
       });
     }
     return ensured;
@@ -90,9 +95,9 @@ function makePgStore(sql: ReturnType<typeof postgres>): DeckStore {
     async list() {
       await ensureTable();
       const rows = await sql<
-        { id: string; filename: string; house: string; uploaded_at: string; slide_count: number }[]
+        { id: string; filename: string; house: string; uploaded_at: string; slide_count: number; is_demo: boolean }[]
       >`
-        SELECT id, filename, house, uploaded_at, slide_count
+        SELECT id, filename, house, uploaded_at, slide_count, is_demo
         FROM ar_superhero_deck_library
         ORDER BY uploaded_at DESC
       `;
@@ -102,12 +107,22 @@ function makePgStore(sql: ReturnType<typeof postgres>): DeckStore {
         house: r.house,
         uploadedAt: Number(r.uploaded_at),
         slideCount: r.slide_count,
+        isDemo: r.is_demo,
       }));
     },
     async get(id) {
       await ensureTable();
       const rows = await sql<
-        { id: string; filename: string; house: string; uploaded_at: string; slide_count: number; slides_json: unknown }[]
+        {
+          id: string;
+          filename: string;
+          house: string;
+          uploaded_at: string;
+          slide_count: number;
+          slides_json: unknown;
+          file_blob: Buffer | null;
+          is_demo: boolean;
+        }[]
       >`
         SELECT * FROM ar_superhero_deck_library WHERE id = ${id}
       `;
@@ -120,15 +135,18 @@ function makePgStore(sql: ReturnType<typeof postgres>): DeckStore {
         uploadedAt: Number(r.uploaded_at),
         slideCount: r.slide_count,
         slides: r.slides_json as DeckLibraryRow["slides"],
+        fileBlob: r.file_blob ?? null,
+        isDemo: r.is_demo,
       };
     },
     async insert(row) {
       await ensureTable();
       await sql`
-        INSERT INTO ar_superhero_deck_library (id, filename, house, uploaded_at, slide_count, slides_json)
+        INSERT INTO ar_superhero_deck_library
+          (id, filename, house, uploaded_at, slide_count, slides_json, file_blob, is_demo)
         VALUES (${row.id}, ${row.filename}, ${row.house}, ${row.uploadedAt}, ${row.slideCount}, ${sql.json(
           row.slides as unknown as postgres.JSONValue
-        )})
+        )}, ${row.fileBlob}, ${row.isDemo})
       `;
     },
     async remove(id) {

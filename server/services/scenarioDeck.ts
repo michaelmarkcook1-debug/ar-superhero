@@ -18,6 +18,7 @@ import {
 import { agFetch } from "./agApi";
 import { getArBrief, type ArBrief } from "./agIntelligence";
 import { derivePersonaView, type PersonaView } from "./personaLens";
+import { vendorById } from "./vendors";
 import type { PersonaId } from "./directPersonaDeck";
 import { houseLearnings } from "./resultsLearning";
 import { playbookById, type AnalystHouseId } from "@shared/assessmentPlaybooks";
@@ -289,7 +290,7 @@ export interface ScenarioDeckRequest {
   scenarioId: string;
   houseId?: AnalystHouseId;
   competitorTickers?: string[];
-  vendorName?: string;
+  vendorId?: string;
 }
 
 export function scenarioDeckFilename(req: ScenarioDeckRequest): string {
@@ -300,17 +301,20 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
   const scenario = scenarioById(req.scenarioId);
   if (!scenario) throw new Error(`Unknown scenario: ${req.scenarioId}`);
   const personaLabel = PERSONA_LABEL[req.personaId] ?? req.personaId;
-  const vendorName = req.vendorName?.trim() || "Capgemini";
+  const vendor = vendorById(req.vendorId);
+  const vendorName = vendor.name;
   const houseId: AnalystHouseId = req.houseId ?? "gartner";
   const playbook = playbookById(houseId);
 
   // Live data: the AR brief (degraded → one forced retry), plus the raw
   // snapshot and reputation series for the charts.
-  let brief = await getArBrief({ competitors: req.competitorTickers });
-  if (brief.degraded) brief = await getArBrief({ competitors: req.competitorTickers, force: true });
+  let brief = await getArBrief({ competitors: req.competitorTickers, focalTicker: vendor.agTicker });
+  if (brief.degraded) {
+    brief = await getArBrief({ competitors: req.competitorTickers, focalTicker: vendor.agTicker, force: true });
+  }
   const view = brief.live && !brief.degraded ? derivePersonaView(brief, req.personaId) : null;
 
-  const focalTicker = brief.focal?.ticker ?? "CGEMY";
+  const focalTicker = brief.focal?.ticker ?? vendor.agTicker;
   const [snapR, repR] = await Promise.all([
     agFetch("providers/snapshot", { ticker: focalTicker }),
     agFetch("reputation-tracker/trends", { ticker: focalTicker }),
@@ -322,8 +326,8 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
 
   const brand: Brand = {
     vendorName,
-    vendorMark: vendorName.slice(0, 1).toUpperCase(),
-    vendorAccent: "0070AD",
+    vendorMark: vendor.mark,
+    vendorAccent: vendor.accent,
     deckLabel: `${personaLabel} · ${scenario.label}`,
   };
 

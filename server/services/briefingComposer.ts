@@ -17,6 +17,7 @@ import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
 import { type DeckLibraryRow } from "../storage";
 import { deckStore } from "./deckStore";
 import { houseLearnings } from "./resultsLearning";
+import { vendorById } from "./vendors";
 import {
   CONFIDENCE_FACTOR,
   ENGAGEMENT_STAGES,
@@ -57,7 +58,7 @@ export interface ComposeRequest {
   houseId: AnalystHouseId;
   deckIds: string[];
   variables: ComposerVariables;
-  vendorName?: string;
+  vendorId?: string;
   competitorTickers?: string[];
 }
 
@@ -125,7 +126,8 @@ export function composerFilename(req: ComposeRequest): string {
 export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> {
   const playbook = playbookById(req.houseId);
   const vars = req.variables;
-  const vendorName = req.vendorName?.trim() || "Capgemini";
+  const vendor = vendorById(req.vendorId);
+  const vendorName = vendor.name;
   const { reusedMax } = slideBudget(vars.briefingLengthMins);
 
   const decks = (await Promise.all(req.deckIds.map((id) => deckStore.get(id)))).filter(
@@ -136,8 +138,8 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
 
   const brand: Brand = {
     vendorName,
-    vendorMark: vendorName.slice(0, 1).toUpperCase(),
-    vendorAccent: "0070AD",
+    vendorMark: vendor.mark,
+    vendorAccent: vendor.accent,
     deckLabel: `${playbook.house} ${playbook.assessment.name} briefing`,
   };
 
@@ -265,7 +267,7 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
   }
 
   // 4. Live AG intelligence overlay (signal read + competitive + gap analysis).
-  await addAgIntelligenceSlides(pptx, brand, idx, req.competitorTickers);
+  await addAgIntelligenceSlides(pptx, brand, idx, req.competitorTickers, vendor.agTicker);
 
   // 5. Reused prior-deck content — verbatim with provenance.
   for (const pick of reused) {

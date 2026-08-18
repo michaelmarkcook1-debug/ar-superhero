@@ -10,6 +10,19 @@
 import type { ReadinessBand } from "./seed";
 
 // ---------------------------------------------------------------------------
+// Vendor selector — shared by Succeed and Direct, since both let AR pick
+// which company a generated deck defends/briefs for. Ids match the server's
+// vendor -> AnalystGenius-ticker registry (server/services/vendors.ts).
+// ---------------------------------------------------------------------------
+
+export const VENDOR_OPTIONS = [
+  { id: "capgemini", label: "Capgemini" },
+  { id: "cognizant", label: "Cognizant" },
+  { id: "accenture", label: "Accenture" },
+  { id: "ibm", label: "IBM" },
+];
+
+// ---------------------------------------------------------------------------
 // Mode definitions
 // ---------------------------------------------------------------------------
 

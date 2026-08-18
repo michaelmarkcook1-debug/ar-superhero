@@ -14,6 +14,7 @@ import {
   SUCCEED_MATERIAL_TYPES,
   SUCCEED_DECISION_STAGES,
   SUCCEED_MODEL_IMPACTS,
+  VENDOR_OPTIONS,
   type AnalystMoment,
   type SucceedUpload,
   type SucceedMaterialType,
@@ -37,13 +38,6 @@ import {
   SubNav,
 } from "@/components/cockpit/atoms";
 import { Target as TargetIcon, FolderOpen, GitBranch } from "lucide-react";
-
-const VENDOR_OPTIONS = [
-  { id: "capgemini", label: "Capgemini" },
-  { id: "cognizant", label: "Cognizant" },
-  { id: "accenture", label: "Accenture" },
-  { id: "ibm", label: "IBM" },
-];
 
 const LIVE_DEMO_MOMENT_IDS = ["m1", "m2"];
 

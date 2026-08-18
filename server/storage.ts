@@ -241,7 +241,9 @@ function ensureSchema() {
       house TEXT NOT NULL,
       uploaded_at INTEGER NOT NULL,
       slide_count INTEGER NOT NULL,
-      slides_json TEXT NOT NULL
+      slides_json TEXT NOT NULL,
+      file_blob BLOB,
+      is_demo INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS assessment_results (
@@ -269,7 +271,23 @@ function ensureSchema() {
   `);
 }
 
+// deck_library predates file_blob/is_demo — add them for databases created
+// before those columns existed. No-op (duplicate column) once already applied.
+function migrateDeckLibrary() {
+  for (const stmt of [
+    "ALTER TABLE deck_library ADD COLUMN file_blob BLOB",
+    "ALTER TABLE deck_library ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0",
+  ]) {
+    try {
+      sqlite.exec(stmt);
+    } catch {
+      // column already exists
+    }
+  }
+}
+
 ensureSchema();
+migrateDeckLibrary();
 
 const now = () => Date.now();
 
@@ -856,6 +874,13 @@ export interface DeckLibraryRow {
   uploadedAt: number;
   slideCount: number;
   slides: { index: number; texts: string[] }[];
+  // Raw uploaded bytes, kept so the original .pptx can be re-downloaded
+  // rather than only the extracted text. Null for rows uploaded before this
+  // column existed.
+  fileBlob: Buffer | null;
+  // Marks fictional/illustrative decks so they're never mistaken for real
+  // client briefing material in the library list.
+  isDemo: boolean;
 }
 
 
@@ -957,22 +982,41 @@ export const assessmentResultsLocal = {
 };
 
 export const deckLibrary = {
-  list(): Omit<DeckLibraryRow, "slides">[] {
+  list(): Omit<DeckLibraryRow, "slides" | "fileBlob">[] {
     return (
       sqlite
-        .prepare("SELECT id, filename, house, uploaded_at, slide_count FROM deck_library ORDER BY uploaded_at DESC")
-        .all() as { id: string; filename: string; house: string; uploaded_at: number; slide_count: number }[]
+        .prepare(
+          "SELECT id, filename, house, uploaded_at, slide_count, is_demo FROM deck_library ORDER BY uploaded_at DESC"
+        )
+        .all() as {
+        id: string;
+        filename: string;
+        house: string;
+        uploaded_at: number;
+        slide_count: number;
+        is_demo: number;
+      }[]
     ).map((r) => ({
       id: r.id,
       filename: r.filename,
       house: r.house,
       uploadedAt: r.uploaded_at,
       slideCount: r.slide_count,
+      isDemo: Boolean(r.is_demo),
     }));
   },
   get(id: string): DeckLibraryRow | null {
     const r = sqlite.prepare("SELECT * FROM deck_library WHERE id = ?").get(id) as
-      | { id: string; filename: string; house: string; uploaded_at: number; slide_count: number; slides_json: string }
+      | {
+          id: string;
+          filename: string;
+          house: string;
+          uploaded_at: number;
+          slide_count: number;
+          slides_json: string;
+          file_blob: Buffer | null;
+          is_demo: number;
+        }
       | undefined;
     if (!r) return null;
     return {
@@ -982,14 +1026,25 @@ export const deckLibrary = {
       uploadedAt: r.uploaded_at,
       slideCount: r.slide_count,
       slides: JSON.parse(r.slides_json),
+      fileBlob: r.file_blob ?? null,
+      isDemo: Boolean(r.is_demo),
     };
   },
   insert(row: DeckLibraryRow): void {
     sqlite
       .prepare(
-        "INSERT INTO deck_library (id, filename, house, uploaded_at, slide_count, slides_json) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO deck_library (id, filename, house, uploaded_at, slide_count, slides_json, file_blob, is_demo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
       )
-      .run(row.id, row.filename, row.house, row.uploadedAt, row.slideCount, JSON.stringify(row.slides));
+      .run(
+        row.id,
+        row.filename,
+        row.house,
+        row.uploadedAt,
+        row.slideCount,
+        JSON.stringify(row.slides),
+        row.fileBlob,
+        row.isDemo ? 1 : 0
+      );
   },
   remove(id: string): boolean {
     return sqlite.prepare("DELETE FROM deck_library WHERE id = ?").run(id).changes > 0;

@@ -13,7 +13,11 @@ import { captureSignals, deriveMovement, type MovementReport } from "./signalHis
 // content instead.
 // ============================================================================
 
-const FOCAL_TICKER = process.env.AG_FOCAL_TICKER ?? "CGEMY";
+// Default focal company — used whenever a caller doesn't specify one (the
+// cockpit's own AG Pulse always tracks "us", i.e. this default). Deck
+// generators that let the user pick a vendor pass their own focalTicker
+// instead (see server/services/vendors.ts for the vendor -> ticker map).
+export const DEFAULT_FOCAL_TICKER = process.env.AG_FOCAL_TICKER ?? "CGEMY";
 const DEFAULT_COMPETITOR_TICKERS = (process.env.AG_COMPETITOR_TICKERS ?? "ACN,CTSH,IBM")
   .split(",")
   .map((t) => t.trim().toUpperCase())
@@ -24,18 +28,19 @@ const MAX_COMPETITORS = 5;
 const TICKER_RE = /^[A-Z0-9.]{1,12}$/;
 
 /** Sanitise a caller-supplied competitor list: uppercase, well-formed, no focal, capped. */
-export function normaliseCompetitors(raw: string[] | undefined): string[] {
-  if (!raw?.length) return DEFAULT_COMPETITOR_TICKERS;
+export function normaliseCompetitors(raw: string[] | undefined, focalTicker: string): string[] {
+  const fallback = DEFAULT_COMPETITOR_TICKERS.filter((t) => t !== focalTicker);
+  if (!raw?.length) return fallback.length ? fallback : DEFAULT_COMPETITOR_TICKERS;
   const seen = new Set<string>();
   const out: string[] = [];
   for (const t of raw) {
     const up = t.trim().toUpperCase();
-    if (!TICKER_RE.test(up) || up === FOCAL_TICKER || seen.has(up)) continue;
+    if (!TICKER_RE.test(up) || up === focalTicker || seen.has(up)) continue;
     seen.add(up);
     out.push(up);
     if (out.length >= MAX_COMPETITORS) break;
   }
-  return out.length ? out : DEFAULT_COMPETITOR_TICKERS;
+  return out.length ? out : fallback.length ? fallback : DEFAULT_COMPETITOR_TICKERS;
 }
 
 export interface ArBriefItem {
@@ -149,7 +154,7 @@ function deriveLensMoves(series: SentimentSeries[], quarters: string[]) {
   return moves;
 }
 
-async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
+async function buildBrief(competitorTickers: string[], focalTicker: string): Promise<ArBrief> {
   const generatedAt = new Date().toISOString();
   const empty: ArBrief = {
     live: false,
@@ -167,9 +172,9 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
 
   // Fetch focal signals + competitor snapshots in parallel.
   const [snapR, gapR, repR, ...compRs] = await Promise.all([
-    agFetch("providers/snapshot", { ticker: FOCAL_TICKER }),
-    agFetch("narrative-reality-gap", { ticker: FOCAL_TICKER }),
-    agFetch("reputation-tracker/trends", { ticker: FOCAL_TICKER }),
+    agFetch("providers/snapshot", { ticker: focalTicker }),
+    agFetch("narrative-reality-gap", { ticker: focalTicker }),
+    agFetch("reputation-tracker/trends", { ticker: focalTicker }),
     ...competitorTickers.flatMap((t) => [
       agFetch("providers/snapshot", { ticker: t }),
       agFetch("narrative-reality-gap", { ticker: t }),
@@ -180,7 +185,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
   const gap = ok(gapR)?.gap ?? null;
   const rep = ok(repR);
 
-  if (!snap && !gap && !rep) return { ...empty, reason: `no live data for ${FOCAL_TICKER}` };
+  if (!snap && !gap && !rep) return { ...empty, reason: `no live data for ${focalTicker}` };
 
   // The focal snapshot carries the core scores (assessment, AI readiness,
   // revenue, gap). If it failed to load we still return what we have, but flag
@@ -191,7 +196,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
   const highlights: ArBriefItem[] = [];
   const actions: ArBriefItem[] = [];
 
-  const focalName: string = snap?.displayName ?? snap?.name ?? gap?.providerName ?? FOCAL_TICKER;
+  const focalName: string = snap?.displayName ?? snap?.name ?? gap?.providerName ?? focalTicker;
 
   // ---- Reputation lens movement → emergencies / highlights / actions ----
   const trend = rep?.sentimentTrend;
@@ -345,7 +350,7 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
     degraded,
     generatedAt,
     focal: {
-      ticker: FOCAL_TICKER,
+      ticker: focalTicker,
       name: focalName,
       assessmentScore: snap?.assessmentScore ?? null,
       aiReadinessScore: snap?.aiReadinessScore ?? null,
@@ -397,15 +402,16 @@ async function buildBrief(competitorTickers: string[]): Promise<ArBrief> {
 }
 
 export async function getArBrief(
-  opts: { competitors?: string[]; force?: boolean } = {}
+  opts: { competitors?: string[]; force?: boolean; focalTicker?: string } = {}
 ): Promise<ArBrief> {
-  const competitorTickers = normaliseCompetitors(opts.competitors);
-  const cacheKey = competitorTickers.join(",");
+  const focalTicker = (opts.focalTicker || DEFAULT_FOCAL_TICKER).trim().toUpperCase();
+  const competitorTickers = normaliseCompetitors(opts.competitors, focalTicker);
+  const cacheKey = `${focalTicker}|${competitorTickers.join(",")}`;
   const now = Date.now();
   const hit = _cache.get(cacheKey);
   if (!opts.force && hit && now - hit.at < CACHE_TTL_MS) return hit.brief;
   try {
-    const brief = await buildBrief(competitorTickers);
+    const brief = await buildBrief(competitorTickers, focalTicker);
     if (brief.live && !brief.degraded) {
       // Persist a history snapshot (throttled, fire-and-forget) and attach
       // the real movement report before caching.

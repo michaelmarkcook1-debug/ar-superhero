@@ -354,6 +354,7 @@ export async function registerRoutes(
       if (!HOUSE_IDS.has(house)) {
         return res.status(400).json({ error: `house must be one of: ${[...HOUSE_IDS].join(", ")}` });
       }
+      const isDemo = req.query.demo === "1" || req.query.demo === "true";
       const body = req.body as Buffer;
       if (!Buffer.isBuffer(body) || body.length < 100) {
         return res.status(400).json({ error: "Upload the .pptx file as the raw request body." });
@@ -367,6 +368,8 @@ export async function registerRoutes(
           uploadedAt: Date.now(),
           slideCount: parsed.slideCount,
           slides: parsed.slides,
+          fileBlob: body,
+          isDemo,
         };
         await deckStore.insert(row);
         res.json({
@@ -374,6 +377,7 @@ export async function registerRoutes(
           filename: row.filename,
           house: row.house,
           slideCount: row.slideCount,
+          isDemo: row.isDemo,
           extractedTextSlides: parsed.slides.filter((s) => s.texts.length > 0).length,
         });
       } catch (err) {
@@ -387,6 +391,26 @@ export async function registerRoutes(
       res.json({ decks: await deckStore.list(), backend: deckStore.kind });
     } catch (err) {
       res.status(503).json({ error: (err as Error).message, backend: deckStore.kind });
+    }
+  });
+
+  app.get("/api/deck-library/:id/download", async (req, res) => {
+    try {
+      const row = await deckStore.get(req.params.id);
+      if (!row) return res.status(404).json({ error: "Deck not found." });
+      if (!row.fileBlob) {
+        return res
+          .status(404)
+          .json({ error: "No stored file for this deck — it was uploaded before file storage was added." });
+      }
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      );
+      res.setHeader("Content-Disposition", `attachment; filename="${row.filename}"`);
+      res.send(row.fileBlob);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
     }
   });
 
@@ -407,6 +431,7 @@ export async function registerRoutes(
     personaId: z.string().min(1),
     scenarioId: z.string().refine((s) => Boolean(scenarioById(s)), "unknown scenario"),
     houseId: z.string().refine((h) => HOUSE_IDS.has(h), "unknown analyst house").optional(),
+    vendorId: z.string().max(40).optional(),
     competitorTickers: z.array(z.string()).max(8).optional(),
   });
 
@@ -424,6 +449,7 @@ export async function registerRoutes(
         personaId: parse.data.personaId as PersonaId,
         scenarioId: parse.data.scenarioId,
         houseId: parse.data.houseId as AnalystHouseId | undefined,
+        vendorId: parse.data.vendorId,
         competitorTickers: parse.data.competitorTickers,
       };
       const buffer = await composeScenarioDeck(request);
@@ -505,7 +531,7 @@ export async function registerRoutes(
       executives: z.array(z.object({ name: z.string().min(1).max(80), title: z.string().min(1).max(120) })).max(8).default([]),
       objectives: z.array(z.string().max(200)).max(6).optional(),
     }),
-    vendorName: z.string().max(80).optional(),
+    vendorId: z.string().max(40).optional(),
     competitorTickers: z.array(z.string()).max(8).optional(),
   });
 

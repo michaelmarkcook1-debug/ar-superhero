@@ -16,6 +16,7 @@ import {
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
 import { derivePersonaView, type PersonaView } from "./personaLens";
+import { vendorById } from "./vendors";
 
 // ============================================================================
 // Direct tab — persona analyst-influence briefing packs.
@@ -353,15 +354,8 @@ const PERSONAS: Persona[] = [
   },
 ];
 
-const VENDOR_BRANDS: Record<string, { name: string; mark: string; accent: string }> = {
-  capgemini: { name: "Capgemini", mark: "C", accent: "0070AD" },
-  cognizant: { name: "Cognizant", mark: "C", accent: "1F70C1" },
-  accenture: { name: "Accenture", mark: "A", accent: "A100FF" },
-  ibm: { name: "IBM", mark: "IBM", accent: "0F62FE" },
-};
-
 function resolveBrand(vendorId: string | undefined, deckLabel: string): Brand {
-  const v = VENDOR_BRANDS[(vendorId ?? "capgemini").toLowerCase()] ?? VENDOR_BRANDS.capgemini;
+  const v = vendorById(vendorId);
   return { vendorName: v.name, vendorMark: v.mark, vendorAccent: v.accent, deckLabel };
 }
 
@@ -381,7 +375,7 @@ function toneForState(state: ProofRow["state"]): "good" | "warn" | "bad" | "defa
 }
 
 export function getDirectPersonaDeckFilename(personaIds: PersonaId[], vendorId = "capgemini"): string {
-  const v = VENDOR_BRANDS[(vendorId ?? "capgemini").toLowerCase()] ?? VENDOR_BRANDS.capgemini;
+  const v = vendorById(vendorId);
   const personaPart = personaIds.length === 1 ? slugify(personaById(personaIds[0]).label) : "multi-persona";
   return `${slugify(v.name)}--${personaPart}--analyst-influence-briefing.pptx`;
 }
@@ -408,6 +402,7 @@ export async function createDirectPersonaDeck(
   const multi = personas.length > 1;
   const deckLabel = multi ? "Analyst Influence Briefing" : `${personas[0].label} — Analyst Influence Briefing`;
   const brand = resolveBrand(vendorId, deckLabel);
+  const agTicker = vendorById(vendorId).agTicker;
 
   const pptx = newDeck({
     title: `${brand.vendorName} ${deckLabel}`,
@@ -449,7 +444,7 @@ export async function createDirectPersonaDeck(
     });
   }
 
-  const brief = await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers);
+  const brief = await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers, agTicker);
 
   for (const persona of personas) {
     const view = derivePersonaView(brief, persona.id);

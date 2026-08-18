@@ -12,6 +12,7 @@ import {
   DIRECT_MODEL_IMPACTS,
   DIRECT_DELIVERABLES,
   DIRECT_DELIVERABLES_NOTE,
+  VENDOR_OPTIONS,
   type LensId,
   type DirectUpload,
   type DirectMaterialType,
@@ -33,8 +34,6 @@ import {
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
 
-const PERSONA_DECK_VENDOR = "capgemini";
-
 export default function Direct() {
   const [tab, setTab] = useState<"briefings" | "documents" | "pipeline">("briefings");
   const [selectedId, setSelectedId] = useState<LensId>("executive");
@@ -43,6 +42,7 @@ export default function Direct() {
   const [contextOpen, setContextOpen] = useState(false);
   const [scenarioId, setScenarioId] = useState<PersonaScenarioId | "standard">("standard");
   const [scenarioHouse, setScenarioHouse] = useState<AnalystHouseId>("gartner");
+  const [vendorId, setVendorId] = useState(VENDOR_OPTIONS[0].id);
   const selected = LENSES.find((l) => l.id === selectedId) || LENSES[0];
 
   async function downloadScenarioDeck(personaId: LensId, scenario: PersonaScenarioId, houseId: AnalystHouseId) {
@@ -52,6 +52,7 @@ export default function Direct() {
         personaId,
         scenarioId: scenario,
         houseId,
+        vendorId,
         competitorTickers: storedCompetitorTickers(),
       });
       const blob = await response.blob();
@@ -75,7 +76,7 @@ export default function Direct() {
     try {
       const response = await apiRequest("POST", "/api/persona-decks/generate", {
         personaIds,
-        vendorId: PERSONA_DECK_VENDOR,
+        vendorId,
         competitorTickers: storedCompetitorTickers(),
       });
       const blob = await response.blob();
@@ -83,7 +84,7 @@ export default function Direct() {
       const match = disposition.match(/filename="?([^";]+)"?/);
       const filename =
         match?.[1] ??
-        `${PERSONA_DECK_VENDOR}-${personaIds.join("-")}-analyst-influence-briefing.pptx`;
+        `${vendorId}-${personaIds.join("-")}-analyst-influence-briefing.pptx`;
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -178,6 +179,28 @@ export default function Direct() {
           to know, what does AR need from them, and what briefing should AR run
           this week.
         </p>
+        <div className="mt-7 inline-flex flex-wrap items-center gap-3 rounded-2xl border border-[#a88945]/25 bg-[#a88945]/[0.06] px-4 py-3">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#d5b46b]">
+              Vendor
+            </div>
+            <div className="mt-0.5 text-[13px] text-white/55">
+              Generated persona and scenario decks brief for this company.
+            </div>
+          </div>
+          <select
+            value={vendorId}
+            onChange={(event) => setVendorId(event.target.value)}
+            data-testid="select-persona-deck-vendor"
+            className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
+          >
+            {VENDOR_OPTIONS.map((vendor) => (
+              <option key={vendor.id} value={vendor.id}>
+                {vendor.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </section>
 
       {/* Lens selector — premium horizontal rail */}
