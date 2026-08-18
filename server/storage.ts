@@ -11,6 +11,7 @@ import {
   analyst_relationship_stances,
   interactions,
   analyst_signals,
+  public_analyst_rankings,
   tasks,
   evidence_items,
   leader_lens_briefs,
@@ -34,6 +35,8 @@ import type {
   InsertInteraction,
   AnalystSignal,
   InsertAnalystSignal,
+  PublicAnalystRanking,
+  InsertPublicAnalystRanking,
   Task,
   InsertTask,
   EvidenceItem,
@@ -198,6 +201,20 @@ function ensureSchema() {
       content_text TEXT NOT NULL,
       filename TEXT,
       uploaded_by TEXT,
+      created_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS public_analyst_rankings (
+      id TEXT PRIMARY KEY,
+      vendor_id TEXT NOT NULL,
+      analyst_firm TEXT NOT NULL,
+      report_name TEXT NOT NULL,
+      category TEXT,
+      placement TEXT NOT NULL,
+      published_date TEXT NOT NULL,
+      date_precision TEXT NOT NULL DEFAULT 'day',
+      source_url TEXT NOT NULL,
+      source_type TEXT NOT NULL,
+      summary TEXT NOT NULL,
       created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS tasks (
@@ -553,6 +570,9 @@ export interface IStorage {
   // Analyst signals (uploaded notes/write-ups feeding the perception engine)
   listAnalystSignals(analystId: string): AnalystSignal[];
   insertAnalystSignal(input: InsertAnalystSignal): AnalystSignal;
+  // Public analyst rankings (cited placements found via web research)
+  listPublicRankings(vendorId?: string): PublicAnalystRanking[];
+  insertPublicRanking(input: InsertPublicAnalystRanking): PublicAnalystRanking;
   // Tasks
   listTasks(): Task[];
   createTask(input: InsertTask): Task;
@@ -817,6 +837,33 @@ export class DatabaseStorage implements IStorage {
       created_at: now(),
     };
     db.insert(analyst_signals).values(row).run();
+    return row;
+  }
+
+  listPublicRankings(vendorId?: string) {
+    const q = db.select().from(public_analyst_rankings);
+    const rows = vendorId
+      ? q.where(eq(public_analyst_rankings.vendor_id, vendorId)).all()
+      : q.all();
+    return [...rows].sort((a, b) => b.published_date.localeCompare(a.published_date));
+  }
+
+  insertPublicRanking(input: InsertPublicAnalystRanking) {
+    const row: PublicAnalystRanking = {
+      id: input.id ?? `pr_${randomUUID()}`,
+      vendor_id: input.vendor_id,
+      analyst_firm: input.analyst_firm,
+      report_name: input.report_name,
+      category: input.category ?? null,
+      placement: input.placement,
+      published_date: input.published_date,
+      date_precision: input.date_precision ?? "day",
+      source_url: input.source_url,
+      source_type: input.source_type,
+      summary: input.summary,
+      created_at: now(),
+    };
+    db.insert(public_analyst_rankings).values(row).run();
     return row;
   }
 

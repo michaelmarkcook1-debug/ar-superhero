@@ -22,6 +22,7 @@ import {
 } from "@/components/cockpit/atoms";
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
+import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 
 export default function MissionControl() {
   const { competitors, setCompetitors } = useCompetitorSelection();
@@ -338,6 +339,12 @@ export default function MissionControl() {
         </Pane>
         </div>
       </section>
+
+      {/* ====================================================================
+          Public analyst rankings — real, cited placements by analyst firm,
+          click through to the 2-year history per firm.
+      ==================================================================== */}
+      <PublicRankingsSection />
     </div>
   );
 }

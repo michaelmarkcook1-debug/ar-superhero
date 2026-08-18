@@ -34,6 +34,7 @@ import { ingestDocument } from "./services/docIngest";
 import { analyzeRfp } from "./services/rfpAnalyzer";
 import { analystStore } from "./services/analystStore";
 import { suggestStanceFromSignals, confirmStance } from "./services/perceptionEngine";
+import { publicRankingsStore } from "./services/publicRankingsStore";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -825,6 +826,46 @@ export async function registerRoutes(
       res.json(confirmed);
     } catch (err) {
       res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Public analyst rankings — real, cited Magic Quadrant / Wave / PEAK Matrix
+  // / Horizons / NEAT / Provider Lens placements for tracked vendors, found
+  // via web research. Every insert requires a real source_url — this is a
+  // curated-evidence table, not a computed one.
+  // --------------------------------------------------------------------------
+
+  const createRankingSchema = z.object({
+    vendor_id: z.string().min(1).max(40),
+    analyst_firm: z.string().min(1).max(120),
+    report_name: z.string().min(1).max(300),
+    category: z.string().max(160).optional(),
+    placement: z.string().min(1).max(120),
+    published_date: z.string().min(4).max(10),
+    date_precision: z.enum(["day", "month", "year"]).optional(),
+    source_url: z.string().url().max(600),
+    source_type: z.enum(["vendor_press_release", "analyst_firm_page", "trade_press", "other"]),
+    summary: z.string().min(1).max(600),
+  });
+
+  app.get("/api/public-rankings", async (req, res) => {
+    try {
+      const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId : undefined;
+      res.json(await publicRankingsStore.listRankings(vendorId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.post("/api/public-rankings", async (req, res) => {
+    const parse = createRankingSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const created = await publicRankingsStore.insertRanking(parse.data);
+      res.json(created);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
     }
   });
 

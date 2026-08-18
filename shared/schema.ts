@@ -248,6 +248,35 @@ export const insertAnalystSignalSchema = createInsertSchema(analyst_signals).par
 export type InsertAnalystSignal = z.infer<typeof insertAnalystSignalSchema>;
 
 // ============================================================================
+// Public analyst rankings — real, cited placements (Magic Quadrant, Wave,
+// PEAK Matrix, Horizons, NEAT, Provider Lens, etc.) for tracked vendors,
+// found via web research. Every row carries a real source_url; there is no
+// "estimated" or "modelled" placement — absence of a public ranking for a
+// given vendor/firm/period is simply the absence of a row, not a zero.
+// ============================================================================
+export const public_analyst_rankings = sqliteTable("public_analyst_rankings", {
+  id: text("id").primaryKey(),
+  vendor_id: text("vendor_id").notNull(), // matches server/services/vendors.ts VendorContext.id
+  analyst_firm: text("analyst_firm").notNull(),
+  report_name: text("report_name").notNull(),
+  category: text("category"),
+  placement: text("placement").notNull(),
+  published_date: text("published_date").notNull(), // YYYY-MM-DD, YYYY-MM, or YYYY — precision varies by source
+  date_precision: text("date_precision").notNull().default("day"), // day | month | year
+  source_url: text("source_url").notNull(),
+  source_type: text("source_type").notNull(), // vendor_press_release | analyst_firm_page | trade_press | other
+  summary: text("summary").notNull(),
+  created_at: integer("created_at").notNull(),
+});
+
+export type PublicAnalystRanking = typeof public_analyst_rankings.$inferSelect;
+export const insertPublicAnalystRankingSchema = createInsertSchema(public_analyst_rankings).partial({
+  id: true,
+  created_at: true,
+});
+export type InsertPublicAnalystRanking = z.infer<typeof insertPublicAnalystRankingSchema>;
+
+// ============================================================================
 // Tasks (suggested only in MVP)
 // ============================================================================
 export const tasks = sqliteTable("tasks", {
