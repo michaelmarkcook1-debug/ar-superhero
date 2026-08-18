@@ -228,6 +228,26 @@ export const insertInteractionSchema = createInsertSchema(interactions).partial(
 export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
 
 // ============================================================================
+// Analyst signals — notes, write-ups, and interaction logs an AR user
+// attaches to a named analyst. Real, human-entered evidence; the perception
+// engine reads these to suggest a stance update, never to fabricate one.
+// ============================================================================
+export const analyst_signals = sqliteTable("analyst_signals", {
+  id: text("id").primaryKey(),
+  analyst_id: text("analyst_id").notNull(),
+  kind: text("kind").notNull(), // note | write_up | interaction_log | upload
+  title: text("title").notNull(),
+  content_text: text("content_text").notNull(),
+  filename: text("filename"), // set when kind === "upload"
+  uploaded_by: text("uploaded_by"),
+  created_at: integer("created_at").notNull(),
+});
+
+export type AnalystSignal = typeof analyst_signals.$inferSelect;
+export const insertAnalystSignalSchema = createInsertSchema(analyst_signals).partial({ id: true, created_at: true });
+export type InsertAnalystSignal = z.infer<typeof insertAnalystSignalSchema>;
+
+// ============================================================================
 // Tasks (suggested only in MVP)
 // ============================================================================
 export const tasks = sqliteTable("tasks", {

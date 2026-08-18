@@ -1,20 +1,17 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import {
-  ANALYSTS,
   EVIDENCE,
   SUGGESTED_TASKS,
   WORKSTREAMS,
   SIGNALS,
   LEARNING,
   INTEGRATIONS,
-  type Analyst,
   type EvidenceItem,
   type Integration,
   type IntelSignal,
   type LearningItem,
   type SuggestedTask,
   type Workstream,
-  type Stance,
 } from "./seed";
 
 type TaskState = "suggested" | "accepted" | "rejected";
@@ -57,7 +54,6 @@ const REFRESH_BRIEFS: Brief[] = [
 ];
 
 type Ctx = {
-  analysts: Analyst[];
   workstreams: Workstream[];
   signals: IntelSignal[];
   learning: LearningItem[];
@@ -72,8 +68,6 @@ type Ctx = {
   refreshBrief: () => void;
   briefRefreshing: boolean;
   toggleIntegration: (id: string) => void;
-  updateStance: (analystId: string, stance: Stance, note?: string) => void;
-  stanceNotes: Record<string, { stance: Stance; note?: string; at: Date }[]>;
   exportLog: { lens: string; format: string; at: Date }[];
   logExport: (lens: string, format: string) => void;
 };
@@ -81,7 +75,6 @@ type Ctx = {
 const AppDataCtx = createContext<Ctx | null>(null);
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
-  const [analysts, setAnalysts] = useState<Analyst[]>(ANALYSTS);
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS);
   const [taskStates, setTaskStates] = useState<Record<string, TaskState>>({});
   const [evidenceStates, setEvidenceStates] = useState<Record<string, EvidenceState>>(
@@ -89,12 +82,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   );
   const [brief, setBrief] = useState<Brief>(INITIAL_BRIEF);
   const [briefRefreshing, setBriefRefreshing] = useState(false);
-  const [stanceNotes, setStanceNotes] = useState<Record<string, { stance: Stance; note?: string; at: Date }[]>>({});
   const [exportLog, setExportLog] = useState<{ lens: string; format: string; at: Date }[]>([]);
 
   const value = useMemo<Ctx>(
     () => ({
-      analysts,
       workstreams: WORKSTREAMS,
       signals: SIGNALS,
       learning: LEARNING,
@@ -130,28 +121,11 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
               : i
           )
         ),
-      updateStance: (analystId, stance, note) => {
-        setAnalysts((prev) =>
-          prev.map((a) =>
-            a.id === analystId
-              ? { ...a, stance, stanceConfidence: 1, override: true }
-              : a
-          )
-        );
-        setStanceNotes((prev) => ({
-          ...prev,
-          [analystId]: [
-            ...(prev[analystId] || []),
-            { stance, note, at: new Date() },
-          ],
-        }));
-      },
-      stanceNotes,
       exportLog,
       logExport: (lens, format) =>
         setExportLog((prev) => [...prev, { lens, format, at: new Date() }]),
     }),
-    [analysts, integrations, taskStates, evidenceStates, brief, briefRefreshing, stanceNotes, exportLog]
+    [integrations, taskStates, evidenceStates, brief, briefRefreshing, exportLog]
   );
 
   return <AppDataCtx.Provider value={value}>{children}</AppDataCtx.Provider>;

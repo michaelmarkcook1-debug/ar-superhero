@@ -1,6 +1,10 @@
 import { useAppData } from "@/lib/state";
+import { ANALYSTS } from "@/lib/seed";
 import { Card, Chip, Eyebrow, ReadinessBar, AnalystAvatar, RatingPill } from "@/components/atoms";
 
+// NOTE: assigned-analyst lookup here is still the fictional seed roster — the
+// real (Postgres-backed) analyst records have no workstream link yet, so this
+// join can't be migrated without new schema. Tracked as follow-up.
 export default function Workstreams() {
   const data = useAppData();
   return (
@@ -16,7 +20,7 @@ export default function Workstreams() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {data.workstreams.map((w) => {
-          const analysts = data.analysts.filter((a) => w.analystIds.includes(a.id));
+          const analysts = ANALYSTS.filter((a) => w.analystIds.includes(a.id));
           return (
             <Card key={w.id} className="p-5">
               <div className="flex items-start justify-between gap-3 mb-3">

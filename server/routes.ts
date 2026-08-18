@@ -32,6 +32,8 @@ import { scenarioById } from "@shared/briefingScenarios";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 import { ingestDocument } from "./services/docIngest";
 import { analyzeRfp } from "./services/rfpAnalyzer";
+import { analystStore } from "./services/analystStore";
+import { suggestStanceFromSignals, confirmStance } from "./services/perceptionEngine";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -618,27 +620,39 @@ export async function registerRoutes(
   // Analysts + stances
   // --------------------------------------------------------------------------
 
-  app.get("/api/analysts", (_req, res) => {
-    const allStances = storage.listStances();
-    res.json(
-      storage.listAnalysts().map((a) => {
-        const latest = allStances.find((s) => s.analyst_id === a.id && !s.suggested);
-        return decorateAnalyst(a, latest);
-      })
-    );
+  app.get("/api/analysts", async (_req, res) => {
+    try {
+      const [analystsList, allStances] = await Promise.all([analystStore.listAnalysts(), analystStore.listStances()]);
+      res.json(
+        analystsList.map((a) => {
+          const latest = allStances.find((s) => s.analyst_id === a.id && !s.suggested);
+          return decorateAnalyst(a, latest);
+        })
+      );
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: analystStore.kind });
+    }
   });
 
-  app.patch("/api/analysts/:id", (req, res) => {
-    const patch = req.body;
-    if (patch.coverage && Array.isArray(patch.coverage)) patch.coverage = JSON.stringify(patch.coverage);
-    if (patch.rating) patch.rating_overridden = true;
-    const updated = storage.updateAnalyst(req.params.id, patch);
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
+  app.patch("/api/analysts/:id", async (req, res) => {
+    try {
+      const patch = req.body;
+      if (patch.coverage && Array.isArray(patch.coverage)) patch.coverage = JSON.stringify(patch.coverage);
+      if (patch.rating) patch.rating_overridden = true;
+      const updated = await analystStore.updateAnalyst(req.params.id, patch);
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      res.json(updated);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
-  app.get("/api/analysts/:id/stances", (req, res) => {
-    res.json(storage.listStances(req.params.id));
+  app.get("/api/analysts/:id/stances", async (req, res) => {
+    try {
+      res.json(await analystStore.listStances(req.params.id));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
   const stanceSchema = z.object({
@@ -650,57 +664,172 @@ export async function registerRoutes(
   });
 
   // Accept a stance update (manual, not auto).
-  app.post("/api/stances", (req, res) => {
+  app.post("/api/stances", async (req, res) => {
     const parse = stanceSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.issues });
-    const row = storage.insertStance({
-      analyst_id: parse.data.analyst_id,
-      stance: parse.data.stance,
-      confidence: parse.data.confidence ?? 70,
-      source: "ar_manual",
-      note: parse.data.note ?? null,
-      suggested: false,
-      visible_in_leader_lens: parse.data.visible_in_leader_lens ?? false,
-    });
-    res.json(row);
+    try {
+      const row = await analystStore.insertStance({
+        analyst_id: parse.data.analyst_id,
+        stance: parse.data.stance,
+        confidence: parse.data.confidence ?? 70,
+        source: "ar_manual",
+        note: parse.data.note ?? null,
+        suggested: false,
+        visible_in_leader_lens: parse.data.visible_in_leader_lens ?? false,
+      });
+      res.json(row);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
   // Confirm / dismiss a suggested stance update.
-  app.patch("/api/stances/:id", (req, res) => {
-    const patch = req.body;
-    // Update directly via storage (no helper because we never edit historical stances much)
-    const existing = storage.listStances().find((s) => s.id === req.params.id);
-    if (!existing) return res.status(404).json({ error: "Not found" });
-    const updated = { ...existing, ...patch };
-    storage.insertStance({
-      analyst_id: existing.analyst_id,
-      stance: patch.stance ?? existing.stance,
-      confidence: patch.confidence ?? existing.confidence,
-      source: patch.source ?? "ar_confirmed",
-      note: patch.note ?? existing.note,
-      suggested: false,
-      visible_in_leader_lens: patch.visible_in_leader_lens ?? false,
-    });
-    res.json(updated);
+  app.patch("/api/stances/:id", async (req, res) => {
+    try {
+      const patch = req.body;
+      const existing = (await analystStore.listStances()).find((s) => s.id === req.params.id);
+      if (!existing) return res.status(404).json({ error: "Not found" });
+      const updated = { ...existing, ...patch };
+      await analystStore.insertStance({
+        analyst_id: existing.analyst_id,
+        stance: patch.stance ?? existing.stance,
+        confidence: patch.confidence ?? existing.confidence,
+        source: patch.source ?? "ar_confirmed",
+        note: patch.note ?? existing.note,
+        suggested: false,
+        visible_in_leader_lens: patch.visible_in_leader_lens ?? false,
+      });
+      res.json(updated);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Analyst signals — uploaded notes/write-ups/interaction logs that feed the
+  // perception engine. Uploading a signal immediately triggers a suggested
+  // stance update (source: system_suggestion) so "feed and update" happens
+  // in one step; AR staff separately confirm or ignore the suggestion.
+  // --------------------------------------------------------------------------
+
+  const signalSchema = z.object({
+    kind: z.enum(["note", "write_up", "interaction_log", "upload"]),
+    title: z.string().min(1).max(200),
+    content_text: z.string().min(1).max(20000),
+    filename: z.string().max(200).optional(),
+    uploaded_by: z.string().max(120).optional(),
+  });
+
+  app.get("/api/analysts/:id/signals", async (req, res) => {
+    try {
+      res.json(await analystStore.listSignals(req.params.id));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.post("/api/analysts/:id/signals", async (req, res) => {
+    const parse = signalSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const analyst = await analystStore.getAnalyst(req.params.id);
+      if (!analyst) return res.status(404).json({ error: "Analyst not found." });
+      const signal = await analystStore.insertSignal({ analyst_id: req.params.id, ...parse.data });
+      const perception = await suggestStanceFromSignals(req.params.id);
+      res.json({ signal, perception });
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  const SIGNAL_KINDS = new Set(["note", "write_up", "interaction_log", "upload"]);
+
+  // Same as above, but for an actual uploaded document (.docx/.txt) rather
+  // than typed text — reuses the same doc-ingestion path as the RFP analyzer.
+  app.post(
+    "/api/analysts/:id/signals/upload",
+    express.raw({ type: () => true, limit: "10mb" }),
+    async (req: Request, res: Response) => {
+      const filename = String(req.query.filename ?? "").trim() || "untitled.txt";
+      const title = String(req.query.title ?? "").trim();
+      const kindRaw = String(req.query.kind ?? "upload");
+      const kind = SIGNAL_KINDS.has(kindRaw) ? kindRaw : "upload";
+      const uploadedBy = req.query.uploadedBy ? String(req.query.uploadedBy).trim() : undefined;
+      const body = req.body as Buffer;
+      if (!Buffer.isBuffer(body) || body.length < 1) {
+        return res.status(400).json({ error: "Upload the document as the raw request body." });
+      }
+      if (!title) return res.status(400).json({ error: "title is required." });
+      try {
+        const analyst = await analystStore.getAnalyst(req.params.id);
+        if (!analyst) return res.status(404).json({ error: "Analyst not found." });
+        const doc = ingestDocument(body, filename);
+        const signal = await analystStore.insertSignal({
+          analyst_id: req.params.id,
+          kind,
+          title,
+          content_text: doc.text,
+          filename,
+          uploaded_by: uploadedBy,
+        });
+        const perception = await suggestStanceFromSignals(req.params.id);
+        res.json({ signal, perception, truncated: doc.truncated });
+      } catch (err) {
+        res.status(422).json({ error: (err as Error).message });
+      }
+    }
+  );
+
+  // Re-run the perception engine on demand (e.g. after several signals were
+  // added without triggering a fresh suggestion each time).
+  app.post("/api/analysts/:id/suggest-stance", async (req, res) => {
+    try {
+      const perception = await suggestStanceFromSignals(req.params.id);
+      res.json(perception);
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  // AR staff accepting a system-suggested stance.
+  app.post("/api/analysts/:id/stances/:stanceId/confirm", async (req, res) => {
+    try {
+      const confirmed = await confirmStance(req.params.id, req.params.stanceId);
+      if (!confirmed) return res.status(404).json({ error: "Suggested stance not found." });
+      res.json(confirmed);
+    } catch (err) {
+      res.status(500).json({ error: (err as Error).message });
+    }
   });
 
   // --------------------------------------------------------------------------
   // Interactions
   // --------------------------------------------------------------------------
 
-  app.get("/api/interactions", (_req, res) => {
-    res.json(storage.listInteractions());
+  app.get("/api/interactions", async (_req, res) => {
+    try {
+      res.json(await analystStore.listInteractions());
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
-  app.post("/api/interactions", (req, res) => {
-    const row = storage.createInteraction(req.body);
-    res.json(row);
+  app.post("/api/interactions", async (req, res) => {
+    try {
+      res.json(await analystStore.insertInteraction(req.body));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
-  app.patch("/api/interactions/:id", (req, res) => {
-    const updated = storage.updateInteraction(req.params.id, req.body);
-    if (!updated) return res.status(404).json({ error: "Not found" });
-    res.json(updated);
+  app.patch("/api/interactions/:id", async (req, res) => {
+    try {
+      const updated = await analystStore.updateInteraction(req.params.id, req.body);
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      res.json(updated);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
   });
 
   // --------------------------------------------------------------------------

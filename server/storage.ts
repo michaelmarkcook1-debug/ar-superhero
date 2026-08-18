@@ -10,6 +10,7 @@ import {
   analysts,
   analyst_relationship_stances,
   interactions,
+  analyst_signals,
   tasks,
   evidence_items,
   leader_lens_briefs,
@@ -31,6 +32,8 @@ import type {
   StanceRecord,
   Interaction,
   InsertInteraction,
+  AnalystSignal,
+  InsertAnalystSignal,
   Task,
   InsertTask,
   EvidenceItem,
@@ -186,6 +189,16 @@ function ensureSchema() {
       source TEXT NOT NULL DEFAULT 'manual',
       needs_confirmation INTEGER NOT NULL DEFAULT 0,
       synced_item_id TEXT
+    );
+    CREATE TABLE IF NOT EXISTS analyst_signals (
+      id TEXT PRIMARY KEY,
+      analyst_id TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content_text TEXT NOT NULL,
+      filename TEXT,
+      uploaded_by TEXT,
+      created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY,
@@ -527,6 +540,9 @@ export interface IStorage {
   listInteractions(): Interaction[];
   createInteraction(input: InsertInteraction & { source?: string; needs_confirmation?: boolean; synced_item_id?: string }): Interaction;
   updateInteraction(id: string, patch: Partial<Interaction>): Interaction | undefined;
+  // Analyst signals (uploaded notes/write-ups feeding the perception engine)
+  listAnalystSignals(analystId: string): AnalystSignal[];
+  insertAnalystSignal(input: InsertAnalystSignal): AnalystSignal;
   // Tasks
   listTasks(): Task[];
   createTask(input: InsertTask): Task;
@@ -741,6 +757,30 @@ export class DatabaseStorage implements IStorage {
     const updated = { ...existing, ...patch };
     db.update(interactions).set(updated).where(eq(interactions.id, id)).run();
     return updated;
+  }
+
+  listAnalystSignals(analystId: string) {
+    return db
+      .select()
+      .from(analyst_signals)
+      .where(eq(analyst_signals.analyst_id, analystId))
+      .orderBy(desc(analyst_signals.created_at))
+      .all();
+  }
+
+  insertAnalystSignal(input: InsertAnalystSignal) {
+    const row: AnalystSignal = {
+      id: input.id ?? `sig_${randomUUID()}`,
+      analyst_id: input.analyst_id,
+      kind: input.kind,
+      title: input.title,
+      content_text: input.content_text,
+      filename: input.filename ?? null,
+      uploaded_by: input.uploaded_by ?? null,
+      created_at: now(),
+    };
+    db.insert(analyst_signals).values(row).run();
+    return row;
   }
 
   listTasks() {

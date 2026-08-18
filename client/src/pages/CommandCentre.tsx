@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { useAppData, formatRelativeAgo } from "@/lib/state";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Card,
   Chip,
@@ -18,25 +20,45 @@ import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
 import { LENSES, STANCE_OPTIONS, type Stance } from "@/lib/seed";
 import {
+  asStance,
+  initialsOf,
+  SIGNAL_KIND_OPTIONS,
+  type AnalystRow,
+  type StanceRow,
+  type SignalRow,
+  type SignalKind,
+  type PerceptionResult,
+} from "@/lib/analystApi";
+import {
   RefreshCw,
   Check,
   X,
   Plus,
   Sparkles,
   FileDown,
+  FileUp,
   ChevronRight,
   AlertTriangle,
   Info,
+  Loader2,
 } from "lucide-react";
 
 export default function CommandCentre() {
   const data = useAppData();
   const [activeLens, setActiveLens] = useState("strategy");
-  const [stanceModal, setStanceModal] = useState<{ analystId: string; current: Stance } | null>(null);
+  const [stanceModal, setStanceModal] = useState<{ analystId: string } | null>(null);
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportContacted, setSupportContacted] = useState(false);
 
   const briefAge = formatRelativeAgo(data.brief.generatedAt);
+
+  // Real, DB-backed analyst roster — separate from the fictional workstream
+  // demo data above. Same queryKey the Analysts/LeaderLens pages and the
+  // stance modal use, so they all share one cache.
+  const analysts = useQuery<AnalystRow[]>({ queryKey: ["/api/analysts"] });
+  const analystRows = analysts.data ?? [];
+  const firmCount = new Set(analystRows.map((a) => a.firm)).size;
+  const friendlyCount = analystRows.filter((a) => a.current_stance?.stance === "Friendly").length;
 
   // Backend-summary read (drives the small "systems" indicator). Real backend data —
   // never claims live integrations are connected: mock adapters report mock_mode.
@@ -176,7 +198,15 @@ export default function CommandCentre() {
       {/* SUMMARY METRICS STRIP */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard label="Active workstreams" value="5" hint="2 Tier 1 · 2 Tier 2 · 1 submitted" />
-        <MetricCard label="Tracked analysts" value="9" hint="across 7 houses · 3 Friendly stance" />
+        <MetricCard
+          label="Tracked analysts"
+          value={analysts.isLoading ? "…" : String(analystRows.length)}
+          hint={
+            analysts.isLoading
+              ? "Loading…"
+              : `across ${firmCount} firm${firmCount === 1 ? "" : "s"} · ${friendlyCount} Friendly stance`
+          }
+        />
         <MetricCard label="Evidence items" value="34" hint="12 approved · 9 candidates · 4 expiring" />
         <MetricCard label="Open suggestions" value={String(data.tasks.filter(t => data.taskStates[t.id] !== "accepted" && data.taskStates[t.id] !== "rejected").length)} hint="all are suggestions, not auto-assigned" />
       </section>
@@ -371,36 +401,50 @@ export default function CommandCentre() {
             id="analysts"
             eyebrow="Analyst Landscape"
             title="Tracked analysts with firm tier, rating, and relationship stance"
-            description="Stance updates are system-suggested only. Click any stance to provide evidence and override."
+            description="Stance shown is the latest confirmed record. Click any stance to add evidence, upload notes, or review a system suggestion."
             action={
-              <button className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground">
-                View all 9 <ChevronRight className="h-3 w-3" />
-              </button>
+              <Link
+                href="/admin/analysts"
+                className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground"
+              >
+                View all {analystRows.length} <ChevronRight className="h-3 w-3" />
+              </Link>
             }
           >
             <Card noPadding>
+              {analysts.isLoading && (
+                <div className="px-5 py-4 text-[13px] text-muted-foreground">Loading analysts…</div>
+              )}
+              {analysts.isError && (
+                <div className="px-5 py-4 text-[13px] text-destructive">Couldn't load analysts.</div>
+              )}
+              {!analysts.isLoading && !analysts.isError && analystRows.length === 0 && (
+                <div className="px-5 py-4 text-[13px] text-muted-foreground">No analysts on record yet.</div>
+              )}
               <div className="divide-y divide-card-border">
-                {data.analysts.map((a) => (
+                {analystRows.map((a) => (
                   <div key={a.id} className="px-5 py-3.5 flex items-center gap-4">
-                    <AnalystAvatar initials={a.initials} />
+                    <AnalystAvatar initials={initialsOf(a.name)} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-foreground">{a.name}</span>
-                        <TierChip tier={a.houseTier} />
-                        <RatingPill rating={a.rating} confidence={a.confidence} />
+                        <TierChip tier={a.firm_tier} />
+                        <RatingPill rating={a.rating} confidence={a.confidence / 100} />
                       </div>
                       <div className="text-[12px] text-muted-foreground truncate">
-                        {a.house} · {a.role}
+                        {a.firm} · {a.role ?? "—"}
                       </div>
                     </div>
                     <div className="hidden md:block text-[11.5px] text-muted-foreground min-w-[150px]">
                       <div>Last interaction</div>
-                      <div className="text-foreground/80">{a.lastInteraction}</div>
+                      <div className="text-foreground/80">
+                        {a.last_interaction_at ? formatRelativeAgo(new Date(a.last_interaction_at)) : "None logged"}
+                      </div>
                     </div>
                     <StanceChip
-                      stance={a.stance}
-                      confidence={a.stanceConfidence}
-                      onClick={() => setStanceModal({ analystId: a.id, current: a.stance })}
+                      stance={a.current_stance ? asStance(a.current_stance.stance) : "Unknown"}
+                      confidence={a.current_stance ? a.current_stance.confidence / 100 : undefined}
+                      onClick={() => setStanceModal({ analystId: a.id })}
                     />
                   </div>
                 ))}
@@ -609,15 +653,7 @@ export default function CommandCentre() {
 
       {/* STANCE MODAL */}
       {stanceModal && (
-        <StanceModal
-          analystId={stanceModal.analystId}
-          current={stanceModal.current}
-          onClose={() => setStanceModal(null)}
-          onSubmit={(s, note) => {
-            data.updateStance(stanceModal.analystId, s, note);
-            setStanceModal(null);
-          }}
-        />
+        <StanceModal analystId={stanceModal.analystId} onClose={() => setStanceModal(null)} />
       )}
     </div>
   );
@@ -695,42 +731,140 @@ function ActionBtn({
 
 function StanceModal({
   analystId,
-  current,
   onClose,
-  onSubmit,
 }: {
   analystId: string;
-  current: Stance;
   onClose: () => void;
-  onSubmit: (s: Stance, note?: string) => void;
 }) {
-  const data = useAppData();
-  const analyst = data.analysts.find((a) => a.id === analystId);
-  const [stance, setStance] = useState<Stance>(current);
+  const queryClient = useQueryClient();
+  const analysts = useQuery<AnalystRow[]>({ queryKey: ["/api/analysts"] });
+  const analyst = analysts.data?.find((a) => a.id === analystId);
+  const stancesQuery = useQuery<StanceRow[]>({ queryKey: ["/api/analysts", analystId, "stances"] });
+  const signalsQuery = useQuery<SignalRow[]>({ queryKey: ["/api/analysts", analystId, "signals"] });
+
+  const [stance, setStance] = useState<Stance>(() =>
+    analyst?.current_stance ? asStance(analyst.current_stance.stance) : "Unknown"
+  );
   const [note, setNote] = useState("");
 
+  const [signalKind, setSignalKind] = useState<SignalKind>("note");
+  const [signalTitle, setSignalTitle] = useState("");
+  const [signalContent, setSignalContent] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<{ perception: PerceptionResult } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function invalidateAnalystData() {
+    queryClient.invalidateQueries({ queryKey: ["/api/analysts"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/analysts", analystId, "stances"] });
+  }
+
+  const submitStance = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", "/api/stances", { analyst_id: analystId, stance, confidence: 100, note: note || undefined }),
+    onSuccess: () => {
+      invalidateAnalystData();
+      onClose();
+    },
+  });
+
+  const submitSignal = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/analysts/${analystId}/signals`, {
+        kind: signalKind,
+        title: signalTitle,
+        content_text: signalContent,
+      });
+      return (await res.json()) as { signal: SignalRow; perception: PerceptionResult };
+    },
+    onSuccess: (result) => {
+      setSignalTitle("");
+      setSignalContent("");
+      setLastResult({ perception: result.perception });
+      invalidateAnalystData();
+      queryClient.invalidateQueries({ queryKey: ["/api/analysts", analystId, "signals"] });
+    },
+  });
+
+  const confirmSuggestion = useMutation({
+    mutationFn: (stanceId: string) => apiRequest("POST", `/api/analysts/${analystId}/stances/${stanceId}/confirm`),
+    onSuccess: () => invalidateAnalystData(),
+  });
+
+  async function handleUploadFile(file: File) {
+    if (!signalTitle.trim()) {
+      setUploadError("Give this signal a title before uploading.");
+      return;
+    }
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const qs = new URLSearchParams({ filename: file.name, title: signalTitle, kind: signalKind });
+      const res = await fetch(`/api/analysts/${analystId}/signals/upload?${qs}`, { method: "POST", body: file });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Upload failed (${res.status})`);
+      }
+      const result = (await res.json()) as { signal: SignalRow; perception: PerceptionResult };
+      setSignalTitle("");
+      setLastResult({ perception: result.perception });
+      invalidateAnalystData();
+      queryClient.invalidateQueries({ queryKey: ["/api/analysts", analystId, "signals"] });
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  if (analysts.isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="rounded-xl border border-border bg-card px-6 py-5 text-[13px] text-muted-foreground shadow-2xl">
+          Loading analyst…
+        </div>
+      </div>
+    );
+  }
   if (!analyst) return null;
-  const prior = data.stanceNotes[analystId] || [];
+
+  const priorStances = stancesQuery.data ?? [];
+  const priorSignals = signalsQuery.data ?? [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div
         role="dialog"
         aria-modal="true"
-        className="w-full max-w-lg rounded-xl border border-border bg-card shadow-2xl"
+        className="w-full max-w-xl rounded-xl border border-border bg-card shadow-2xl flex flex-col max-h-[85vh]"
       >
-        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between shrink-0">
           <div>
-            <Eyebrow className="mb-1">Update relationship stance</Eyebrow>
+            <Eyebrow className="mb-1">Relationship stance &amp; perception</Eyebrow>
             <h3 className="text-[15px] font-semibold tracking-tight">{analyst.name}</h3>
+            <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+              Current:
+              {analyst.current_stance ? (
+                <StanceChip
+                  stance={asStance(analyst.current_stance.stance)}
+                  confidence={analyst.current_stance.confidence / 100}
+                />
+              ) : (
+                <StanceChip stance="Unknown" />
+              )}
+            </div>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-md hover-elevate" aria-label="Close">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-5 py-4 space-y-4">
+
+        <div className="px-5 py-4 space-y-5 overflow-y-auto">
+          {/* Manual override */}
           <div>
-            <div className="text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">Select stance</div>
+            <div className="text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">Set stance manually</div>
             <div className="flex flex-wrap gap-1.5">
               {STANCE_OPTIONS.map((s) => (
                 <button
@@ -747,48 +881,172 @@ function StanceModal({
                 </button>
               ))}
             </div>
-          </div>
-          <div>
-            <label className="text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground block mb-1.5">
-              Evidence note (recommended)
-            </label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               data-testid="textarea-stance-note"
+              rows={2}
+              placeholder="Evidence note (recommended) — quote, observed behaviour, public commentary."
+              className="mt-2.5 w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary/40"
+            />
+            {submitStance.isError && (
+              <p className="mt-1.5 text-[12px] text-destructive">{(submitStance.error as Error).message}</p>
+            )}
+          </div>
+
+          {/* Add a signal — this is what feeds the perception engine */}
+          <div className="rounded-lg border border-border bg-secondary/40 p-3.5">
+            <div className="text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">
+              Add a note, write-up, or interaction
+            </div>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <select
+                value={signalKind}
+                onChange={(e) => setSignalKind(e.target.value as SignalKind)}
+                data-testid="select-signal-kind"
+                className="rounded-md border border-input bg-card/60 px-2 py-1.5 text-[12.5px]"
+              >
+                {SIGNAL_KIND_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={signalTitle}
+                onChange={(e) => setSignalTitle(e.target.value)}
+                placeholder={'Title — e.g. "Q2 briefing follow-up"'}
+                data-testid="input-signal-title"
+                className="flex-1 min-w-[160px] rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[12.5px] placeholder:text-muted-foreground/70"
+              />
+            </div>
+            <textarea
+              value={signalContent}
+              onChange={(e) => setSignalContent(e.target.value)}
               rows={3}
-              placeholder="Briefly describe what evidence supports this stance change. Examples: quote from a recent inquiry, observed behaviour during a briefing, public commentary."
+              placeholder="Type the note here, or upload a document instead."
+              data-testid="textarea-signal-content"
               className="w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary/40"
             />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={!signalTitle.trim() || !signalContent.trim() || submitSignal.isPending}
+                onClick={() => submitSignal.mutate()}
+                data-testid="button-submit-signal"
+                className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-2.5 h-8 text-[12px] font-medium text-primary hover-elevate disabled:opacity-50"
+              >
+                {submitSignal.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                Add signal
+              </button>
+              <span className="text-[11px] text-muted-foreground">or</span>
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={() => fileRef.current?.click()}
+                data-testid="button-upload-signal"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 h-8 text-[12px] font-medium hover-elevate disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
+                Upload document (.docx/.txt)
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".docx,.txt"
+                className="hidden"
+                data-testid="input-signal-file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleUploadFile(f);
+                }}
+              />
+            </div>
+            {(submitSignal.isError || uploadError) && (
+              <p className="mt-1.5 text-[12px] text-destructive">
+                {uploadError ?? (submitSignal.error as Error)?.message}
+              </p>
+            )}
+            {lastResult && (
+              <div className="mt-2.5 rounded-md border border-primary/25 bg-primary/[0.06] px-3 py-2 text-[12px] text-foreground/90">
+                {lastResult.perception.suggested && lastResult.perception.stanceRecord ? (
+                  <>
+                    <Sparkles className="inline h-3 w-3 text-primary mr-1" />
+                    Perception engine suggests <strong>{lastResult.perception.stanceRecord.stance}</strong> (
+                    {lastResult.perception.stanceRecord.confidence}% confidence) — see the log below to confirm.
+                  </>
+                ) : (
+                  <>Signal saved. {lastResult.perception.reason ?? "No new suggestion yet."}</>
+                )}
+              </div>
+            )}
+            {priorSignals.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/60">
+                <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-1.5">
+                  {priorSignals.length} signal{priorSignals.length === 1 ? "" : "s"} on record
+                </div>
+                <ul className="space-y-1">
+                  {priorSignals.slice(0, 5).map((s) => (
+                    <li key={s.id} className="text-[12px] text-foreground/80 flex items-center gap-1.5">
+                      <span className="text-muted-foreground">{formatRelativeAgo(new Date(s.created_at))} ·</span>
+                      {s.title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          {prior.length > 0 && (
+
+          {/* Stance history — both auto-suggested and AR-confirmed */}
+          {priorStances.length > 0 && (
             <div className="rounded-md border border-border bg-secondary/50 p-3">
-              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2">Recent stance log</div>
-              <ul className="space-y-1.5">
-                {prior.slice(-3).reverse().map((p, i) => (
-                  <li key={i} className="text-[12px] text-foreground/90">
-                    <span className="text-foreground">{p.stance}</span>
-                    {p.note && <span className="text-muted-foreground"> — {p.note}</span>}
+              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-2">Stance history</div>
+              <ul className="space-y-2">
+                {priorStances.slice(0, 6).map((p) => (
+                  <li key={p.id} className="text-[12px] text-foreground/90">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-foreground font-medium">{p.stance}</span>
+                      <Chip tone={p.source === "system_suggestion" ? "accent" : p.source === "ar_confirmed" ? "primary" : "muted"}>
+                        {p.source === "system_suggestion" ? "System suggestion" : p.source === "ar_confirmed" ? "AR confirmed" : "Manual"}
+                      </Chip>
+                      <span className="text-muted-foreground">
+                        {p.confidence}% · {formatRelativeAgo(new Date(p.recorded_at))}
+                      </span>
+                      {p.suggested && (
+                        <button
+                          onClick={() => confirmSuggestion.mutate(p.id)}
+                          disabled={confirmSuggestion.isPending}
+                          data-testid={`button-confirm-stance-${p.id}`}
+                          className="inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover-elevate disabled:opacity-50"
+                        >
+                          <Check className="h-3 w-3" /> Confirm
+                        </button>
+                      )}
+                    </div>
+                    {p.note && <div className="text-muted-foreground mt-0.5">{p.note}</div>}
                   </li>
                 ))}
               </ul>
             </div>
           )}
         </div>
-        <div className="px-5 py-4 border-t border-border flex items-center justify-between">
+
+        <div className="px-5 py-4 border-t border-border flex items-center justify-between shrink-0">
           <span className="text-[11.5px] text-muted-foreground">
-            Marks this analyst as <strong>user-overridden</strong> with full confidence.
+            Manual stance saves at <strong>full confidence</strong>.
           </span>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="rounded-md border border-border bg-secondary px-3 h-9 text-[12.5px] hover-elevate">
-              Cancel
+              Close
             </button>
             <button
-              onClick={() => onSubmit(stance, note || undefined)}
+              onClick={() => submitStance.mutate()}
+              disabled={submitStance.isPending}
               data-testid="button-submit-stance"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-primary/40 bg-primary text-primary-foreground px-3 h-9 text-[12.5px] font-semibold hover-elevate"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-primary/40 bg-primary text-primary-foreground px-3 h-9 text-[12.5px] font-semibold hover-elevate disabled:opacity-50"
             >
-              <Plus className="h-3.5 w-3.5" /> Save evidence
+              {submitStance.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+              Save evidence
             </button>
           </div>
         </div>

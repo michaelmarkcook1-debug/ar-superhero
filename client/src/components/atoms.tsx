@@ -1,6 +1,6 @@
 // Small shared atoms: badges, chips, rating pills, confidence bars
 import { cn } from "@/lib/utils";
-import type { ReadinessBand, Stance, Rating, Tier } from "@/lib/seed";
+import type { ReadinessBand, Stance } from "@/lib/seed";
 
 export function Eyebrow({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("eyebrow", className)}>{children}</div>;
@@ -36,7 +36,7 @@ export function Chip({
   );
 }
 
-export function TierChip({ tier }: { tier: Tier }) {
+export function TierChip({ tier }: { tier: string }) {
   const tone =
     tier === "Tier 1" ? "primary" : tier === "Tier 2" ? "neutral" : "muted";
   return <Chip tone={tone as any}>{tier}</Chip>;
@@ -46,7 +46,7 @@ export function RatingPill({
   rating,
   confidence,
 }: {
-  rating: Rating;
+  rating: string;
   confidence: number;
 }) {
   // Single muted pill — rating left, confidence dot right.

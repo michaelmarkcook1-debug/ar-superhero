@@ -1,21 +1,43 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAppData } from "@/lib/state";
 import { Card, Chip, Eyebrow, AnalystAvatar, RatingPill } from "@/components/atoms";
 import { LENSES } from "@/lib/seed";
+import { asStance, initialsOf, type AnalystRow } from "@/lib/analystApi";
 import { cn } from "@/lib/utils";
 import { FileDown, Check } from "lucide-react";
 
+// Known letter-grade order for display grouping. Ratings are free text at
+// the DB layer (no enforced enum) — anything outside this list still shows,
+// just sorted alphabetically after the recognised grades, so nothing is
+// silently dropped.
+const KNOWN_RATING_ORDER = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D"];
+function sortRatings(ratings: string[]): string[] {
+  return [...ratings].sort((a, b) => {
+    const ai = KNOWN_RATING_ORDER.indexOf(a);
+    const bi = KNOWN_RATING_ORDER.indexOf(b);
+    if (ai !== -1 && bi !== -1) return ai - bi;
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+    return a.localeCompare(b);
+  });
+}
+
 export default function LeaderLens() {
   const data = useAppData();
+  const { data: analysts, isLoading, isError } = useQuery<AnalystRow[]>({
+    queryKey: ["/api/analysts"],
+  });
   const [active, setActive] = useState("strategy");
   const [includeStance, setIncludeStance] = useState(false);
   const lens = LENSES.find((l) => l.id === active)!;
 
-  const groupedByRating = data.analysts.reduce<Record<string, typeof data.analysts>>((acc, a) => {
+  const groupedByRating = (analysts ?? []).reduce<Record<string, AnalystRow[]>>((acc, a) => {
     acc[a.rating] = acc[a.rating] || [];
     acc[a.rating].push(a);
     return acc;
   }, {});
+  const ratingOrder = sortRatings(Object.keys(groupedByRating));
 
   return (
     <div className="px-5 lg:px-8 py-6 lg:py-8 max-w-[1280px] mx-auto space-y-6">
@@ -95,8 +117,13 @@ export default function LeaderLens() {
 
       <section>
         <Eyebrow className="mb-3">Analysts in this briefing · grouped by rating</Eyebrow>
+        {isLoading && <p className="text-[13px] text-muted-foreground">Loading…</p>}
+        {isError && <p className="text-[13px] text-destructive">Couldn't load analysts.</p>}
+        {!isLoading && !isError && ratingOrder.length === 0 && (
+          <p className="text-[13px] text-muted-foreground">No analysts on record yet.</p>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {["A+", "A", "B+", "B"].map((rating) => {
+          {ratingOrder.map((rating) => {
             const list = groupedByRating[rating] || [];
             if (list.length === 0) return null;
             return (
@@ -108,13 +135,15 @@ export default function LeaderLens() {
                 <ul className="space-y-2">
                   {list.map((a) => (
                     <li key={a.id} className="flex items-center gap-3">
-                      <AnalystAvatar initials={a.initials} size={24} />
+                      <AnalystAvatar initials={initialsOf(a.name)} size={24} />
                       <div className="flex-1 min-w-0">
                         <div className="text-[13px] text-foreground truncate">{a.name}</div>
-                        <div className="text-[11px] text-muted-foreground truncate">{a.house}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">{a.firm}</div>
                       </div>
-                      <RatingPill rating={a.rating} confidence={a.confidence} />
-                      {includeStance && <Chip tone="muted">{a.stance}</Chip>}
+                      <RatingPill rating={a.rating} confidence={a.confidence / 100} />
+                      {includeStance && (
+                        <Chip tone="muted">{a.current_stance ? asStance(a.current_stance.stance) : "Unknown"}</Chip>
+                      )}
                     </li>
                   ))}
                 </ul>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useAppData } from "@/lib/state";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   Chip,
@@ -10,16 +10,27 @@ import {
   TierChip,
 } from "@/components/atoms";
 import { cn } from "@/lib/utils";
-import { ANALYST_HOUSES } from "@/lib/seed";
+import { asStance, initialsOf, type AnalystRow } from "@/lib/analystApi";
 
 export default function Analysts() {
-  const data = useAppData();
-  const [filterTier, setFilterTier] = useState<"all" | "Tier 1" | "Tier 2">("all");
-  const [filterHouse, setFilterHouse] = useState<string>("all");
+  const { data: analysts, isLoading, isError, error } = useQuery<AnalystRow[]>({
+    queryKey: ["/api/analysts"],
+  });
+  const [filterTier, setFilterTier] = useState<string>("all");
+  const [filterFirm, setFilterFirm] = useState<string>("all");
 
-  const filtered = data.analysts.filter((a) => {
-    if (filterTier !== "all" && a.houseTier !== filterTier) return false;
-    if (filterHouse !== "all" && a.house !== filterHouse) return false;
+  const tiers = useMemo(
+    () => Array.from(new Set((analysts ?? []).map((a) => a.firm_tier))).sort(),
+    [analysts]
+  );
+  const firms = useMemo(
+    () => Array.from(new Set((analysts ?? []).map((a) => a.firm))).sort(),
+    [analysts]
+  );
+
+  const filtered = (analysts ?? []).filter((a) => {
+    if (filterTier !== "all" && a.firm_tier !== filterTier) return false;
+    if (filterFirm !== "all" && a.firm !== filterFirm) return false;
     return true;
   });
 
@@ -28,71 +39,114 @@ export default function Analysts() {
       <div>
         <Eyebrow>Analyst Landscape</Eyebrow>
         <h1 className="mt-1.5 text-[26px] font-semibold tracking-tight">
-          {data.analysts.length} tracked analysts · {ANALYST_HOUSES.length} houses
+          {isLoading
+            ? "Loading analysts…"
+            : `${(analysts ?? []).length} tracked analysts · ${firms.length} firm${firms.length === 1 ? "" : "s"}`}
         </h1>
         <p className="mt-2 text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
-          Population sourced from external AR platform import, public discovery, customer data sync,
-          and user review. Click any stance to add evidence or override the system suggestion.
+          Live from the AR relationship database. Stance shown is the latest confirmed record — upload
+          notes, write-ups, or interactions from Command Centre to feed the perception engine a fresh suggestion.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <FilterChip active={filterTier === "all"} onClick={() => setFilterTier("all")}>All tiers</FilterChip>
-        <FilterChip active={filterTier === "Tier 1"} onClick={() => setFilterTier("Tier 1")}>Tier 1</FilterChip>
-        <FilterChip active={filterTier === "Tier 2"} onClick={() => setFilterTier("Tier 2")}>Tier 2</FilterChip>
-        <div className="h-4 w-px bg-border mx-1" />
-        <FilterChip active={filterHouse === "all"} onClick={() => setFilterHouse("all")}>All houses</FilterChip>
-        {ANALYST_HOUSES.map((h) => (
-          <FilterChip key={h.id} active={filterHouse === h.name} onClick={() => setFilterHouse(h.name)}>
-            {h.name}
-          </FilterChip>
-        ))}
-      </div>
+      {isError && (
+        <Card className="border-destructive/30 bg-destructive/5">
+          <p className="text-[13px] text-destructive">
+            Couldn't load analysts: {(error as Error)?.message ?? "unknown error"}
+          </p>
+        </Card>
+      )}
 
-      <Card noPadding>
-        <div className="overflow-x-auto">
-        <table className="w-full text-[13px] min-w-[920px]">
-          <thead>
-            <tr className="text-left text-muted-foreground border-b border-card-border">
-              <th className="font-medium px-5 py-3 text-[11px] uppercase tracking-[0.12em]">Analyst</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">House</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Tier</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Rating</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Stance</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Coverage</th>
-              <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Source</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((a, idx) => (
-              <tr key={a.id} className={cn("border-b last:border-b-0 border-card-border", idx % 2 === 1 && "bg-card/50")}>
-                <td className="px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <AnalystAvatar initials={a.initials} />
-                    <div>
-                      <div className="font-medium text-foreground">
-                        {a.name} {a.override && <span className="text-[10px] text-accent">· overridden</span>}
-                      </div>
-                      <div className="text-[11.5px] text-muted-foreground">{a.role}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-3 py-3 text-foreground/90 whitespace-nowrap">{a.house}</td>
-                <td className="px-3 py-3"><TierChip tier={a.houseTier} /></td>
-                <td className="px-3 py-3"><RatingPill rating={a.rating} confidence={a.confidence} /></td>
-                <td className="px-3 py-3"><StanceChip stance={a.stance} confidence={a.stanceConfidence} /></td>
-                <td className="px-3 py-3">
-                  <div className="flex flex-wrap gap-1">
-                    {a.coverage.map((c) => <Chip key={c} tone="muted">{c}</Chip>)}
-                  </div>
-                </td>
-                <td className="px-3 py-3 text-[11.5px] text-muted-foreground whitespace-nowrap">{a.source}</td>
-              </tr>
+      {isLoading && (
+        <Card>
+          <p className="text-[13px] text-muted-foreground">Loading…</p>
+        </Card>
+      )}
+
+      {!isLoading && !isError && (analysts ?? []).length === 0 && (
+        <Card>
+          <p className="text-[13px] text-muted-foreground">
+            No analysts on record yet.
+          </p>
+        </Card>
+      )}
+
+      {!isLoading && !isError && (analysts ?? []).length > 0 && (
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterChip active={filterTier === "all"} onClick={() => setFilterTier("all")}>All tiers</FilterChip>
+            {tiers.map((t) => (
+              <FilterChip key={t} active={filterTier === t} onClick={() => setFilterTier(t)}>{t}</FilterChip>
             ))}
-          </tbody>
-        </table>
-        </div>
-      </Card>
+            <div className="h-4 w-px bg-border mx-1" />
+            <FilterChip active={filterFirm === "all"} onClick={() => setFilterFirm("all")}>All firms</FilterChip>
+            {firms.map((f) => (
+              <FilterChip key={f} active={filterFirm === f} onClick={() => setFilterFirm(f)}>
+                {f}
+              </FilterChip>
+            ))}
+          </div>
+
+          <Card noPadding>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13px] min-w-[920px]">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b border-card-border">
+                    <th className="font-medium px-5 py-3 text-[11px] uppercase tracking-[0.12em]">Analyst</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Firm</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Tier</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Rating</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Stance</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Coverage</th>
+                    <th className="font-medium px-3 py-3 text-[11px] uppercase tracking-[0.12em]">Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((a, idx) => (
+                    <tr key={a.id} className={cn("border-b last:border-b-0 border-card-border", idx % 2 === 1 && "bg-card/50")}>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <AnalystAvatar initials={initialsOf(a.name)} />
+                          <div>
+                            <div className="font-medium text-foreground">
+                              {a.name}{" "}
+                              {a.rating_overridden && <span className="text-[10px] text-accent">· overridden</span>}
+                            </div>
+                            <div className="text-[11.5px] text-muted-foreground">{a.role ?? "—"}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-foreground/90 whitespace-nowrap">{a.firm}</td>
+                      <td className="px-3 py-3"><TierChip tier={a.firm_tier} /></td>
+                      <td className="px-3 py-3"><RatingPill rating={a.rating} confidence={a.confidence / 100} /></td>
+                      <td className="px-3 py-3">
+                        {a.current_stance ? (
+                          <StanceChip
+                            stance={asStance(a.current_stance.stance)}
+                            confidence={a.current_stance.confidence / 100}
+                          />
+                        ) : (
+                          <StanceChip stance="Unknown" />
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {a.coverage.length > 0 ? (
+                            a.coverage.map((c) => <Chip key={c} tone="muted">{c}</Chip>)
+                          ) : (
+                            <span className="text-[11.5px] text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-[11.5px] text-muted-foreground whitespace-nowrap">{a.source}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
