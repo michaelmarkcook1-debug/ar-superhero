@@ -169,7 +169,12 @@ export default function MissionControl() {
       ==================================================================== */}
       <section className="mb-14">
         <div className="mb-7 flex items-baseline justify-between">
-          <Eyebrow className="text-white/45">Choose your mode</Eyebrow>
+          <div className="flex items-center gap-2">
+            <Eyebrow className="text-white/45">Choose your mode</Eyebrow>
+            <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
+              demo data
+            </span>
+          </div>
           <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
             Three modes · One cockpit
           </div>
@@ -184,7 +189,14 @@ export default function MissionControl() {
       {/* ====================================================================
           Snapshots — three thin panes summarising each mode
       ==================================================================== */}
-      <section className="mb-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <section className="mb-14">
+        <div className="mb-5 flex items-center gap-2">
+          <Eyebrow className="text-white/45">Mode snapshots</Eyebrow>
+          <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
+            demo data
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         {/* Succeed snapshot */}
         <Pane glow="gold" className="p-6">
           <div className="mb-5 flex items-center justify-between">
@@ -324,6 +336,7 @@ export default function MissionControl() {
             <MiniStat value={String(presenceGapCount)} label="Presence gaps" />
           </div>
         </Pane>
+        </div>
       </section>
     </div>
   );

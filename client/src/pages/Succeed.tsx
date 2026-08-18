@@ -56,6 +56,7 @@ export default function Succeed() {
   const [showHfsDetail, setShowHfsDetail] = useState(false);
   const [extraUploads, setExtraUploads] = useState<SucceedUpload[]>([]);
   const [generatingDeckId, setGeneratingDeckId] = useState<string | null>(null);
+  const [deckError, setDeckError] = useState<string | null>(null);
   const [selectedVendorId, setSelectedVendorId] = useState<string>("capgemini");
   const selected = liveMoments.find((m) => m.id === selectedId) || liveMoments[0];
   const selectedVendor =
@@ -126,6 +127,7 @@ export default function Succeed() {
 
   async function handleGenerateBriefingDeck(moment: AnalystMoment) {
     setGeneratingDeckId(moment.id);
+    setDeckError(null);
     try {
       const response = await apiRequest("POST", "/api/briefing-decks/generate", {
         momentId: moment.id,
@@ -146,6 +148,8 @@ export default function Succeed() {
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
+    } catch (e) {
+      setDeckError(e instanceof Error ? e.message : "Deck generation failed");
     } finally {
       setGeneratingDeckId(null);
     }
@@ -309,6 +313,14 @@ export default function Succeed() {
                 );
               })}
             </ul>
+            {deckError && (
+              <div
+                className="mx-5 mb-4 rounded-lg border border-[#e89797]/40 bg-[#e89797]/[0.08] px-3.5 py-2.5 text-[12.5px] text-[#e89797]"
+                data-testid="deck-generation-error"
+              >
+                {deckError}
+              </div>
+            )}
           </Pane>
 
           {/* Detail */}
@@ -477,19 +489,6 @@ export default function Succeed() {
                 <p className="text-[13.5px] leading-relaxed text-[#f0dca8]">
                   {HFS_GUIDANCE.prompt}
                 </p>
-                <div className="mt-4 flex items-center gap-3">
-                  <button
-                    type="button"
-                    data-testid="button-open-session"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[#a88945] px-4 py-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#0c1a15] transition hover:bg-[#d5b46b]"
-                  >
-                    Open readiness session
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
-                    Co-author · 45 min
-                  </span>
-                </div>
               </div>
             )}
           </div>
