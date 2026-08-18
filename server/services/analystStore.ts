@@ -18,6 +18,16 @@ import type { Analyst, StanceRecord, Interaction, AnalystSignal, InsertAnalystSi
 export interface AnalystStore {
   readonly kind: "postgres" | "sqlite";
   listAnalysts(): Promise<Analyst[]>;
+  createAnalyst(input: {
+    name: string;
+    firm: string;
+    firm_tier: string;
+    role?: string | null;
+    rating?: string;
+    confidence?: number;
+    coverage?: string;
+    source?: string;
+  }): Promise<Analyst>;
   getAnalyst(id: string): Promise<Analyst | null>;
   updateAnalyst(id: string, patch: Partial<Analyst>): Promise<Analyst | null>;
   listStances(analystId?: string): Promise<StanceRecord[]>;
@@ -42,6 +52,9 @@ const sqliteStore: AnalystStore = {
   kind: "sqlite",
   async listAnalysts() {
     return storage.listAnalysts();
+  },
+  async createAnalyst(input) {
+    return storage.createAnalyst(input);
   },
   async getAnalyst(id) {
     return storage.getAnalyst(id) ?? null;
@@ -174,6 +187,30 @@ function makePgStore(sql: ReturnType<typeof postgres>): AnalystStore {
         rating_overridden: r.rating_overridden,
         last_interaction_at: r.last_interaction_at == null ? null : Number(r.last_interaction_at),
       })) as unknown as Analyst[];
+    },
+
+    async createAnalyst(input) {
+      await ensureTables();
+      const row = {
+        id: `an_${randomUUID()}`,
+        name: input.name,
+        firm: input.firm,
+        firm_tier: input.firm_tier,
+        role: input.role ?? null,
+        rating: input.rating ?? "B",
+        rating_overridden: false,
+        confidence: input.confidence ?? 50,
+        coverage: input.coverage ?? "[]",
+        source: input.source ?? "User added",
+        last_interaction_at: null as number | null,
+      };
+      await sql`
+        INSERT INTO ar_superhero_analysts
+          (id, name, firm, firm_tier, role, rating, rating_overridden, confidence, coverage, source, last_interaction_at)
+        VALUES (${row.id}, ${row.name}, ${row.firm}, ${row.firm_tier}, ${row.role}, ${row.rating},
+          ${row.rating_overridden}, ${row.confidence}, ${row.coverage}, ${row.source}, ${row.last_interaction_at})
+      `;
+      return row as Analyst;
     },
 
     async getAnalyst(id) {

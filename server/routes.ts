@@ -634,6 +634,32 @@ export async function registerRoutes(
     }
   });
 
+  const createAnalystSchema = z.object({
+    name: z.string().min(1).max(200),
+    firm: z.string().min(1).max(200),
+    firm_tier: z.string().min(1).max(40),
+    role: z.string().max(200).optional(),
+    rating: z.string().max(10).optional(),
+    confidence: z.number().int().min(0).max(100).optional(),
+    coverage: z.array(z.string().max(80)).max(20).optional(),
+    source: z.string().max(120).optional(),
+  });
+
+  app.post("/api/analysts", async (req, res) => {
+    const parse = createAnalystSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const { coverage, ...rest } = parse.data;
+      const created = await analystStore.createAnalyst({
+        ...rest,
+        coverage: coverage ? JSON.stringify(coverage) : undefined,
+      });
+      res.json(created);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
   app.patch("/api/analysts/:id", async (req, res) => {
     try {
       const patch = req.body;

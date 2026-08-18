@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, X, Loader2 } from "lucide-react";
 import {
   Card,
   Chip,
@@ -10,14 +11,33 @@ import {
   TierChip,
 } from "@/components/atoms";
 import { cn } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
 import { asStance, initialsOf, type AnalystRow } from "@/lib/analystApi";
 
 export default function Analysts() {
+  const queryClient = useQueryClient();
   const { data: analysts, isLoading, isError, error } = useQuery<AnalystRow[]>({
     queryKey: ["/api/analysts"],
   });
   const [filterTier, setFilterTier] = useState<string>("all");
   const [filterFirm, setFilterFirm] = useState<string>("all");
+  const [addOpen, setAddOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", firm: "", firm_tier: "Tier 2", role: "" });
+
+  const createAnalyst = useMutation({
+    mutationFn: () =>
+      apiRequest("POST", "/api/analysts", {
+        name: form.name.trim(),
+        firm: form.firm.trim(),
+        firm_tier: form.firm_tier.trim(),
+        role: form.role.trim() || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/analysts"] });
+      setForm({ name: "", firm: "", firm_tier: "Tier 2", role: "" });
+      setAddOpen(false);
+    },
+  });
 
   const tiers = useMemo(
     () => Array.from(new Set((analysts ?? []).map((a) => a.firm_tier))).sort(),
@@ -36,18 +56,80 @@ export default function Analysts() {
 
   return (
     <div className="px-5 lg:px-8 py-6 lg:py-8 max-w-[1280px] mx-auto space-y-6">
-      <div>
-        <Eyebrow>Analyst Landscape</Eyebrow>
-        <h1 className="mt-1.5 text-[26px] font-semibold tracking-tight">
-          {isLoading
-            ? "Loading analysts…"
-            : `${(analysts ?? []).length} tracked analysts · ${firms.length} firm${firms.length === 1 ? "" : "s"}`}
-        </h1>
-        <p className="mt-2 text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
-          Live from the AR relationship database. Stance shown is the latest confirmed record — upload
-          notes, write-ups, or interactions from Command Centre to feed the perception engine a fresh suggestion.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <Eyebrow>Analyst Landscape</Eyebrow>
+          <h1 className="mt-1.5 text-[26px] font-semibold tracking-tight">
+            {isLoading
+              ? "Loading analysts…"
+              : `${(analysts ?? []).length} tracked analysts · ${firms.length} firm${firms.length === 1 ? "" : "s"}`}
+          </h1>
+          <p className="mt-2 text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
+            Live from the AR relationship database. Stance shown is the latest confirmed record — upload
+            notes, write-ups, or interactions from Command Centre to feed the perception engine a fresh suggestion.
+          </p>
+        </div>
+        <button
+          onClick={() => setAddOpen((v) => !v)}
+          data-testid="button-toggle-add-analyst"
+          className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-3 h-9 text-[12.5px] font-medium text-primary hover-elevate shrink-0"
+        >
+          {addOpen ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+          {addOpen ? "Cancel" : "Add analyst"}
+        </button>
       </div>
+
+      {addOpen && (
+        <Card className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+            <input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              placeholder="Name"
+              data-testid="input-analyst-name"
+              className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px] placeholder:text-muted-foreground/70"
+            />
+            <input
+              value={form.firm}
+              onChange={(e) => setForm((f) => ({ ...f, firm: e.target.value }))}
+              placeholder="Firm — e.g. Gartner"
+              data-testid="input-analyst-firm"
+              className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px] placeholder:text-muted-foreground/70"
+            />
+            <select
+              value={form.firm_tier}
+              onChange={(e) => setForm((f) => ({ ...f, firm_tier: e.target.value }))}
+              data-testid="select-analyst-tier"
+              className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px]"
+            >
+              <option value="Tier 1">Tier 1</option>
+              <option value="Tier 2">Tier 2</option>
+              <option value="Tier 3">Tier 3</option>
+            </select>
+            <input
+              value={form.role}
+              onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+              placeholder="Role (optional)"
+              data-testid="input-analyst-role"
+              className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px] placeholder:text-muted-foreground/70"
+            />
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              onClick={() => createAnalyst.mutate()}
+              disabled={!form.name.trim() || !form.firm.trim() || createAnalyst.isPending}
+              data-testid="button-submit-analyst"
+              className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary text-primary-foreground px-3 h-8 text-[12.5px] font-semibold hover-elevate disabled:opacity-50"
+            >
+              {createAnalyst.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+              Add
+            </button>
+            {createAnalyst.isError && (
+              <span className="text-[12px] text-destructive">{(createAnalyst.error as Error).message}</span>
+            )}
+          </div>
+        </Card>
+      )}
 
       {isError && (
         <Card className="border-destructive/30 bg-destructive/5">

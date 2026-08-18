@@ -531,6 +531,16 @@ export interface IStorage {
   listWorkstreams(): Workstream[];
   // Analysts
   listAnalysts(): Analyst[];
+  createAnalyst(input: {
+    name: string;
+    firm: string;
+    firm_tier: string;
+    role?: string | null;
+    rating?: string;
+    confidence?: number;
+    coverage?: string;
+    source?: string;
+  }): Analyst;
   getAnalyst(id: string): Analyst | undefined;
   updateAnalyst(id: string, patch: Partial<Analyst>): Analyst | undefined;
   // Stances
@@ -688,6 +698,33 @@ export class DatabaseStorage implements IStorage {
 
   listAnalysts() {
     return db.select().from(analysts).all();
+  }
+
+  createAnalyst(input: {
+    name: string;
+    firm: string;
+    firm_tier: string;
+    role?: string | null;
+    rating?: string;
+    confidence?: number;
+    coverage?: string;
+    source?: string;
+  }) {
+    const row: Analyst = {
+      id: `an_${randomUUID()}`,
+      name: input.name,
+      firm: input.firm,
+      firm_tier: input.firm_tier,
+      role: input.role ?? null,
+      rating: input.rating ?? "B",
+      rating_overridden: false,
+      confidence: input.confidence ?? 50,
+      coverage: input.coverage ?? "[]",
+      source: input.source ?? "User added",
+      last_interaction_at: null,
+    };
+    db.insert(analysts).values(row).run();
+    return row;
   }
 
   getAnalyst(id: string) {
