@@ -848,7 +848,9 @@ export async function registerRoutes(
     vendor_id: z.string().min(1).max(40),
     analyst_firm: z.string().min(1).max(120),
     report_name: z.string().min(1).max(300),
-    category: z.string().max(160).optional(),
+    // Nullable, not just optional: some real reports state no category, and
+    // the loader sends an explicit null for those rather than omitting it.
+    category: z.string().max(160).nullable().optional(),
     placement: z.string().min(1).max(120),
     published_date: z.string().min(4).max(10),
     date_precision: z.enum(["day", "month", "year"]).optional(),
