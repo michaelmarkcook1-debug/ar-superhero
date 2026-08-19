@@ -794,19 +794,20 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Upload the document as the raw request body." });
       }
       if (!title) return res.status(400).json({ error: "title is required." });
+      const analystId = String(req.params.id);
       try {
-        const analyst = await analystStore.getAnalyst(req.params.id);
+        const analyst = await analystStore.getAnalyst(analystId);
         if (!analyst) return res.status(404).json({ error: "Analyst not found." });
         const doc = ingestDocument(body, filename);
         const signal = await analystStore.insertSignal({
-          analyst_id: req.params.id,
+          analyst_id: analystId,
           kind,
           title,
           content_text: doc.text,
           filename,
           uploaded_by: uploadedBy,
         });
-        const perception = await suggestStanceFromSignals(req.params.id);
+        const perception = await suggestStanceFromSignals(analystId);
         res.json({ signal, perception, truncated: doc.truncated });
       } catch (err) {
         res.status(422).json({ error: (err as Error).message });

@@ -2,7 +2,7 @@ import postgres from "postgres";
 import { randomUUID } from "node:crypto";
 import { getPgSql } from "./deckStore";
 import { storage } from "../storage";
-import type { PublicAnalystRanking, InsertPublicAnalystRanking } from "../storage";
+import type { PublicAnalystRanking, InsertPublicAnalystRanking } from "@shared/schema";
 
 // ============================================================================
 // Public analyst rankings store — durable when DECK_DB_URL is set, local

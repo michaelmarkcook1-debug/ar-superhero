@@ -2,7 +2,7 @@ import postgres from "postgres";
 import { randomUUID } from "node:crypto";
 import { getPgSql } from "./deckStore";
 import { storage } from "../storage";
-import type { Analyst, StanceRecord, Interaction, AnalystSignal, InsertAnalystSignal } from "../storage";
+import type { Analyst, StanceRecord, Interaction, AnalystSignal, InsertAnalystSignal } from "@shared/schema";
 
 // ============================================================================
 // Analyst store — durable when DECK_DB_URL is set, local otherwise.

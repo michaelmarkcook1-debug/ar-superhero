@@ -2,7 +2,7 @@ import { generateText, Output } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { analystStore } from "./analystStore";
-import type { StanceRecord } from "../storage";
+import type { StanceRecord } from "@shared/schema";
 
 // ============================================================================
 // Perception engine — Direct tab (analyst ranking/perception).
