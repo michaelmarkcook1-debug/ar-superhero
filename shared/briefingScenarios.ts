@@ -13,6 +13,7 @@
 export type PersonaScenarioId =
   | "quarterly-update"
   | "pre-briefing-prep"
+  | "assessment-kickoff"
   | "competitive-shift"
   | "reputation-pulse"
   | "narrative-campaign"
@@ -40,6 +41,12 @@ export interface BriefingScenario {
   intel: string[];
   /** True when the deck also needs an analyst-house context (playbook tie-in). */
   houseScoped: boolean;
+  /**
+   * False hides the scenario from the Direct stakeholder deck-creation menu
+   * while leaving the deck itself fully generatable (scenarioById still
+   * resolves it, the API still builds it). Defaults to visible when omitted.
+   */
+  showInDirectMenu?: boolean;
 }
 
 export const BRIEFING_SCENARIOS: BriefingScenario[] = [
@@ -73,6 +80,30 @@ export const BRIEFING_SCENARIOS: BriefingScenario[] = [
       "This house's published placements for you and your peers",
     ],
     houseScoped: true,
+  },
+  {
+    id: "assessment-kickoff",
+    label: "Assessment cycle kick-off",
+    when: "An evaluation window is opening — align the team on what moves the ranking.",
+    // Commercial and marketing added: commercial supplies the client references
+    // that decide most assessments, and marketing owns the narrative that gets
+    // submitted. Excluding them from the kick-off is how submissions stall.
+    // Regional included: several houses run country-scoped studies (ISG
+    // Provider Lens has Australia / Brazil / UK editions), so a geography lead
+    // owns their own assessment cycle.
+    personas: ["executive", "strategy", "product", "delivery", "commercial", "marketing", "regional"],
+    intel: [
+      "What moves rankings at this house (playbook)",
+      "Your published placement history with this house (2 years)",
+      "Peer placements with this house entering the cycle",
+      "Learned-from-results observations (your cycles)",
+      "Competitive positions entering the cycle",
+      "RFI-stage do's (playbook)",
+    ],
+    houseScoped: true,
+    // Withdrawn from the Direct stakeholder menu (owner request). The deck and
+    // its house-scoped placement record remain available via the API.
+    showInDirectMenu: false,
   },
   {
     id: "competitive-shift",
@@ -154,8 +185,15 @@ export const BRIEFING_SCENARIOS: BriefingScenario[] = [
   },
 ];
 
+/**
+ * Scenarios offered in the Direct stakeholder deck-creation menu for a persona.
+ * Excludes any scenario flagged showInDirectMenu: false — those decks still
+ * exist and still generate, they are just not offered here.
+ */
 export function scenariosForPersona(personaId: ScenarioPersonaId): BriefingScenario[] {
-  return BRIEFING_SCENARIOS.filter((s) => s.personas.includes(personaId));
+  return BRIEFING_SCENARIOS.filter(
+    (s) => s.showInDirectMenu !== false && s.personas.includes(personaId)
+  );
 }
 
 export function scenarioById(id: string): BriefingScenario | undefined {
