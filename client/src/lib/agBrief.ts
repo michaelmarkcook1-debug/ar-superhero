@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 // ============================================================================
 
 const STORAGE_KEY = "ag-competitor-tickers";
+const FOCAL_STORAGE_KEY = "ag-focal-vendor-id";
 export const MAX_COMPETITORS = 5;
 
 export type ArBriefItem = {
@@ -125,10 +126,44 @@ export function useCompetitorSelection() {
   return { competitors, setCompetitors };
 }
 
-/** The live AR brief for the given competitor set (empty = server default). */
-export function useArBrief(competitors: string[]) {
-  const qs = competitors.length ? `?competitors=${encodeURIComponent(competitors.join(","))}` : "";
+/**
+ * The live AR brief for the given competitor set (empty = server default).
+ * `focalTicker` selects which company the brief is *about*; omitted = the
+ * server's default focal firm.
+ */
+export function useArBrief(competitors: string[], focalTicker?: string) {
+  const params = new URLSearchParams();
+  if (competitors.length) params.set("competitors", competitors.join(","));
+  if (focalTicker) params.set("focalTicker", focalTicker);
+  const qs = params.toString() ? `?${params}` : "";
   return useQuery<ArBrief>({ queryKey: [`/api/ag/ar-brief${qs}`] });
+}
+
+/**
+ * localStorage-persisted focal vendor — which company the cockpit is about.
+ * Stores the vendor id (e.g. "virtusa"); callers map it to an AG ticker.
+ * Empty string = use the server's default focal firm.
+ */
+export function useFocalVendor() {
+  const [focalVendorId, setFocalVendorIdState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(FOCAL_STORAGE_KEY) ?? "";
+    } catch {
+      return "";
+    }
+  });
+
+  const setFocalVendorId = useCallback((next: string) => {
+    setFocalVendorIdState(next);
+    try {
+      if (next) localStorage.setItem(FOCAL_STORAGE_KEY, next);
+      else localStorage.removeItem(FOCAL_STORAGE_KEY);
+    } catch {
+      // Storage unavailable (private mode) — selection still works for the session.
+    }
+  }, []);
+
+  return { focalVendorId, setFocalVendorId };
 }
 
 /** Full provider catalog for the competitor picker. */

@@ -15,13 +15,19 @@ import type { ReadinessBand } from "./seed";
 // vendor -> AnalystGenius-ticker registry (server/services/vendors.ts).
 // ---------------------------------------------------------------------------
 
+// `agTicker` mirrors server/services/vendors.ts — kept in sync by hand so the
+// cockpit can request a focal AR brief for the selected vendor.
 export const VENDOR_OPTIONS = [
-  { id: "capgemini", label: "Capgemini" },
-  { id: "cognizant", label: "Cognizant" },
-  { id: "accenture", label: "Accenture" },
-  { id: "ibm", label: "IBM" },
-  { id: "virtusa", label: "Virtusa" },
+  { id: "capgemini", label: "Capgemini", agTicker: "CGEMY" },
+  { id: "cognizant", label: "Cognizant", agTicker: "CTSH" },
+  { id: "accenture", label: "Accenture", agTicker: "ACN" },
+  { id: "ibm", label: "IBM", agTicker: "IBM" },
+  { id: "virtusa", label: "Virtusa", agTicker: "VRTU" },
 ];
+
+export function vendorTicker(vendorId: string): string | undefined {
+  return VENDOR_OPTIONS.find((v) => v.id === vendorId)?.agTicker;
+}
 
 // ---------------------------------------------------------------------------
 // Mode definitions

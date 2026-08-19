@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowUpRight, Activity, AlertTriangle, Sparkles } from "lucide-react";
-import { useArBrief, useCompetitorSelection } from "@/lib/agBrief";
+import { useArBrief, useCompetitorSelection, useFocalVendor } from "@/lib/agBrief";
 import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
 import {
   MODES,
@@ -11,6 +11,8 @@ import {
   SELL_PROOF,
   CLAIMS_TO_AVOID,
   PRESENCE_GAPS,
+  VENDOR_OPTIONS,
+  vendorTicker,
 } from "@/lib/cockpit";
 import {
   Pane,
@@ -26,7 +28,8 @@ import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 
 export default function MissionControl() {
   const { competitors, setCompetitors } = useCompetitorSelection();
-  const { data: arBrief } = useArBrief(competitors);
+  const { focalVendorId, setFocalVendorId } = useFocalVendor();
+  const { data: arBrief } = useArBrief(competitors, vendorTicker(focalVendorId));
   // A degraded brief (focal snapshot failed → blank scores) is treated as
   // not-fully-live so the cockpit shows complete labelled demo content rather
   // than half-empty live panels.
@@ -78,6 +81,35 @@ export default function MissionControl() {
       {/* ====================================================================
           HERO — Narrative vs reality gap (the headline function)
       ==================================================================== */}
+      {/* Focal vendor — which company the whole cockpit brief is about. */}
+      <section className="mb-6 flex flex-wrap items-center gap-2" data-testid="focal-vendor-picker">
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/35">
+          Briefing on
+        </span>
+        {VENDOR_OPTIONS.map((v) => {
+          const on = v.id === focalVendorId;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setFocalVendorId(on ? "" : v.id)}
+              data-testid={`focal-vendor-${v.id}`}
+              className={cn(
+                "rounded-full border px-3 py-1 text-[12px] font-medium transition",
+                on
+                  ? "border-[#a88945]/45 bg-[#a88945]/[0.12] text-[#f0dca8]"
+                  : "border-[#3d8f6d]/24 bg-[#1a5540]/[0.18] text-white/55 hover:border-[#3d8f6d]/36 hover:text-white/90"
+              )}
+            >
+              {v.label}
+            </button>
+          );
+        })}
+        {!focalVendorId && (
+          <span className="text-[11px] text-white/30">· default focal firm</span>
+        )}
+      </section>
+
       {live && arBrief ? (
         <section className="mb-12">
           <NarrativeGapHero brief={arBrief} />

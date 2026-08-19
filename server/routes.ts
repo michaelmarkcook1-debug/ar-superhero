@@ -70,7 +70,14 @@ export async function registerRoutes(
   // Registered before the generic :key proxy so "ar-brief" is not shadowed.
   app.get("/api/ag/ar-brief", async (req, res) => {
     const raw = typeof req.query.competitors === "string" ? req.query.competitors.split(",") : undefined;
-    const brief = await getArBrief({ competitors: raw });
+    // focalTicker makes the cockpit brief multi-company, matching the deck
+    // generators. Without it the brief silently stayed on the default focal
+    // firm no matter which vendor the user had selected.
+    const focalTicker =
+      typeof req.query.focalTicker === "string" && req.query.focalTicker.trim()
+        ? req.query.focalTicker.trim().toUpperCase()
+        : undefined;
+    const brief = await getArBrief({ competitors: raw, focalTicker });
     res.json(brief);
   });
 
