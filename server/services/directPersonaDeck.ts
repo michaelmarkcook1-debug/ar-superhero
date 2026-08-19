@@ -609,7 +609,76 @@ function addPersonaBriefingSlides(
     }
   }
 
-  // Slide C — financial trajectory, only when AG actually carries the series.
+  // Slide C — emerging threats and opportunities from the AG pulse.
+  if (b.threats.length || b.opportunities.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      title: `${p.label} — emerging threats and opportunities`,
+      note: "From the live AG pulse. Each line names the AG signal it derives from.",
+    });
+
+    if (b.threats.length) {
+      addSectionLabel(slide, "Emerging threats", { x: 0.6, y: contentTop, w: 5.9 });
+      addTable(slide, {
+        x: 0.6,
+        y: contentTop + 0.32,
+        w: 5.9,
+        colW: [2.2, 3.7],
+        headers: ["SIGNAL", "WHAT IT MEANS"],
+        rows: b.threats.slice(0, 5).map((t) => ({ cells: [t.title, t.detail], tone: "warn" as const })),
+        fontSize: 9,
+      });
+    }
+
+    if (b.opportunities.length) {
+      addSectionLabel(slide, "Emerging opportunities", { x: 6.75, y: contentTop, w: 5.98 });
+      addTable(slide, {
+        x: 6.75,
+        y: contentTop + 0.32,
+        w: 5.98,
+        colW: [2.24, 3.74],
+        headers: ["SIGNAL", "WHAT IT MEANS"],
+        rows: b.opportunities.slice(0, 5).map((o) => ({ cells: [o.title, o.detail], tone: "good" as const })),
+        fontSize: 9,
+      });
+    }
+  }
+
+  // Slide D — talent competitiveness across the peer set.
+  if (b.talent.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      title: `${p.label} — talent competitiveness across your peer set`,
+      note: "Where talent is moving across the named set. Attrition windows differ per firm and are shown.",
+    });
+
+    addTable(slide, {
+      x: 0.6,
+      y: contentTop,
+      w: 12.13,
+      colW: [2.9, 1.6, 1.5, 1.3, 3.13, 1.7],
+      headers: ["FIRM", "HEADCOUNT", "YOY", "ATTRITION", "ATTRITION WINDOW", "NET FLOW"],
+      rows: b.talent.map((t) => ({
+        cells: [t.name, t.headcount, t.headcountYoY, t.attrition, t.attritionWindow, t.netFlow],
+        tone: t.isFocal ? ("good" as const) : ("default" as const),
+      })),
+      fontSize: 9.5,
+    });
+
+    const anaTop = contentTop + 0.42 + b.talent.length * 0.32 + 0.3;
+    if (b.talentAnalysis.length && anaTop < 6.3) {
+      addSectionLabel(slide, "What this means", { x: 0.6, y: anaTop, w: 12.13 });
+      addBulletList(slide, b.talentAnalysis, {
+        x: 0.6,
+        y: anaTop + 0.3,
+        w: 12.13,
+        h: 1.6,
+        fontSize: 10,
+      });
+    }
+  }
+
+  // Slide E — financial trajectory, only when AG actually carries the series.
   if (b.quarterlyRevenue.length >= 2) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),

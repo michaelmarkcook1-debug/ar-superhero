@@ -49,6 +49,25 @@ export interface QuarterPoint {
   revenueUsdM: number;
 }
 
+export interface TalentRow {
+  name: string;
+  isFocal: boolean;
+  headcount: string;
+  headcountYoY: string;
+  attrition: string;
+  /** AG reports attrition over DIFFERENT windows per firm — shown so the
+   *  reader can see the comparison is not strictly like-for-like. */
+  attritionWindow: string;
+  netFlow: string;
+  aiSkillDensity: string;
+}
+
+export interface PulseItem {
+  title: string;
+  detail: string;
+  source: string;
+}
+
 export interface PersonaBriefing {
   personaId: PersonaId;
   /** Headline stating this persona's position — derived, never predictive. */
@@ -62,6 +81,14 @@ export interface PersonaBriefing {
   competitorIntel: CompetitorIntelRow[];
   marketMovements: { title: string; detail: string; source: string }[];
   quarterlyRevenue: QuarterPoint[];
+  /** Emerging threats from the AG pulse. */
+  threats: PulseItem[];
+  /** Emerging opportunities from the AG pulse. */
+  opportunities: PulseItem[];
+  /** Peer talent competitiveness. */
+  talent: TalentRow[];
+  /** Derived reading of the talent table — direction only, never named flows. */
+  talentAnalysis: string[];
   /** Honest statement of metrics that are unavailable, and why. */
   dataGaps: string[];
 }
@@ -141,6 +168,52 @@ async function focalQuarterlyRevenue(ticker: string): Promise<QuarterPoint[]> {
       .sort((a, b) => a.quarter.localeCompare(b.quarter));
   } catch {
     return [];
+  }
+}
+
+interface TalentRead {
+  ticker: string;
+  headcount: number | null;
+  headcountYoY: number | null;
+  attritionPct: number | null;
+  attritionWindow: string | null;
+  netFlow: number | null;
+  aiSkillDensityPct: number | null;
+}
+
+/**
+ * Talent KPIs per firm.
+ *
+ * NOTE ON THE SOURCE: agApi's allow-list comment excludes talent/intelligence
+ * because an older payload carried synthesized `hiringTrend`/`layoffSignal`/
+ * `evidence` fields. Those fields are no longer in the response. What it now
+ * returns — headcount, headcount YoY, attrition with a NAMED window per firm,
+ * a net-flow signal and AI skill density — is real reported data, and the
+ * payload self-labels its estimated fields with a `provenance` block. Only the
+ * fields listed above are read here; the self-labelled estimates (average
+ * tenure "AI estimate", "~N AI specialists") are deliberately NOT surfaced.
+ */
+async function talentRead(ticker: string): Promise<TalentRead | null> {
+  try {
+    const res = await agFetch("talent/intelligence", { ticker });
+    const b = res.body as
+      | { kpis?: Record<string, unknown>; flowSignals?: Record<string, unknown> }
+      | undefined;
+    if (!b?.kpis) return null;
+    const k = b.kpis;
+    const f = b.flowSignals ?? {};
+    const n = (v: unknown): number | null => (typeof v === "number" ? v : null);
+    return {
+      ticker,
+      headcount: n(k.headcount),
+      headcountYoY: n(k.headcountYoY),
+      attritionPct: n(k.attritionPct),
+      attritionWindow: typeof k.attritionWindow === "string" ? k.attritionWindow : null,
+      netFlow: n(f.netFlow),
+      aiSkillDensityPct: n(f.aiSkillDensityPct),
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -250,11 +323,90 @@ export async function buildPersonaBriefing(
   // --- Quarterly revenue series (focal). ----------------------------------
   const quarterlyRevenue = await focalQuarterlyRevenue(focal.ticker);
 
+  // --- Emerging threats / opportunities from the pulse. --------------------
+  const threats: PulseItem[] = (brief.emergencies ?? [])
+    .slice(0, 6)
+    .map((e) => ({ title: e.title, detail: e.detail, source: e.source }));
+  const opportunities: PulseItem[] = (brief.highlights ?? [])
+    .slice(0, 6)
+    .map((h) => ({ title: h.title, detail: h.detail, source: h.source }));
+
+  // --- Talent competitiveness across the peer set. ------------------------
+  const talentTickers = [focal.ticker, ...competitors.map((c) => c.ticker)];
+  const talentReads = await Promise.all(talentTickers.map(talentRead));
+  const nameFor = (t: string) =>
+    t === focal.ticker ? `${focal.name} (you)` : (competitors.find((c) => c.ticker === t)?.name ?? t);
+
+  const talent: TalentRow[] = talentReads
+    .map((r, i) => {
+      if (!r) return null;
+      const t = talentTickers[i];
+      return {
+        name: nameFor(t),
+        isFocal: t === focal.ticker,
+        headcount: r.headcount === null ? "—" : r.headcount.toLocaleString(),
+        headcountYoY:
+          r.headcountYoY === null ? "—" : `${r.headcountYoY > 0 ? "+" : ""}${r.headcountYoY.toLocaleString()}`,
+        attrition: r.attritionPct === null ? "—" : `${r.attritionPct}%`,
+        attritionWindow: r.attritionWindow ?? "—",
+        netFlow: r.netFlow === null ? "—" : `${r.netFlow > 0 ? "+" : ""}${r.netFlow.toLocaleString()}`,
+        aiSkillDensity: r.aiSkillDensityPct === null ? "—" : `${r.aiSkillDensityPct}%`,
+      };
+    })
+    .filter((r): r is TalentRow => r !== null);
+
+  // Derived talent reading. AG carries NO company-to-company destination data,
+  // so this states DIRECTION across the named set (who is absorbing headcount
+  // while you shed it) and never asserts that a named peer hired your leavers.
+  const talentAnalysis: string[] = [];
+  const focalT = talentReads[0];
+  if (focalT) {
+    const absorbing = talentReads
+      .map((r, i) => ({ r, t: talentTickers[i] }))
+      .filter((x) => x.r && x.t !== focal.ticker && (x.r.netFlow ?? 0) > 0)
+      .sort((a, b) => (b.r!.netFlow ?? 0) - (a.r!.netFlow ?? 0));
+    if ((focalT.netFlow ?? 0) < 0 && absorbing.length) {
+      talentAnalysis.push(
+        `Net flow is negative for ${focal.name} (${focalT.netFlow}), while ${absorbing
+          .map((x) => `${nameFor(x.t)} (${x.r!.netFlow! > 0 ? "+" : ""}${x.r!.netFlow})`)
+          .join(", ")} are net absorbers in this set — talent is moving toward them at the peer-group level.`
+      );
+    } else if ((focalT.netFlow ?? 0) > 0) {
+      talentAnalysis.push(
+        `${focal.name} is a net absorber of talent in this peer set (${focalT.netFlow! > 0 ? "+" : ""}${focalT.netFlow}).`
+      );
+    }
+    const withAttr = talentReads
+      .map((r, i) => ({ r, t: talentTickers[i] }))
+      .filter((x) => x.r?.attritionPct != null);
+    if (focalT.attritionPct != null && withAttr.length > 1) {
+      const sorted = [...withAttr].sort((a, b) => (b.r!.attritionPct ?? 0) - (a.r!.attritionPct ?? 0));
+      const rankA = sorted.findIndex((x) => x.t === focal.ticker) + 1;
+      talentAnalysis.push(
+        `Attrition ${focalT.attritionPct}% ranks ${rankA} highest of ${sorted.length} firms reporting it here (${sorted
+          .map((x) => `${nameFor(x.t).replace(" (you)", "")} ${x.r!.attritionPct}%`)
+          .join(", ")}). Windows differ per firm — see the column.`
+      );
+    }
+    if (focalT.aiSkillDensityPct != null) {
+      const denser = talentReads.filter((r) => r && (r.aiSkillDensityPct ?? 0) > (focalT.aiSkillDensityPct ?? 0));
+      talentAnalysis.push(
+        denser.length === 0
+          ? `AI skill density ${focalT.aiSkillDensityPct}% is the highest in this peer set — a defensible engineering-depth claim.`
+          : `AI skill density ${focalT.aiSkillDensityPct}%; ${denser.length} peer(s) in this set report higher.`
+      );
+    }
+    if (focalT.headcountYoY != null && focalT.headcountYoY < 0) {
+      talentAnalysis.push(
+        `Headcount is down ${Math.abs(focalT.headcountYoY).toLocaleString()} year on year, so retention pressure compounds any recognition gap.`
+      );
+    }
+  }
+
   // --- Honest data gaps. ---------------------------------------------------
+  // Share price is intentionally out of scope for this deck and is not
+  // mentioned; only genuine ambiguities in what IS shown are listed here.
   const dataGaps: string[] = [];
-  dataGaps.push(
-    "Share-price performance is not shown: AnalystGenius carries no market-price series for any firm, and its /financial endpoint is excluded from this product because its values are not real. Add a market-data source to include it."
-  );
   if (focal.revenueUsd === null && focal.revenueGrowthYoy === null) {
     dataGaps.push(
       `${focal.name} is privately held, so AG carries no revenue or market series for it. Financial comparison below is therefore peer-side only.`
@@ -280,6 +432,11 @@ export async function buildPersonaBriefing(
       "Assessment and AI-readiness show the same value for every firm here: AG's snapshot endpoint returns one figure for both fields (its provider catalogue reports them separately). Read them as a single score, not as two measures agreeing."
     );
   }
+  if (talent.length) {
+    dataGaps.push(
+      "Talent: AG reports no company-to-company movement, so this shows net flow and attrition per firm — the direction talent is moving across the set — not named destinations for your leavers."
+    );
+  }
 
   return {
     personaId,
@@ -292,6 +449,10 @@ export async function buildPersonaBriefing(
     competitorIntel,
     marketMovements,
     quarterlyRevenue,
+    threats,
+    opportunities,
+    talent,
+    talentAnalysis,
     dataGaps,
   };
 }
