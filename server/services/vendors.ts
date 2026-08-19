@@ -77,6 +77,13 @@ export function vendorById(vendorId: string | undefined | null): VendorContext {
   return VENDORS.find((v) => v.id === vendorId.toLowerCase()) ?? DEFAULT_VENDOR;
 }
 
+/** Resolve a vendor from its AnalystGenius ticker (e.g. "ACN" → Accenture). */
+export function vendorByTicker(ticker: string | undefined | null): VendorContext | undefined {
+  if (!ticker) return undefined;
+  const t = ticker.trim().toUpperCase();
+  return VENDORS.find((v) => v.agTicker.toUpperCase() === t);
+}
+
 /** Case-insensitive match on display name, for callers that only have free-text (e.g. a typed vendor name). */
 export function vendorByName(name: string | undefined | null): VendorContext {
   if (!name) return DEFAULT_VENDOR;

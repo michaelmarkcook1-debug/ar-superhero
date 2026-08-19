@@ -18,7 +18,9 @@ import {
 import { agFetch } from "./agApi";
 import { getArBrief, type ArBrief } from "./agIntelligence";
 import { derivePersonaView, type PersonaView } from "./personaLens";
-import { vendorById } from "./vendors";
+import { vendorById, vendorByTicker } from "./vendors";
+import { publicRankingsStore } from "./publicRankingsStore";
+import type { PublicAnalystRanking } from "@shared/schema";
 import type { PersonaId } from "./directPersonaDeck";
 import { houseLearnings } from "./resultsLearning";
 import { playbookById, type AnalystHouseId } from "@shared/assessmentPlaybooks";
@@ -195,6 +197,123 @@ function addNarrativeVolumeChart(pptx: pptxgen, slide: pptxgen.Slide, brief: ArB
 // ---------------------------------------------------------------------------
 // Shared slide blocks
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Published analyst placements — the third-party record.
+//
+// Distinct from every AG signal in these decks: these are real, cited
+// placements (Magic Quadrant / Wave / PEAK Matrix / Horizons / NEAT / Provider
+// Lens) with a source URL per row. Rendered verbatim; when no placement is on
+// record the slide says so rather than implying an empty field means "none
+// exist" — it means none has been logged.
+// ---------------------------------------------------------------------------
+
+function formatPlacementDate(published: string, precision: string): string {
+  if (precision === "year") return published;
+  if (precision === "month") {
+    const [y, m] = published.split("-").map(Number);
+    if (!y || !m) return published;
+    return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  }
+  const d = new Date(published);
+  return Number.isNaN(d.getTime())
+    ? published
+    : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+interface PlacementSet {
+  focal: PublicAnalystRanking[];
+  peers: PublicAnalystRanking[];
+}
+
+async function loadPlacements(
+  vendorId: string,
+  competitorTickers: string[] | undefined,
+  houseName?: string
+): Promise<PlacementSet> {
+  try {
+    const all = await publicRankingsStore.listRankings();
+    const inHouse = houseName ? all.filter((r) => r.analyst_firm === houseName) : all;
+    const peerIds = new Set(
+      (competitorTickers ?? [])
+        .map((t) => vendorByTicker(t)?.id)
+        .filter((v): v is string => Boolean(v) && v !== vendorId)
+    );
+    return {
+      focal: inHouse.filter((r) => r.vendor_id === vendorId),
+      peers: inHouse.filter((r) => peerIds.has(r.vendor_id)),
+    };
+  } catch {
+    return { focal: [], peers: [] };
+  }
+}
+
+function addPlacementSlide(
+  pptx: pptxgen,
+  brand: Brand,
+  idx: () => string,
+  vendorName: string,
+  placements: PlacementSet,
+  opts: { title: string; note: string; focusPeers?: boolean }
+) {
+  if (!placements.focal.length && !placements.peers.length) return;
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    title: opts.title,
+    note: opts.note,
+  });
+
+  const rowsFor = (rs: PublicAnalystRanking[], withVendor: boolean) =>
+    rs
+      .slice(0, 8)
+      .map((r) => ({
+        cells: withVendor
+          ? [
+              vendorById(r.vendor_id).name,
+              r.analyst_firm,
+              r.report_name,
+              r.placement,
+              formatPlacementDate(r.published_date, r.date_precision),
+            ]
+          : [
+              r.analyst_firm,
+              r.report_name,
+              r.placement,
+              formatPlacementDate(r.published_date, r.date_precision),
+            ],
+      }));
+
+  let y = contentTop;
+  if (placements.focal.length) {
+    addSectionLabel(slide, `${vendorName} — published placements`, { x: 0.6, y, w: 12.13 });
+    addTable(slide, {
+      x: 0.6,
+      y: y + 0.32,
+      w: 12.13,
+      colW: [2.1, 5.4, 2.53, 2.1],
+      headers: ["ANALYST FIRM", "REPORT", "PLACEMENT", "PUBLISHED"],
+      rows: rowsFor(placements.focal, false),
+      fontSize: 9,
+    });
+    y += 0.42 + Math.min(placements.focal.length, 8) * 0.3 + 0.35;
+  } else {
+    addSectionLabel(slide, `${vendorName} — no placement logged for this scope`, { x: 0.6, y, w: 12.13 });
+    y += 0.45;
+  }
+
+  if (placements.peers.length && y < 5.6) {
+    addSectionLabel(slide, "Peer placements — same scope", { x: 0.6, y, w: 12.13 });
+    addTable(slide, {
+      x: 0.6,
+      y: y + 0.32,
+      w: 12.13,
+      colW: [1.7, 1.8, 4.2, 2.33, 2.1],
+      headers: ["FIRM", "ANALYST FIRM", "REPORT", "PLACEMENT", "PUBLISHED"],
+      rows: rowsFor(placements.peers, true),
+      fontSize: 8.5,
+    });
+  }
+}
 
 function addPersonaReadSlide(pptx: pptxgen, brand: Brand, view: PersonaView, idx: () => string) {
   const { slide, contentTop } = addBodySlide(pptx, brand, {
@@ -443,6 +562,19 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         }
         const s2 = addBodySlide(pptx, brand, { index: idx(), title: "Competitive positions entering the cycle" });
         addCompetitorBarChart(pptx, s2.slide, brief, { x: 0.6, y: s2.contentTop + 0.2, w: 12.1, h: 4.4 });
+        // The third-party record with THIS house — what they have actually
+        // published about you and your peers going into the cycle.
+        addPlacementSlide(
+          pptx,
+          brand,
+          idx,
+          vendorName,
+          await loadPlacements(vendor.id, req.competitorTickers, playbook.house),
+          {
+            title: `${playbook.house} — your published placement record`,
+            note: `Real, cited ${playbook.house} placements for you and your peer set. This is what the house has already said in public.`,
+          }
+        );
         break;
       }
 
@@ -471,6 +603,19 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           ],
           fontSize: 10,
         });
+        // What the analyst houses have actually published about the field —
+        // the third-party record behind the score movement.
+        addPlacementSlide(
+          pptx,
+          brand,
+          idx,
+          vendorName,
+          await loadPlacements(vendor.id, req.competitorTickers),
+          {
+            title: "Published placements across the field",
+            note: "Real, cited analyst placements for you and the named competitors over the last two years.",
+          }
+        );
         break;
       }
 
@@ -566,6 +711,18 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
             { x: 6.9, y: contentTop + 3.07, w: 5.8, h: 0.9, fontSize: 9.5 }
           );
         }
+        // Third-party proof a seller can actually cite in a pursuit.
+        addPlacementSlide(
+          pptx,
+          brand,
+          idx,
+          vendorName,
+          await loadPlacements(vendor.id, req.competitorTickers),
+          {
+            title: "Analyst placements you can cite in this pursuit",
+            note: "Published, source-linked placements — usable as third-party proof, and what the competitor can cite back.",
+          }
+        );
         break;
       }
 
@@ -613,6 +770,19 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         });
         const s2 = addBodySlide(pptx, brand, { index: idx(), title: "The competitive field" });
         addCompetitorBarChart(pptx, s2.slide, brief, { x: 0.6, y: s2.contentTop + 0.2, w: 12.1, h: 4.4 });
+        // A new leader's fastest read of standing: what the houses have
+        // actually published about the firm and its peers.
+        addPlacementSlide(
+          pptx,
+          brand,
+          idx,
+          vendorName,
+          await loadPlacements(vendor.id, req.competitorTickers),
+          {
+            title: "The published analyst record — last two years",
+            note: "Real, cited placements across the analyst firms covering this market.",
+          }
+        );
         break;
       }
     }
