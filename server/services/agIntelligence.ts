@@ -229,6 +229,47 @@ export function verifiedGapHeadline(
   return headline;
 }
 
+/**
+ * The same verification for AG's `agInsight` narrative, which carries the same
+ * class of claim in prose (observed: "one of the most under-recognized
+ * providers in our tracking set" on a firm measured aligned at the lowest gap
+ * in the set). Only the offending SENTENCE is dropped — the rest of the
+ * insight is usually sound and worth keeping. If nothing survives, the caller
+ * gets null and the section is simply shorter, per the pattern used
+ * throughout this service.
+ */
+export function verifiedInsight(
+  insight: string | null,
+  score: number | null,
+  direction: string | null,
+  competitors: ArCompetitorRead[]
+): string | null {
+  if (!insight) return null;
+  const measured = measuredDirection(direction);
+  const peers = competitors.filter((c) => typeof c.gapScore === "number");
+  const outranked =
+    typeof score === "number" && peers.some((c) => (c.gapScore as number) > score);
+
+  const kept = insight
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => {
+      const claimed = claimedDirection(sentence);
+      if (claimed && measured && claimed !== measured) return false;
+      if (/\b(most|least|highest|lowest|biggest|largest|widest|#1|number one)\b/i.test(sentence)) {
+        if (measured === "aligned") return false;
+        if (outranked) return false;
+      }
+      return true;
+    })
+    .join(" ")
+    .trim();
+
+  // A stub left over from filtering ("Prime AIEO target.") reads as a dangling
+  // fragment rather than an insight. Below a sensible minimum, drop it and let
+  // the section not render at all.
+  return kept.length >= 60 ? kept : null;
+}
+
 async function buildBrief(competitorTickers: string[], focalTicker: string): Promise<ArBrief> {
   const generatedAt = new Date().toISOString();
   const empty: ArBrief = {
@@ -456,7 +497,12 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
           headline: safeHeadline,
           gapScore: gap.gapScore ?? null,
           direction: gap.direction ?? null,
-          agInsight: snap?.agInsight ?? null,
+          agInsight: verifiedInsight(
+            snap?.agInsight ?? null,
+            gap.gapScore ?? null,
+            gap.direction ?? null,
+            competitors
+          ),
           narrativeSignals: (gap.narrativeSignals ?? []).map((s: any) => ({
             source: String(s.source ?? "unknown"),
             sentiment: typeof s.sentiment === "number" ? s.sentiment : null,
