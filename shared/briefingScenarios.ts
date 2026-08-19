@@ -13,7 +13,6 @@
 export type PersonaScenarioId =
   | "quarterly-update"
   | "pre-briefing-prep"
-  | "assessment-kickoff"
   | "competitive-shift"
   | "reputation-pulse"
   | "narrative-campaign"
@@ -72,27 +71,6 @@ export const BRIEFING_SCENARIOS: BriefingScenario[] = [
       "House exec-briefing do's and don'ts (playbook)",
       "Role-scoped exposures",
       "This house's published placements for you and your peers",
-    ],
-    houseScoped: true,
-  },
-  {
-    id: "assessment-kickoff",
-    label: "Assessment cycle kick-off",
-    when: "An evaluation window is opening — align the team on what moves the ranking.",
-    // Commercial and marketing added: commercial supplies the client references
-    // that decide most assessments, and marketing owns the narrative that gets
-    // submitted. Excluding them from the kick-off is how submissions stall.
-    // Regional included: several houses run country-scoped studies (ISG
-    // Provider Lens has Australia / Brazil / UK editions), so a geography lead
-    // owns their own assessment cycle.
-    personas: ["executive", "strategy", "product", "delivery", "commercial", "marketing", "regional"],
-    intel: [
-      "What moves rankings at this house (playbook)",
-      "Your published placement history with this house (2 years)",
-      "Peer placements with this house entering the cycle",
-      "Learned-from-results observations (your cycles)",
-      "Competitive positions entering the cycle",
-      "RFI-stage do's (playbook)",
     ],
     houseScoped: true,
   },

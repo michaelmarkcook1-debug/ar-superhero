@@ -22,7 +22,6 @@ import { vendorById, vendorByTicker } from "./vendors";
 import { publicRankingsStore } from "./publicRankingsStore";
 import type { PublicAnalystRanking } from "@shared/schema";
 import type { PersonaId } from "./directPersonaDeck";
-import { houseLearnings } from "./resultsLearning";
 import { playbookById, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 import { scenarioById } from "@shared/briefingScenarios";
 
@@ -529,52 +528,6 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           ...(stage?.donts.slice(0, 3) ?? []).map((d) => `Don't — ${d}`),
         ];
         addBulletList(slide, rules, { x: 0.6, y: contentTop + 2.52, w: 12.1, h: 2.4, fontSize: 10 });
-        break;
-      }
-
-      case "assessment-kickoff": {
-        const rfi = playbook.stages.find((s) => s.stage === "rfi");
-        const learnings = (await houseLearnings(houseId).catch(() => []))[0];
-        const { slide, contentTop } = addBodySlide(pptx, brand, {
-          index: idx(),
-          title: `Entering the ${playbook.house} ${playbook.assessment.name} cycle`,
-          note: playbook.movementDriver.headline,
-        });
-        addSectionLabel(slide, `What moves rankings at ${playbook.house}`, { x: 0.6, y: contentTop + 0.1, w: 5.9 });
-        addBulletList(slide, playbook.movementDriver.drivers, { x: 0.6, y: contentTop + 0.42, w: 5.9, h: 2.2, fontSize: 10 });
-        addSectionLabel(slide, "RFI-stage rules (owner playbook)", { x: 6.9, y: contentTop + 0.1, w: 5.8 });
-        addBulletList(slide, rfi?.dos.slice(0, 4) ?? [], { x: 6.9, y: contentTop + 0.42, w: 5.8, h: 2.2, fontSize: 10 });
-        addSectionLabel(
-          slide,
-          learnings?.lines.length
-            ? `Learned from your ${playbook.house} results (${learnings.cycles} cycle${learnings.cycles === 1 ? "" : "s"}) — observational`
-            : "Learned from your results — none logged yet for this house",
-          { x: 0.6, y: contentTop + 2.85, w: 12.1 }
-        );
-        if (learnings?.lines.length) {
-          addBulletList(slide, learnings.lines.slice(0, 3).map((l) => l.line), {
-            x: 0.6,
-            y: contentTop + 3.17,
-            w: 12.1,
-            h: 1.7,
-            fontSize: 9,
-          });
-        }
-        const s2 = addBodySlide(pptx, brand, { index: idx(), title: "Competitive positions entering the cycle" });
-        addCompetitorBarChart(pptx, s2.slide, brief, { x: 0.6, y: s2.contentTop + 0.2, w: 12.1, h: 4.4 });
-        // The third-party record with THIS house — what they have actually
-        // published about you and your peers going into the cycle.
-        addPlacementSlide(
-          pptx,
-          brand,
-          idx,
-          vendorName,
-          await loadPlacements(vendor.id, req.competitorTickers, playbook.house),
-          {
-            title: `${playbook.house} — your published placement record`,
-            note: `Real, cited ${playbook.house} placements for you and your peer set. This is what the house has already said in public.`,
-          }
-        );
         break;
       }
 
