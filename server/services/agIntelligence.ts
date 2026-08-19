@@ -154,6 +154,81 @@ function deriveLensMoves(series: SentimentSeries[], quarters: string[]) {
   return moves;
 }
 
+// ---------------------------------------------------------------------------
+// Gap-headline verification.
+//
+// AG returns `headline` as editorial copy alongside the measured `gapScore`
+// and `direction`. The two can disagree — a firm measured "aligned" at gap 6
+// has shipped the headline "the most under-recognized provider in AG's
+// tracking set" while two other tracked firms measured 24. Publishing that
+// unchecked puts a false claim in the hero and in every deck, so the headline
+// is only used when it agrees with the measurement.
+//
+// Two checks, both conservative (only demonstrable contradictions are caught):
+//   1. Direction — if the copy asserts a lean the measurement contradicts.
+//   2. Superlative — if the copy claims a rank the tracked set contradicts.
+// On failure the headline is replaced with one derived from the real figures,
+// never left to imply something the numbers do not support.
+// ---------------------------------------------------------------------------
+
+type GapDir = "under" | "over" | "aligned" | null;
+
+function claimedDirection(headline: string): GapDir {
+  const h = headline.toLowerCase();
+  if (/under-recognis|under-recogniz|under-narrat|under-distribut|under-told|under-represent/.test(h)) return "under";
+  if (/over-hyped|over-stat|over-claim|over-represent|ahead of (its|their) delivery/.test(h)) return "over";
+  return null;
+}
+
+function measuredDirection(direction: string | null): GapDir {
+  if (!direction) return null;
+  const d = direction.toLowerCase();
+  if (d.includes("under")) return "under";
+  if (d.includes("over")) return "over";
+  if (d.includes("align")) return "aligned";
+  return null;
+}
+
+function derivedHeadline(name: string, score: number | null, direction: string | null): string {
+  const dir = measuredDirection(direction);
+  const scorePart = score === null ? "" : ` (gap ${score})`;
+  if (dir === "aligned") return `${name}'s narrative and measured reality are broadly aligned${scorePart}.`;
+  if (dir === "under") return `${name} is delivering ahead of its market story${scorePart}.`;
+  if (dir === "over") return `${name}'s market story is running ahead of the measured delivery${scorePart}.`;
+  return `${name}: narrative–reality gap${scorePart}.`;
+}
+
+export function verifiedGapHeadline(
+  headline: string | null,
+  score: number | null,
+  direction: string | null,
+  focalName: string,
+  competitors: ArCompetitorRead[]
+): string | null {
+  if (!headline) return null;
+  const measured = measuredDirection(direction);
+
+  // 1. Directional contradiction.
+  const claimed = claimedDirection(headline);
+  if (claimed && measured && claimed !== measured) {
+    return derivedHeadline(focalName, score, direction);
+  }
+
+  // 2. Superlative contradiction — only checkable against the tracked set.
+  if (/\b(most|least|highest|lowest|biggest|largest|widest|#1|number one)\b/i.test(headline)) {
+    const peers = competitors.filter((c) => typeof c.gapScore === "number");
+    if (peers.length && typeof score === "number") {
+      const beaten = peers.filter((c) => (c.gapScore as number) > score);
+      if (beaten.length) return derivedHeadline(focalName, score, direction);
+    }
+    // A superlative on a firm measured "aligned" is unsupportable regardless
+    // of the peer set — aligned means least divergent, not most.
+    if (measured === "aligned") return derivedHeadline(focalName, score, direction);
+  }
+
+  return headline;
+}
+
 async function buildBrief(competitorTickers: string[], focalTicker: string): Promise<ArBrief> {
   const generatedAt = new Date().toISOString();
   const empty: ArBrief = {
@@ -345,6 +420,20 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
   emergencies.sort((a, b) => sevRank[a.severity ?? "LOW"] - sevRank[b.severity ?? "LOW"]);
   actions.sort((a, b) => sevRank[a.severity ?? "LOW"] - sevRank[b.severity ?? "LOW"]);
 
+  // AG's `headline` is editorial copy and can contradict AG's OWN measured
+  // gapScore/direction on the same record (observed: a provider measured
+  // "aligned" at gap 6 carrying the headline "the most under-recognized
+  // provider in AG's tracking set", while two other tracked firms measured 24).
+  // Rendering that as the hero states a falsehood, so the claim is checked
+  // against the measurement and replaced with a derived one when it conflicts.
+  const safeHeadline = verifiedGapHeadline(
+    gap?.headline ?? null,
+    gap?.gapScore ?? null,
+    gap?.direction ?? null,
+    focalName,
+    competitors
+  );
+
   return {
     live: true,
     degraded,
@@ -358,13 +447,13 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
       revenueGrowthYoy: snap?.revenueGrowthYoy ?? null,
       gapScore: gap?.gapScore ?? null,
       gapDirection: gap?.direction ?? null,
-      gapHeadline: gap?.headline ?? null,
+      gapHeadline: safeHeadline,
       reputationInsightTitle: rep?.insightTitle ?? null,
       reputationInsightBody: rep?.insightBody ?? null,
     },
     gapAnalysis: gap
       ? {
-          headline: gap.headline ?? null,
+          headline: safeHeadline,
           gapScore: gap.gapScore ?? null,
           direction: gap.direction ?? null,
           agInsight: snap?.agInsight ?? null,
