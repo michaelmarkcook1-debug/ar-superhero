@@ -52,6 +52,22 @@ export const VENDORS: VendorContext[] = [
       "Lead with hybrid cloud, AI, consulting execution, ecosystem leverage, and enterprise-grade delivery proof.",
     agTicker: "IBM",
   },
+  {
+    // VRTU confirmed present in AG's provider catalog (GET /api/ag/providers)
+    // and independently analysable — providers/snapshot?ticker=VRTU returns a
+    // real per-firm assessment. AG retains the pre-2021 NASDAQ ticker as its
+    // identifier even though Virtusa is now privately held (isPublic: false).
+    id: "virtusa",
+    name: "Virtusa",
+    mark: "V",
+    // Dominant brand colour sampled from virtusa.com's own rendered styles;
+    // used as a fill behind white text, so the deep navy is the readable pick
+    // over their bright-green secondary accent.
+    accent: "1E2345",
+    thesis:
+      "Lead with digital engineering depth, industry domain expertise, and delivery agility — differentiating on focused client co-innovation rather than the scale of larger integrators.",
+    agTicker: "VRTU",
+  },
 ];
 
 const DEFAULT_VENDOR = VENDORS[0]; // Capgemini — preserves prior hardcoded behaviour when no vendor is specified.

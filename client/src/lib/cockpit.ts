@@ -20,6 +20,7 @@ export const VENDOR_OPTIONS = [
   { id: "cognizant", label: "Cognizant" },
   { id: "accenture", label: "Accenture" },
   { id: "ibm", label: "IBM" },
+  { id: "virtusa", label: "Virtusa" },
 ];
 
 // ---------------------------------------------------------------------------
