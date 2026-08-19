@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { ArrowUpRight, Activity, AlertTriangle, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useArBrief, useCompetitorSelection, useFocalVendor } from "@/lib/agBrief";
 import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
 import {
