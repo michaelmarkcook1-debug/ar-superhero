@@ -175,8 +175,23 @@ type GapDir = "under" | "over" | "aligned" | null;
 
 function claimedDirection(headline: string): GapDir {
   const h = headline.toLowerCase();
+  // Directional leans are checked first, so a headline that names a lean is
+  // never mistaken for an alignment claim because it also says "aligned".
   if (/under-recognis|under-recogniz|under-narrat|under-distribut|under-told|under-represent/.test(h)) return "under";
   if (/over-hyped|over-stat|over-claim|over-represent|ahead of (its|their) delivery/.test(h)) return "over";
+  // Alignment claims. AG has shipped "narrative and reality are close" on a
+  // firm measured over-hyped at gap 15, which reads as a clean bill of health
+  // the measurement does not support. Kept narrow — the phrase must actually
+  // be about the narrative/story/reality being in step, so wording like
+  // "leads on narrative coherence but reality signals show slower conversion"
+  // (a genuine over-hyped read) is not caught.
+  if (
+    /\b(broadly|closely|largely|well|fully)[- ]aligned\b/.test(h) ||
+    /\b(narrative|story|messaging)\b[^.]{0,60}\b(is|are)\s+(broadly\s+|closely\s+)?(aligned|in step|in line|close)\b/.test(h) ||
+    /\b(narrative|story)\s+(and|vs\.?|versus)\s+(the\s+)?(measured\s+)?(reality|delivery)\b[^.]{0,30}\b(are|is)\s+(close|aligned|matched|in step)\b/.test(h)
+  ) {
+    return "aligned";
+  }
   return null;
 }
 
