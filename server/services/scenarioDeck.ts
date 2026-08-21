@@ -224,12 +224,37 @@ function formatPlacementDate(published: string, precision: string): string {
 interface PlacementSet {
   focal: PublicAnalystRanking[];
   peers: PublicAnalystRanking[];
+  /** Set when a recency filter dropped rows whose date is too coarse to place. */
+  coarseDropped?: number;
+}
+
+/**
+ * Keep placements published on/after `sinceISO`.
+ *
+ * published_date carries mixed precision (day / month / year). A year-only
+ * value cannot be placed inside a quarter, so those rows are EXCLUDED from a
+ * recency view and counted, rather than being assumed recent or assumed old.
+ * The count is surfaced on the slide so the omission is visible.
+ */
+function filterRecent(rows: PublicAnalystRanking[], sinceISO: string): { kept: PublicAnalystRanking[]; coarse: number } {
+  let coarse = 0;
+  const kept = rows.filter((r) => {
+    if (r.date_precision === "year") {
+      coarse++;
+      return false;
+    }
+    // "2026-07" compares correctly against a "2026-05-21" boundary once padded.
+    const d = r.date_precision === "month" ? `${r.published_date}-01` : r.published_date;
+    return d >= sinceISO;
+  });
+  return { kept, coarse };
 }
 
 async function loadPlacements(
   vendorId: string,
   competitorTickers: string[] | undefined,
-  houseName?: string
+  houseName?: string,
+  sinceISO?: string
 ): Promise<PlacementSet> {
   try {
     const all = await publicRankingsStore.listRankings();
@@ -239,10 +264,12 @@ async function loadPlacements(
         .map((t) => vendorByTicker(t)?.id)
         .filter((v): v is string => Boolean(v) && v !== vendorId)
     );
-    return {
-      focal: inHouse.filter((r) => r.vendor_id === vendorId),
-      peers: inHouse.filter((r) => peerIds.has(r.vendor_id)),
-    };
+    const focalAll = inHouse.filter((r) => r.vendor_id === vendorId);
+    const peersAll = inHouse.filter((r) => peerIds.has(r.vendor_id));
+    if (!sinceISO) return { focal: focalAll, peers: peersAll };
+    const f = filterRecent(focalAll, sinceISO);
+    const p = filterRecent(peersAll, sinceISO);
+    return { focal: f.kept, peers: p.kept, coarseDropped: f.coarse + p.coarse };
   } catch {
     return { focal: [], peers: [] };
   }
@@ -260,7 +287,11 @@ function addPlacementSlide(
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
     title: opts.title,
-    note: opts.note,
+    // Say plainly when a recency filter had to drop year-only dates, so a
+    // short list never reads as "nothing else was published".
+    note: placements.coarseDropped
+      ? `${opts.note} ${placements.coarseDropped} further placement${placements.coarseDropped === 1 ? " is" : "s are"} dated by year only and cannot be placed in a quarter, so ${placements.coarseDropped === 1 ? "it is" : "they are"} not listed here.`
+      : opts.note,
   });
 
   const rowsFor = (rs: PublicAnalystRanking[], withVendor: boolean) =>
@@ -502,6 +533,22 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           });
           addReputationLineChart(pptx, s2.slide, trend, { x: 0.6, y: s2.contentTop + 0.2, w: 12.1, h: 4.4 });
         }
+        // Placements published in the last ~quarter — the third-party half of
+        // "what moved", alongside the score and sentiment movement above.
+        {
+          const since = new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+          addPlacementSlide(
+            pptx,
+            brand,
+            idx,
+            vendorName,
+            await loadPlacements(vendor.id, req.competitorTickers, undefined, since),
+            {
+              title: "Analyst placements published this quarter",
+              note: `Real, cited placements dated on or after ${since} for you and your peer set.`,
+            }
+          );
+        }
         break;
       }
 
@@ -529,6 +576,19 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           ...(stage?.donts.slice(0, 3) ?? []).map((d) => `Don't — ${d}`),
         ];
         addBulletList(slide, rules, { x: 0.6, y: contentTop + 2.52, w: 12.1, h: 2.4, fontSize: 10 });
+        // What this house has already published about you and your peers —
+        // the record the analyst will have in front of them in the briefing.
+        addPlacementSlide(
+          pptx,
+          brand,
+          idx,
+          vendorName,
+          await loadPlacements(vendor.id, req.competitorTickers, playbook.house),
+          {
+            title: `What ${playbook.house} has already published`,
+            note: `Real, cited ${playbook.house} placements for you and your peer set — the record behind the questions they will ask.`,
+          }
+        );
         break;
       }
 

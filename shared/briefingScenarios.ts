@@ -61,6 +61,7 @@ export const BRIEFING_SCENARIOS: BriefingScenario[] = [
       "Reputation lens movement",
       "Competitive score chart",
       "Narrative–reality gap direction",
+      "Analyst placements published this quarter",
     ],
     houseScoped: false,
   },
