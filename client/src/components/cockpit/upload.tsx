@@ -132,7 +132,7 @@ export function UploadPanel<T extends string>({
             {subtitle}
           </p>
         </div>
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45 md:inline-flex">
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/65 md:inline-flex">
           <ShieldCheck className="h-3 w-3" />
           Source-traced
         </div>
@@ -184,7 +184,7 @@ export function UploadPanel<T extends string>({
                       >
                         {t.label}
                       </span>
-                      <span className="mt-0.5 block text-[11.5px] leading-snug text-white/45">
+                      <span className="mt-0.5 block text-[11.5px] leading-snug text-white/65">
                         {t.hint}
                       </span>
                     </span>
@@ -246,7 +246,7 @@ export function UploadPanel<T extends string>({
                   <div className="text-[14px] font-medium text-[#f4eed8]">
                     Drop a file, or click to browse.
                   </div>
-                  <div className="mt-1 text-[11.5px] text-white/45">
+                  <div className="mt-1 text-[11.5px] text-white/65">
                     PDF · DOCX · PPTX · XLSX · EML · PNG · JPG — up to 50 MB.
                   </div>
                 </div>
@@ -321,11 +321,11 @@ export function UploadPanel<T extends string>({
             )}
           </div>
 
-          <div className="mt-4 flex items-start gap-2 text-[11.5px] leading-snug text-white/45">
-            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/30" />
+          <div className="mt-4 flex items-start gap-2 text-[11.5px] leading-snug text-white/65">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/50" />
             <span>{permissionNote}</span>
           </div>
-          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
+          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
             {UPLOAD_BACKEND_NOTE}
           </div>
         </div>
@@ -374,7 +374,7 @@ export function UploadedItemsList({
 }) {
   return (
     <Pane className="overflow-hidden p-0" data-testid="uploaded-items-list">
-      <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
+      <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/60">
         <div className="col-span-5">File · type</div>
         <div className="col-span-3">Captured signals</div>
         <div className="col-span-2">Uploaded</div>
@@ -407,7 +407,7 @@ export function UploadedItemsList({
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/40">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
                     <span>{it.typeLabel}</span>
                     <span className="text-white/15">·</span>
                     <span>{it.size}</span>
@@ -435,7 +435,7 @@ export function UploadedItemsList({
               </div>
               <div className="col-span-2 text-[12px] text-white/55">
                 <div>{it.uploadedBy}</div>
-                <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/35">
+                <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/55">
                   {it.uploadedAt}
                 </div>
               </div>
@@ -501,7 +501,7 @@ export function DecisionModel<F extends string>({
               ? "text-[#d5b46b]"
               : s.tone === "teal"
               ? "text-[#63d7de]"
-              : "text-white/45";
+              : "text-white/65";
           const toneRing =
             s.tone === "gold"
               ? "border-[#a88945]/30"
@@ -535,7 +535,7 @@ export function DecisionModel<F extends string>({
 
               <HairLine className="my-4" />
 
-              <div className="mb-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/35">
+              <div className="mb-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/55">
                 Fed by
               </div>
               <div className="flex flex-wrap gap-1">
@@ -550,7 +550,7 @@ export function DecisionModel<F extends string>({
               </div>
 
               <div className="mt-3 text-[11.5px] leading-snug text-white/65">
-                <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/35">
+                <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/55">
                   Output
                 </span>
                 <div className="mt-1">{s.output}</div>
@@ -592,13 +592,13 @@ export function DecisionModel<F extends string>({
                 </span>
               </div>
               <div className="col-span-4">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                   Trigger
                 </div>
                 <div className="mt-1 text-[13px] text-white/80">{m.trigger}</div>
               </div>
               <div className="col-span-5">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                   Observed
                 </div>
                 <div className="mt-1 text-[13px] leading-relaxed text-[#e7e3d8]">
@@ -621,7 +621,7 @@ export function DecisionModel<F extends string>({
           ))}
         </Pane>
 
-        <div className="mt-4 max-w-3xl text-[12px] leading-relaxed text-white/45">
+        <div className="mt-4 max-w-3xl text-[12px] leading-relaxed text-white/65">
           {finalNote}
         </div>
       </div>

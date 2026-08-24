@@ -86,7 +86,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 <span
                   className={cn(
                     "mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em]",
-                    lightMode ? "text-[#123d2c]/45" : "text-white/40"
+                    lightMode ? "text-[#123d2c]/45" : "text-white/60"
                   )}
                 >
                   by AnalystGenius
@@ -100,7 +100,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 data-testid="link-admin"
                 className={cn(
                   "hidden text-[11px] uppercase tracking-[0.16em] transition md:inline",
-                  lightMode ? "text-[#123d2c]/45 hover:text-[#123d2c]/75" : "text-white/40 hover:text-white/70"
+                  lightMode ? "text-[#123d2c]/45 hover:text-[#123d2c]/75" : "text-white/60 hover:text-white/70"
                 )}
               >
                 Admin
@@ -162,7 +162,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                     <span
                       className={cn(
                         "font-mono text-[10px] tracking-[0.2em]",
-                        active ? "text-[#a88945]" : lightMode ? "text-[#123d2c]/32" : "text-white/35"
+                        active ? "text-[#a88945]" : lightMode ? "text-[#123d2c]/32" : "text-white/55"
                       )}
                     >
                       {mode.glyph}
@@ -186,7 +186,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
           <div
             className={cn(
               "mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-6 py-4 text-[10.5px] uppercase tracking-[0.18em] lg:px-10",
-              lightMode ? "text-[#123d2c]/42" : "text-white/35"
+              lightMode ? "text-[#123d2c]/42" : "text-white/55"
             )}
           >
             <span>AnalystGenius · Intelligence layer</span>

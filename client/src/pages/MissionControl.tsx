@@ -84,7 +84,7 @@ export default function MissionControl() {
       ==================================================================== */}
       {/* Focal vendor — which company the whole cockpit brief is about. */}
       <section className="mb-6 flex flex-wrap items-center gap-2" data-testid="focal-vendor-picker">
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/35">
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/55">
           Briefing on
         </span>
         {VENDOR_OPTIONS.map((v) => {
@@ -107,7 +107,7 @@ export default function MissionControl() {
           );
         })}
         {!focalVendorId && (
-          <span className="text-[11px] text-white/30">· default focal firm</span>
+          <span className="text-[11px] text-white/50">· default focal firm</span>
         )}
       </section>
 
@@ -137,9 +137,9 @@ export default function MissionControl() {
       ==================================================================== */}
       <section className="mb-14">
         <div className="mb-6 flex items-baseline justify-between">
-          <Eyebrow className="text-white/45">The brief · What changed &amp; where exposed</Eyebrow>
+          <Eyebrow className="text-white/65">The brief · What changed &amp; where exposed</Eyebrow>
           <div
-            className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30"
+            className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50"
             title={live ? arBrief?.sourceNote : "Demo content — no live AnalystGenius connection."}
           >
             {live && arBrief
@@ -172,8 +172,8 @@ export default function MissionControl() {
       ==================================================================== */}
       <section className="mb-14" data-testid="intelligence-monitor">
         <div className="mb-7 flex items-baseline justify-between">
-          <Eyebrow className="text-white/45">Briefing opportunities</Eyebrow>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+          <Eyebrow className="text-white/65">Briefing opportunities</Eyebrow>
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
             Act now · Prepare ahead
           </div>
         </div>
@@ -189,8 +189,8 @@ export default function MissionControl() {
       {live && arBrief && (
         <section className="mb-14 space-y-5">
           <div className="flex items-baseline justify-between">
-            <Eyebrow className="text-white/45">AG Pulse · Competitive read</Eyebrow>
-            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+            <Eyebrow className="text-white/65">AG Pulse · Competitive read</Eyebrow>
+            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
               Your set vs the field
             </div>
           </div>
@@ -204,12 +204,12 @@ export default function MissionControl() {
       <section className="mb-14">
         <div className="mb-7 flex items-baseline justify-between">
           <div className="flex items-center gap-2">
-            <Eyebrow className="text-white/45">Choose your mode</Eyebrow>
+            <Eyebrow className="text-white/65">Choose your mode</Eyebrow>
             <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
               demo data
             </span>
           </div>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
             Three modes · One cockpit
           </div>
         </div>
@@ -225,7 +225,7 @@ export default function MissionControl() {
       ==================================================================== */}
       <section className="mb-14">
         <div className="mb-5 flex items-center gap-2">
-          <Eyebrow className="text-white/45">Mode snapshots</Eyebrow>
+          <Eyebrow className="text-white/65">Mode snapshots</Eyebrow>
           <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
             demo data
           </span>
@@ -249,7 +249,7 @@ export default function MissionControl() {
             <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
               Analyst moments in flight
             </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/45">
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
               {MOMENTS.length} active across {new Set(MOMENTS.map((m) => m.model)).size} assessment
               models. {exposedMoments.length} exposed today.
             </p>
@@ -264,7 +264,7 @@ export default function MissionControl() {
                   <div className="truncate text-[12.5px] font-medium text-white/85">
                     {m.topic}
                   </div>
-                  <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/35">
+                  <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
                     {m.model} · Due {m.due}
                   </div>
                 </div>
@@ -296,7 +296,7 @@ export default function MissionControl() {
             <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
               Leaders needing briefings
             </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/45">
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
               {LENSES.length} stakeholder lenses. Four flagged for AR action this
               week.
             </p>
@@ -308,12 +308,12 @@ export default function MissionControl() {
                 className="flex items-center justify-between gap-3 border-b border-white/[0.04] py-2 last:border-0"
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/30">
+                  <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/50">
                     {l.label.slice(0, 3)}
                   </span>
                   <span className="text-[13px] text-white/80">{l.label}</span>
                 </div>
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
                   {l.briefing.bullets.length} actions
                 </span>
               </li>
@@ -343,7 +343,7 @@ export default function MissionControl() {
             <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
               Sales-safe proof + claims to avoid
             </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/45">
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
               Approved proof for sellers and the claims that would be challenged
               if used.
             </p>
@@ -426,12 +426,12 @@ function BriefBucket({
           </span>
           <Eyebrow tone={tone === "gold" ? "gold" : "teal"}>{label}</Eyebrow>
         </div>
-        <span className="font-mono text-[10px] tracking-[0.22em] text-white/25">
+        <span className="font-mono text-[10px] tracking-[0.22em] text-white/50">
           {glyph}
         </span>
       </div>
 
-      {note && <div className="text-[12px] leading-snug text-white/40">{note}</div>}
+      {note && <div className="text-[12px] leading-snug text-white/60">{note}</div>}
       {topSlot}
 
       {/* Provenance rides on the item's tooltip, not the page. Severity is the
@@ -492,7 +492,7 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
             Mode {mode.glyph}
           </div>
           <ArrowUpRight
-            className="h-4 w-4 text-white/30 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/80"
+            className="h-4 w-4 text-white/50 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white/80"
           />
         </div>
 
@@ -515,11 +515,11 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
               >
                 {metric.value}
               </div>
-              <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/45">
+              <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/65">
                 {metric.label}
               </div>
               {metric.sub && (
-                <div className="mt-1 text-[10.5px] leading-snug text-white/35">
+                <div className="mt-1 text-[10.5px] leading-snug text-white/55">
                   {metric.sub}
                 </div>
               )}
@@ -537,7 +537,7 @@ function MiniStat({ value, label }: { value: string; label: string }) {
       <div className="font-mono text-[18px] font-medium leading-none text-[#f0dca8] tabular-nums">
         {value}
       </div>
-      <div className="mt-1 text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/40">
+      <div className="mt-1 text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60">
         {label}
       </div>
     </div>

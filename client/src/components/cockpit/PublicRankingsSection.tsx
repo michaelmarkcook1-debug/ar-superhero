@@ -84,19 +84,19 @@ export default function PublicRankingsSection() {
     <section className="mb-14" data-testid="public-rankings-section">
       <div className="mb-7 flex items-baseline justify-between">
         <div>
-          <Eyebrow className="text-white/45">Public analyst rankings · last two years</Eyebrow>
-          <p className="mt-1.5 text-[12.5px] text-white/40">
+          <Eyebrow className="text-white/65">Public analyst rankings · last two years</Eyebrow>
+          <p className="mt-1.5 text-[12.5px] text-white/60">
             Every entry is a real, cited placement — click a firm to see the full history and sources.
           </p>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
           By analyst firm
         </div>
       </div>
 
       {isLoading && (
         <Pane className="p-6">
-          <p className="text-[13px] text-white/40">Loading rankings…</p>
+          <p className="text-[13px] text-white/60">Loading rankings…</p>
         </Pane>
       )}
 
@@ -110,7 +110,7 @@ export default function PublicRankingsSection() {
         <Pane className="flex flex-col items-center justify-center gap-2 p-10 text-center">
           <Award className="h-6 w-6 text-white/15" />
           <p className="text-[13px] font-medium text-white/55">No public rankings on record yet</p>
-          <p className="max-w-md text-[11.5px] text-white/35">
+          <p className="max-w-md text-[11.5px] text-white/55">
             This section only shows real, cited analyst-firm placements — nothing is estimated. It fills in as
             verified findings are added.
           </p>
@@ -139,14 +139,14 @@ export default function PublicRankingsSection() {
                       </span>
                       <div className="text-[15px] font-semibold leading-snug text-[#e7e3d8]">{firm}</div>
                     </div>
-                    <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-white/25" />
+                    <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-white/50" />
                   </div>
                   <p className="mt-3 text-[12px] leading-relaxed text-white/50">
                     {entries.length} placement{entries.length === 1 ? "" : "s"} · {vendorsCovered.size} vendor
                     {vendorsCovered.size === 1 ? "" : "s"} covered
                   </p>
                   <HairLine className="my-3.5" />
-                  <div className="text-[11px] text-white/40">
+                  <div className="text-[11px] text-white/60">
                     Most recent — <span className="text-white/60">{vendorLabel(mostRecent.vendor_id)}</span>,{" "}
                     {formatPublished(mostRecent.published_date, mostRecent.date_precision)}
                   </div>
@@ -180,12 +180,12 @@ export default function PublicRankingsSection() {
                       <span className="rounded-full border border-[#a88945]/30 bg-[#a88945]/[0.08] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
                         {e.placement}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/30">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">
                         {formatPublished(e.published_date, e.date_precision)}
                       </span>
                     </div>
                     <div className="text-[13.5px] font-semibold leading-snug text-[#e7e3d8]">{e.report_name}</div>
-                    {e.category && <div className="mt-0.5 text-[11.5px] text-white/40">{e.category}</div>}
+                    {e.category && <div className="mt-0.5 text-[11.5px] text-white/60">{e.category}</div>}
                     <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/60">{e.summary}</p>
                     <a
                       href={e.source_url}

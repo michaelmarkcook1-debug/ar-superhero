@@ -225,7 +225,7 @@ export default function Direct() {
               >
                 <div
                   className={`font-mono text-[10px] uppercase tracking-[0.22em] ${
-                    active ? "text-[#d5b46b]" : "text-white/35"
+                    active ? "text-[#d5b46b]" : "text-white/55"
                   }`}
                 >
                   {String(i + 1).padStart(2, "0")}
@@ -237,7 +237,7 @@ export default function Direct() {
                 >
                   {lens.label}
                 </div>
-                <div className="text-[10.5px] uppercase tracking-[0.14em] text-white/40">
+                <div className="text-[10.5px] uppercase tracking-[0.14em] text-white/60">
                   {lens.stakeholder.split("·")[0].trim()}
                 </div>
               </button>
@@ -252,7 +252,7 @@ export default function Direct() {
           <div className="mb-2 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.22em] text-[#d5b46b]">
             Lens · {selected.label}
           </div>
-          <div className="mb-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white/45">
+          <div className="mb-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white/65">
             {selected.stakeholder}
           </div>
           <h2 className="mt-4 text-[28px] font-semibold leading-tight tracking-tight text-[#f4eed8] md:text-[34px]">
@@ -353,7 +353,7 @@ export default function Direct() {
                   <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${scenarioId === "standard" ? "bg-[#d5b46b]" : "bg-white/25"}`} />
                   <span>
                     <span className="block text-[12.5px] font-medium text-white/85">Standard persona pack</span>
-                    <span className="mt-0.5 block text-[11px] leading-snug text-white/40">
+                    <span className="mt-0.5 block text-[11px] leading-snug text-white/60">
                       The full analyst-influence briefing for this lens.
                     </span>
                   </span>
@@ -373,7 +373,7 @@ export default function Direct() {
                     <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${scenarioId === s.id ? "bg-[#d5b46b]" : "bg-white/25"}`} />
                     <span className="min-w-0">
                       <span className="block text-[12.5px] font-medium text-white/85">{s.label}</span>
-                      <span className="mt-0.5 block text-[11px] leading-snug text-white/40">{s.when}</span>
+                      <span className="mt-0.5 block text-[11px] leading-snug text-white/60">{s.when}</span>
                       {scenarioId === s.id && (
                         <span className="mt-1 block text-[10px] leading-snug text-[#63d7de]/80">
                           Draws on: {s.intel.join(" · ")}
@@ -386,7 +386,7 @@ export default function Direct() {
 
               {scenarioId !== "standard" && scenariosForPersona(selected.id).find((s) => s.id === scenarioId)?.houseScoped && (
                 <div className="mt-3">
-                  <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+                  <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/60">
                     Analyst house context
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -435,7 +435,7 @@ export default function Direct() {
             {downloading === "__all__" ? "Generating combined pack…" : "Download combined persona pack"}
             <FileDown className="h-3.5 w-3.5" />
           </button>
-          <div className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
+          <div className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
             AnalystGenius persona pack · PPT · Source-traced · NDA controls applied
           </div>
         </Pane>
@@ -506,7 +506,7 @@ export default function Direct() {
               Every leader, one click away.
             </div>
           </div>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/35">
+          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/55">
             {LENSES.length} lenses
           </div>
         </div>
@@ -526,7 +526,7 @@ export default function Direct() {
                 }`}
               >
                 <div className="flex-1">
-                  <div className="text-[10.5px] uppercase tracking-[0.18em] text-white/40">
+                  <div className="text-[10.5px] uppercase tracking-[0.18em] text-white/60">
                     {l.stakeholder}
                   </div>
                   <div className="mt-1 text-[16px] font-semibold tracking-tight text-[#e7e3d8]">
@@ -538,7 +538,7 @@ export default function Direct() {
                 </div>
                 <ChevronRight
                   className={`h-4 w-4 shrink-0 ${
-                    active ? "text-[#d5b46b]" : "text-white/30 group-hover:text-white/70"
+                    active ? "text-[#d5b46b]" : "text-white/50 group-hover:text-white/70"
                   }`}
                 />
               </button>

@@ -47,8 +47,8 @@ export default function AssessmentPlaybooks() {
   return (
     <section className="mb-14" data-testid="assessment-playbooks">
       <div className="mb-6 flex items-baseline justify-between">
-        <Eyebrow className="text-white/45">Assessment leadership playbooks</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+        <Eyebrow className="text-white/65">Assessment leadership playbooks</Eyebrow>
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
           Seven houses · Four engagement moments
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function AssessmentPlaybooks() {
             type="button"
             data-testid="button-evidence-boundary"
             onClick={() => setShowBoundary((v) => !v)}
-            className="shrink-0 rounded-full border border-[#3d8f6d]/26 px-3 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/45 transition hover:text-white/75"
+            className="shrink-0 rounded-full border border-[#3d8f6d]/26 px-3 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/65 transition hover:text-white/75"
           >
             {showBoundary ? "Hide" : "Evidence boundary"}
           </button>
@@ -76,7 +76,7 @@ export default function AssessmentPlaybooks() {
           <ul className="mt-4 space-y-1.5 border-t border-[#3d8f6d]/[0.16] pt-4">
             {EVIDENCE_BOUNDARY.map((line, i) => (
               <li key={i} className="flex gap-2.5 text-[12px] leading-relaxed text-white/50">
-                <ChevronRight className="mt-1 h-3 w-3 shrink-0 text-white/25" />
+                <ChevronRight className="mt-1 h-3 w-3 shrink-0 text-white/50" />
                 {line}
               </li>
             ))}
@@ -103,7 +103,7 @@ export default function AssessmentPlaybooks() {
               className={
                 p.id === houseId
                   ? "font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#d5b46b]/80"
-                  : "font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/30"
+                  : "font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/50"
               }
             >
               {p.assessment.name}
@@ -152,7 +152,7 @@ export default function AssessmentPlaybooks() {
                       className={
                         s.id === stageId
                           ? "font-mono text-[9.5px] uppercase tracking-[0.18em] text-[#63d7de]"
-                          : "font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30"
+                          : "font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/50"
                       }
                     >
                       {String(i + 1).padStart(2, "0")}
@@ -162,7 +162,7 @@ export default function AssessmentPlaybooks() {
                         className={
                           g.rank === 1
                             ? "rounded-sm border border-[#a88945]/45 bg-[#a88945]/[0.12] px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-[#f0dca8]"
-                            : "rounded-sm border border-[#3d8f6d]/24 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/40"
+                            : "rounded-sm border border-[#3d8f6d]/24 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/60"
                         }
                         title="Directional influence rank within this house (1 = greatest practical influence). Not a published weight."
                       >
@@ -206,7 +206,7 @@ export default function AssessmentPlaybooks() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-2.5 text-[10.5px] leading-relaxed text-white/35">
+              <p className="mt-2.5 text-[10.5px] leading-relaxed text-white/55">
                 Observations from your logged results vs your linked submissions — they augment the playbook, they don't override it.
               </p>
             </div>
@@ -234,7 +234,7 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
       <div className="mt-5 flex items-stretch gap-3">
         <div className="flex items-center">
           <span
-            className="text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/40"
+            className="text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60"
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
             {yAxis}
@@ -248,20 +248,20 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
               Leadership
             </div>
           </div>
-          <div className="mt-2 text-center text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/40">
+          <div className="mt-2 text-center text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60">
             {xAxis}
           </div>
         </div>
       </div>
 
       <HairLine className="my-5" />
-      <div className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+      <div className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
         What leadership means here
       </div>
       <p className="text-[13px] leading-relaxed text-white/70">{playbook.assessment.leadership}</p>
 
       <div className="mt-5">
-        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
           Leadership lens & theme
         </div>
         {playbook.leadershipFramework.length ? (
@@ -318,14 +318,14 @@ function CrossHouseFramework() {
       <div className="mb-5 rounded-lg border border-[#00a7b7]/25 bg-[#00a7b7]/[0.05] px-3.5 py-3">
         <div className="text-[12.5px] font-semibold text-[#9fe3e8]">{CONFIDENCE_FACTOR.headline}</div>
         <p className="mt-1.5 text-[12px] leading-relaxed text-white/60">{CONFIDENCE_FACTOR.detail}</p>
-        <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+        <p className="mt-2 text-[11px] leading-relaxed text-white/60">
           Evidence sources that must all point the same way: {CONFIDENCE_FACTOR.evidenceSources.join(" · ")}.
         </p>
       </div>
 
       <HairLine className="mb-4" />
       <Eyebrow className="mb-2">Cross-house operating framework</Eyebrow>
-      <p className="mb-4 text-[12px] leading-relaxed text-white/45">
+      <p className="mb-4 text-[12px] leading-relaxed text-white/65">
         Applies to every assessment, regardless of house.
       </p>
       <ol className="space-y-3">
@@ -353,7 +353,7 @@ function CrossHouseFramework() {
 
 function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; guidance: StageGuidance }) {
   const blocks: { key: keyof Pick<StageGuidance, "framework" | "dos" | "donts" | "bestPractices">; label: string; tone: string }[] = [
-    { key: "framework", label: "Framework", tone: "text-white/40" },
+    { key: "framework", label: "Framework", tone: "text-white/60" },
     { key: "dos", label: "Do", tone: "text-[#d5b46b]" },
     { key: "donts", label: "Don't", tone: "text-white/60" },
     { key: "bestPractices", label: "Best practice", tone: "text-[#63d7de]" },
@@ -376,7 +376,7 @@ function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; g
               <ul className="space-y-2">
                 {guidance[b.key].map((item, i) => (
                   <li key={i} className="flex gap-2.5 text-[12.5px] leading-relaxed text-white/75">
-                    <span className="shrink-0 font-mono text-[9.5px] tracking-[0.2em] text-white/30">
+                    <span className="shrink-0 font-mono text-[9.5px] tracking-[0.2em] text-white/50">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {item}
@@ -398,12 +398,12 @@ function AwaitingContent({ what, tall = false }: { what: string; tall?: boolean 
       }`}
       data-testid="awaiting-content"
     >
-      <FileText className="h-4 w-4 shrink-0 text-white/30" />
+      <FileText className="h-4 w-4 shrink-0 text-white/50" />
       <div>
         <div className="text-[12.5px] font-medium text-white/60">
           Structure ready — awaiting the playbook document for {what}.
         </div>
-        <div className="mt-1 text-[11.5px] leading-relaxed text-white/35">
+        <div className="mt-1 text-[11.5px] leading-relaxed text-white/55">
           This panel fills from the owner-supplied source document. Nothing is auto-generated here — guidance
           appears once the document is ingested.
         </div>

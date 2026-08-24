@@ -60,7 +60,7 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
             <div className="font-mono text-[34px] font-medium leading-none text-[#f0dca8] tabular-nums">
               {ga.gapScore ?? "—"}
             </div>
-            <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+            <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-white/60">
               Gap score
             </div>
           </div>
@@ -73,7 +73,7 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
       {/* Per-house narrative signals */}
       {ga.narrativeSignals.length > 0 && (
         <div className="mb-6">
-          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
             Who is telling the story — per-house signals
           </div>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
@@ -90,12 +90,12 @@ export function NarrativeGapPanel({ brief }: { brief: ArBrief }) {
                   <span className="font-mono text-[13px] text-[#d5b46b] tabular-nums">
                     {fmtSentiment(s.sentiment)}
                   </span>
-                  <span className="font-mono text-[10px] text-white/35 tabular-nums">
+                  <span className="font-mono text-[10px] text-white/55 tabular-nums">
                     vol {s.volume ?? "—"}
                   </span>
                 </div>
                 {s.themes.length > 0 && (
-                  <div className="mt-1 truncate text-[10.5px] text-white/40">{s.themes.join(" · ")}</div>
+                  <div className="mt-1 truncate text-[10.5px] text-white/60">{s.themes.join(" · ")}</div>
                 )}
               </div>
             ))}
@@ -169,7 +169,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
             <div className="font-mono text-[46px] font-medium leading-none text-[#f0dca8] tabular-nums">
               {ga.gapScore ?? "—"}
             </div>
-            <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40">
+            <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/60">
               Gap score
             </div>
           </div>
@@ -182,7 +182,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
       {/* Under / over-represented functions — the hero content */}
       {ga.topDivergences.length > 0 && (
         <div className="mt-7">
-          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/65">
             Where your business is under- or over-represented
           </div>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -212,7 +212,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
                   </div>
                   <div className="mt-2.5 flex items-baseline justify-between gap-3">
                     <p className="text-[12.5px] leading-relaxed text-white/60">{d.interpretation ?? ""}</p>
-                    <span className="shrink-0 font-mono text-[11px] text-white/40 tabular-nums">
+                    <span className="shrink-0 font-mono text-[11px] text-white/60 tabular-nums">
                       Δ {d.delta ?? "—"}
                     </span>
                   </div>
@@ -237,7 +237,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
         )}
         {reality.length > 0 && (
           <div>
-            <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+            <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/65">
               Measured reality — the anchor
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -247,7 +247,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
                     {s.value}
                     {/growth|margin|retention|rate/i.test(s.metric) ? "%" : ""}
                   </div>
-                  <div className="mt-0.5 text-[10.5px] leading-tight text-white/45">{s.label}</div>
+                  <div className="mt-0.5 text-[10.5px] leading-tight text-white/65">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -259,7 +259,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
       {ga.narrativeSignals.length > 0 && (
         <>
           <HairLine className="my-6" />
-          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+          <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/65">
             Who is telling the story — per-house signals
           </div>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
@@ -272,9 +272,9 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
                 <div className="text-[12px] font-medium text-white/80">{HOUSE_LABEL[s.source] ?? s.source}</div>
                 <div className="mt-1 flex items-baseline justify-between gap-2">
                   <span className="font-mono text-[13px] text-[#d5b46b] tabular-nums">{fmtSentiment(s.sentiment)}</span>
-                  <span className="font-mono text-[10px] text-white/35 tabular-nums">vol {s.volume ?? "—"}</span>
+                  <span className="font-mono text-[10px] text-white/55 tabular-nums">vol {s.volume ?? "—"}</span>
                 </div>
-                {s.themes.length > 0 && <div className="mt-1 truncate text-[10.5px] text-white/40">{s.themes.join(" · ")}</div>}
+                {s.themes.length > 0 && <div className="mt-1 truncate text-[10.5px] text-white/60">{s.themes.join(" · ")}</div>}
               </div>
             ))}
           </div>
@@ -282,7 +282,7 @@ export function NarrativeGapHero({ brief }: { brief: ArBrief }) {
       )}
 
       <div className="mt-6 flex items-center justify-between">
-        <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/30">
+        <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/50">
           AG narrative-reality-gap · values verbatim
         </span>
         <Link
@@ -309,7 +309,7 @@ export function ScoreBar({
   const pct = value == null ? 0 : Math.max(0, Math.min(100, value));
   return (
     <div className="flex items-center gap-3">
-      <span className="w-[72px] shrink-0 text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/40">
+      <span className="w-[72px] shrink-0 text-[10.5px] font-medium uppercase tracking-[0.14em] text-white/60">
         {label}
       </span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#1a5540]/[0.34]">
@@ -420,7 +420,7 @@ export function CompetitivePanel({
                 aria-label={`Remove ${t}`}
                 data-testid={`button-remove-${t}`}
                 onClick={() => onChange(activeTickers.filter((x) => x !== t))}
-                className="text-white/40 transition hover:text-white/80"
+                className="text-white/60 transition hover:text-white/80"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -428,7 +428,7 @@ export function CompetitivePanel({
           );
         })}
         {competitors.length === 0 && (
-          <span className="text-[12px] text-white/35">Default set — add competitors to re-cut every metric below.</span>
+          <span className="text-[12px] text-white/55">Default set — add competitors to re-cut every metric below.</span>
         )}
       </div>
 
@@ -442,7 +442,7 @@ export function CompetitivePanel({
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search 65 tracked providers…"
             data-testid="input-competitor-search"
-            className="mb-2 h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#00a7b7]/40 focus:outline-none"
+            className="mb-2 h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/50 focus:border-[#00a7b7]/40 focus:outline-none"
           />
           <ul className="max-h-56 overflow-y-auto">
             {options.map((p) => (
@@ -458,14 +458,14 @@ export function CompetitivePanel({
                   className="flex w-full items-center justify-between gap-3 rounded-md px-2.5 py-2 text-left transition hover:bg-[#1a5540]/[0.30]"
                 >
                   <span className="text-[13px] text-white/85">{p.displayName ?? p.name}</span>
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/35">
+                  <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/55">
                     {p.segment ?? p.ticker}
                   </span>
                 </button>
               </li>
             ))}
             {options.length === 0 && (
-              <li className="px-2.5 py-2 text-[12px] text-white/40">No matching providers.</li>
+              <li className="px-2.5 py-2 text-[12px] text-white/60">No matching providers.</li>
             )}
           </ul>
         </div>
@@ -502,7 +502,7 @@ export function CompetitivePanel({
                 <td className="py-2.5 pl-3 text-right">
                   <span className="font-mono text-[12.5px] text-white/70 tabular-nums">{r.gapScore ?? "—"}</span>
                   {r.gapDirection && (
-                    <span className="ml-2 text-[10px] uppercase tracking-[0.1em] text-white/40">
+                    <span className="ml-2 text-[10px] uppercase tracking-[0.1em] text-white/60">
                       {r.gapDirection}
                     </span>
                   )}
@@ -513,7 +513,7 @@ export function CompetitivePanel({
         </table>
       </div>
 
-      <div className="mt-3 text-[12px] text-white/35">
+      <div className="mt-3 text-[12px] text-white/55">
         Your selection also shapes every composed briefing deck.
       </div>
     </Pane>
@@ -528,7 +528,7 @@ function bestOf(rows: { [k: string]: unknown }[], key: string): number | null {
 function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <th
-      className={`pb-2 pr-3 text-[10px] font-medium uppercase tracking-[0.16em] text-white/40 last:pr-0 ${className}`}
+      className={`pb-2 pr-3 text-[10px] font-medium uppercase tracking-[0.16em] text-white/60 last:pr-0 ${className}`}
     >
       {children}
     </th>

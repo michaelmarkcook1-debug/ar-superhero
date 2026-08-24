@@ -269,13 +269,13 @@ export default function Succeed() {
                         <div className="flex items-center gap-2">
                           <span
                             className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
-                              active ? "text-[#d5b46b]" : "text-white/40"
+                              active ? "text-[#d5b46b]" : "text-white/60"
                             }`}
                           >
                             {m.model}
                           </span>
                           <span className="text-white/15">·</span>
-                          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                             Due {m.due}
                           </span>
                         </div>
@@ -292,7 +292,7 @@ export default function Succeed() {
                       </div>
                       <ChevronRight
                         className={`h-4 w-4 shrink-0 ${
-                          active ? "text-[#d5b46b]" : "text-white/25"
+                          active ? "text-[#d5b46b]" : "text-white/50"
                         }`}
                       />
                     </button>
@@ -383,7 +383,7 @@ export default function Succeed() {
           description="Every gap has a status: safe to reuse, restricted to certain audiences, or unsupported and must not be claimed."
         />
         <Pane className="overflow-hidden p-0">
-          <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/40">
+          <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/60">
             <div className="col-span-5">Gap</div>
             <div className="col-span-2">Severity</div>
             <div className="col-span-2">Status</div>
@@ -397,7 +397,7 @@ export default function Succeed() {
             >
               <div className="col-span-5">
                 <div className="text-[13.5px] font-medium text-white/90">{g.title}</div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/35">
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
                   {liveMoments.find((m) => m.id === g.momentId)?.model}
                 </div>
               </div>
@@ -536,7 +536,7 @@ export default function Succeed() {
               <Eyebrow tone={n.tone}>{n.scope}</Eyebrow>
               <div className="mt-3 text-[14px] leading-snug text-[#e7e3d8]">{n.title}</div>
               <p className="mt-2.5 text-[12.5px] leading-relaxed text-white/50">{n.detail}</p>
-              <div className="mt-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/30">
+              <div className="mt-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
                 <Target className="h-3 w-3" />
                 {n.state}
               </div>
@@ -568,7 +568,7 @@ function MomentDetail({
           {moment.model}
         </span>
         <span className="text-white/20">·</span>
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/40">
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/60">
           {moment.cycle}
         </span>
       </div>
@@ -647,7 +647,7 @@ function DetailField({
 }) {
   return (
     <div>
-      <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/40">
+      <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/60">
         {label}
       </div>
       <div className={`text-[13.5px] text-[#e7e3d8] ${mono ? "font-mono tabular-nums" : ""}`}>
@@ -678,7 +678,7 @@ function PrepBlock({
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-[14px] font-semibold text-[#e7e3d8]">{title}</div>
-          <div className="text-[12px] text-white/45">{detail}</div>
+          <div className="text-[12px] text-white/65">{detail}</div>
         </div>
         <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[#d5b46b]">
           {count}
@@ -690,7 +690,7 @@ function PrepBlock({
             key={i}
             className="flex items-center justify-between border-b border-white/[0.04] pb-1.5 last:border-0"
           >
-            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/45">
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/65">
               {r.label}
             </span>
             <span className="text-[12.5px] text-white/75">{r.value}</span>

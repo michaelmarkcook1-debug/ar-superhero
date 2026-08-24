@@ -288,8 +288,8 @@ export function DeliverablesPanel({
         ))}
       </div>
 
-      <div className="mt-5 flex items-start gap-2 text-[12px] leading-relaxed text-white/45">
-        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/30" />
+      <div className="mt-5 flex items-start gap-2 text-[12px] leading-relaxed text-white/65">
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/50" />
         <span>{guardrailNote}</span>
       </div>
 

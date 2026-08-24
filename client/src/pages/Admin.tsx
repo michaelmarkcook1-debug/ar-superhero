@@ -201,7 +201,7 @@ function ConfigBlock({
       <div className="font-mono text-[20px] font-medium leading-none text-[#f0dca8] tabular-nums">
         {value}
       </div>
-      <p className="mt-2 text-[12px] leading-relaxed text-white/45">{detail}</p>
+      <p className="mt-2 text-[12px] leading-relaxed text-white/65">{detail}</p>
     </div>
   );
 }

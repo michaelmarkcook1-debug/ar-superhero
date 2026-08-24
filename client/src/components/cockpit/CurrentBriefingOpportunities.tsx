@@ -74,7 +74,7 @@ export default function CurrentBriefingOpportunities() {
           </span>
           <div>
             <Eyebrow tone="gold">Current Briefing Opportunities</Eyebrow>
-            <p className="mt-1 text-[12px] leading-snug text-white/45">
+            <p className="mt-1 text-[12px] leading-snug text-white/65">
               {data?.meta.organisation ?? "Organisation"} · {data?.meta.ticker ?? ""} · recent signals AR can act on
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function CurrentBriefingOpportunities() {
       {/* Body */}
       <div className="flex-1">
         {isLoading ? (
-          <p className="py-8 text-center text-[13px] text-white/40" data-testid="current-briefing-loading">
+          <p className="py-8 text-center text-[13px] text-white/60" data-testid="current-briefing-loading">
             Loading signals…
           </p>
         ) : isError ? (
@@ -108,7 +108,7 @@ export default function CurrentBriefingOpportunities() {
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-center" data-testid="current-briefing-empty">
             <Bell className="h-7 w-7 text-white/15" />
             <p className="text-[13px] font-medium text-white/55">No active signals right now</p>
-            <p className="text-[11.5px] text-white/35">New opportunities surface here as they are detected.</p>
+            <p className="text-[11.5px] text-white/55">New opportunities surface here as they are detected.</p>
           </div>
         ) : (
           <ul className="space-y-2.5" data-testid="current-briefing-list">
@@ -143,9 +143,9 @@ export default function CurrentBriefingOpportunities() {
                         </p>
                         <div className="mt-1.5 flex items-start gap-1.5 text-[11.5px] leading-snug text-white/55">
                           <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-[#d5b46b]" />
-                          <span className="line-clamp-2"><span className="text-white/40">AR move — </span>{f.recommendedAction}</span>
+                          <span className="line-clamp-2"><span className="text-white/60">AR move — </span>{f.recommendedAction}</span>
                         </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/30">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
                           <span>{formatDate(f.date)}</span>
                           <span className="text-white/15">·</span>
                           <span className={cfg.label}>Likelihood {f.briefingLikelihood}</span>
@@ -170,10 +170,10 @@ export default function CurrentBriefingOpportunities() {
               data-testid="current-briefing-older-toggle"
               className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-left transition hover:bg-[#1a5540]/[0.18]"
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
                 Older signals — background context ({older.length})
               </span>
-              <ChevronDown className={cn("h-3.5 w-3.5 text-white/35 transition-transform", showOlder && "rotate-180")} />
+              <ChevronDown className={cn("h-3.5 w-3.5 text-white/55 transition-transform", showOlder && "rotate-180")} />
             </button>
             {showOlder && (
               <ul className="space-y-1.5 pt-1" data-testid="current-briefing-older-list">
@@ -190,7 +190,7 @@ export default function CurrentBriefingOpportunities() {
                         <span className={cn("mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full", cfg.dot)} />
                         <div className="min-w-0 flex-1">
                           <p className="line-clamp-1 text-[12px] text-white/70">{f.headline}</p>
-                          <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/30">
+                          <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/50">
                             {formatDate(f.date)} · {f.category}
                           </span>
                         </div>
@@ -224,7 +224,7 @@ export default function CurrentBriefingOpportunities() {
                   <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em]", SEVERITY[selected.severity].chip)}>
                     {selected.category}
                   </span>
-                  <span className="rounded-full border border-[#3d8f6d]/26 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/45">
+                  <span className="rounded-full border border-[#3d8f6d]/26 px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-white/65">
                     {formatDate(selected.date)}
                   </span>
                   <span className={cn("rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.14em]", SEVERITY[selected.severity].chip)}>

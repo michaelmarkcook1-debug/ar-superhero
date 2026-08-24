@@ -88,8 +88,8 @@ export default function RfpAnalyzer() {
   return (
     <section className="mb-14" data-testid="rfp-analyzer">
       <div className="mb-7 flex items-baseline justify-between">
-        <Eyebrow className="text-white/45">RFP / RFI analysis</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+        <Eyebrow className="text-white/65">RFP / RFI analysis</Eyebrow>
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
           Live AG data + approved proof library
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function RfpAnalyzer() {
           )}
 
           <HairLine className="my-5" />
-          <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+          <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
             What it draws on
           </div>
           <ul className="mt-2.5 space-y-1.5 text-[12px] leading-relaxed text-white/50">
@@ -151,7 +151,7 @@ export default function RfpAnalyzer() {
             <div className="flex h-full min-h-[220px] flex-col items-center justify-center gap-2 text-center">
               <Sparkles className="h-6 w-6 text-white/15" />
               <p className="text-[13px] font-medium text-white/50">No document analyzed yet</p>
-              <p className="text-[11.5px] text-white/30">Upload a draft to see suggestions here.</p>
+              <p className="text-[11.5px] text-white/50">Upload a draft to see suggestions here.</p>
             </div>
           )}
 
@@ -176,7 +176,7 @@ export default function RfpAnalyzer() {
                   </span>
                 )}
                 {result.truncated && (
-                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-white/40">
+                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-white/60">
                     document truncated for length
                   </span>
                 )}
@@ -202,7 +202,7 @@ export default function RfpAnalyzer() {
 
               <HairLine className="my-5" />
 
-              <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+              <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
                 Suggested improvements ({result.suggestions.length})
               </div>
               <ul className="space-y-3">
@@ -221,9 +221,9 @@ export default function RfpAnalyzer() {
                     <p className="text-[12.5px] leading-relaxed text-white/60">{s.detail}</p>
                     <div className="mt-2 flex items-start gap-1.5 text-[12px] leading-relaxed text-white/70">
                       <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-[#d5b46b]" />
-                      <span><span className="text-white/40">Suggested — </span>{s.suggestedAction}</span>
+                      <span><span className="text-white/60">Suggested — </span>{s.suggestedAction}</span>
                     </div>
-                    <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/30">
+                    <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">
                       {s.groundedIn ? `Grounded in: ${s.groundedIn}` : "General note — not tied to a specific data point"}
                     </div>
                   </li>

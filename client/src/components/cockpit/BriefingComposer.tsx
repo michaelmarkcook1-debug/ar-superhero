@@ -105,8 +105,8 @@ export default function BriefingComposer() {
   return (
     <section className="mb-14" data-testid="briefing-composer">
       <div className="mb-7 flex items-baseline justify-between">
-        <Eyebrow className="text-white/45">Briefing composer</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/30">
+        <Eyebrow className="text-white/65">Briefing composer</Eyebrow>
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
           Prior decks + AG signals + your variables
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function BriefingComposer() {
           {decks.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#1a5540]/[0.12] px-4 py-8 text-center">
               <div className="text-[12.5px] font-medium text-white/55">No decks ingested yet.</div>
-              <div className="mt-1 text-[11.5px] text-white/35">
+              <div className="mt-1 text-[11.5px] text-white/55">
                 Upload previous analyst briefing decks (.pptx) to build the reuse library.
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function BriefingComposer() {
                           </span>
                         )}
                       </div>
-                      <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
+                      <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
                         {HOUSE_PLAYBOOKS.find((p) => p.id === d.house)?.house ?? d.house} · {d.slideCount} slides ·{" "}
                         {new Date(d.uploadedAt).toLocaleDateString("en-GB")}
                       </div>
@@ -190,7 +190,7 @@ export default function BriefingComposer() {
                       download
                       aria-label={`Download ${d.filename}`}
                       data-testid={`link-download-deck-${d.id}`}
-                      className="text-white/30 transition hover:text-white/70"
+                      className="text-white/50 transition hover:text-white/70"
                     >
                       <Download className="h-3.5 w-3.5" />
                     </a>
@@ -199,7 +199,7 @@ export default function BriefingComposer() {
                       aria-label={`Delete ${d.filename}`}
                       data-testid={`button-delete-deck-${d.id}`}
                       onClick={() => void handleDelete(d.id)}
-                      className="text-white/30 transition hover:text-white/70"
+                      className="text-white/50 transition hover:text-white/70"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -281,7 +281,7 @@ export default function BriefingComposer() {
           {/* Executives */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+              <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
                 Presenting executives
               </span>
               <button
@@ -320,7 +320,7 @@ export default function BriefingComposer() {
                       type="button"
                       aria-label="Remove executive"
                       onClick={() => setExecutives((list) => list.filter((_, j) => j !== i))}
-                      className="shrink-0 text-white/30 transition hover:text-white/70"
+                      className="shrink-0 text-white/50 transition hover:text-white/70"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -365,12 +365,12 @@ export default function BriefingComposer() {
 }
 
 const inputCls =
-  "h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#a88945]/40 focus:outline-none";
+  "h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.22] px-3 text-[13px] text-white/85 placeholder:text-white/50 focus:border-[#a88945]/40 focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
         {label}
       </span>
       {children}

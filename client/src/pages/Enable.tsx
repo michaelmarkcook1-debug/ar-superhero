@@ -280,7 +280,7 @@ function SellContent() {
                 </div>
               </div>
               <div className="col-span-3 flex items-center">
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/45">
+                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/65">
                   {p.reuse}
                 </span>
               </div>
@@ -348,7 +348,7 @@ function SellContent() {
                 {b.guidance}
               </p>
               <HairLine className="my-5" />
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
+              <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
                 Approved snippets
               </div>
               <ul className="space-y-1.5">
@@ -392,7 +392,7 @@ function PresenceContent() {
                       ? "text-[#a5d8ab]"
                       : n.resonance === "Steady"
                       ? "text-[#e5c989]"
-                      : "text-white/45"
+                      : "text-white/65"
                   }`}
                 >
                   <TrendingUp
@@ -403,7 +403,7 @@ function PresenceContent() {
               </div>
               <p className="text-[13.5px] leading-relaxed text-white/65">{n.detail}</p>
               {n.internalOnly && (
-                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/65">
                   <Shield className="h-2.5 w-2.5" />
                   Internal guidance only
                 </div>
@@ -463,7 +463,7 @@ function PresenceContent() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {OPPORTUNITIES.map((o) => (
             <Pane key={o.id} className="p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55">
                 {o.format}
               </div>
               <div className="mt-2 text-[15px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
@@ -474,10 +474,10 @@ function PresenceContent() {
               </p>
               <HairLine className="my-5" />
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
                   {o.owner}
                 </span>
-                <span className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/45">
+                <span className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/65">
                   Internal · Briefing-grade
                 </span>
               </div>

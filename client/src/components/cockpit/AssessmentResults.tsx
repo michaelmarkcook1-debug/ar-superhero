@@ -54,7 +54,7 @@ export default function AssessmentResults() {
   return (
     <section className="mb-14" data-testid="assessment-results">
       <div className="mb-6 flex items-baseline justify-between">
-        <Eyebrow className="text-white/45">Verified results · Learning loop</Eyebrow>
+        <Eyebrow className="text-white/65">Verified results · Learning loop</Eyebrow>
         <button
           type="button"
           data-testid="button-log-result"
@@ -79,7 +79,7 @@ export default function AssessmentResults() {
       {results.length === 0 && !showForm ? (
         <Pane className="p-7">
           <div className="text-[13.5px] font-medium text-white/60">No published results logged yet.</div>
-          <p className="mt-1.5 max-w-2xl text-[12.5px] leading-relaxed text-white/40">
+          <p className="mt-1.5 max-w-2xl text-[12.5px] leading-relaxed text-white/60">
             When an assessment publishes, log the outcome with the analyst-stated strengths and cautions and
             link the submission decks you used. The loop compares what you submitted against what the analysts
             concluded — and feeds the nuances back into the house playbooks.
@@ -127,19 +127,19 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
     <Pane className="p-5">
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={onToggle} className="flex min-w-0 flex-1 items-center gap-3 text-left" data-testid={`result-${r.id}`}>
-          <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-white/35 transition ${expanded ? "rotate-90" : ""}`} />
+          <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-white/55 transition ${expanded ? "rotate-90" : ""}`} />
           <div className="min-w-0">
             <div className="truncate text-[13.5px] font-semibold text-white/90">
               {house?.house ?? r.house} · {house?.assessment.name} — {r.segment}
             </div>
-            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
+            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
               {r.cycleLabel} · published {r.publishedAt} · {r.linkedDeckIds.length} linked submission
               {r.linkedDeckIds.length === 1 ? "" : "s"}
             </div>
           </div>
         </button>
         <DirectionChip direction={r.direction} prior={r.priorPosition} position={r.position} />
-        <button type="button" aria-label="Delete result" onClick={() => void handleDelete()} className="text-white/25 transition hover:text-white/65">
+        <button type="button" aria-label="Delete result" onClick={() => void handleDelete()} className="text-white/50 transition hover:text-white/65">
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -186,7 +186,7 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
                       {KIND_LABEL[i.kind] ?? i.kind}
                     </span>
                     <span className="text-[12.5px] leading-relaxed text-white/80">{i.line}</span>
-                    <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-white/30">{i.source}</div>
+                    <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-white/50">{i.source}</div>
                   </li>
                 ))}
               </ul>
@@ -199,14 +199,14 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
 }
 
 const inputCls =
-  "h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.16] px-3 text-[13px] text-white/85 placeholder:text-white/30 focus:border-[#a88945]/40 focus:outline-none";
+  "h-9 w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.16] px-3 text-[13px] text-white/85 placeholder:text-white/50 focus:border-[#a88945]/40 focus:outline-none";
 const areaCls =
-  "min-h-[84px] w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.16] px-3 py-2 text-[13px] leading-relaxed text-white/85 placeholder:text-white/30 focus:border-[#a88945]/40 focus:outline-none";
+  "min-h-[84px] w-full rounded-md border border-[#3d8f6d]/24 bg-[#1a5540]/[0.16] px-3 py-2 text-[13px] leading-relaxed text-white/85 placeholder:text-white/50 focus:border-[#a88945]/40 focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">{label}</span>
+      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">{label}</span>
       {children}
     </label>
   );
@@ -307,11 +307,11 @@ function ResultForm({ decks, onDone }: { decks: LibraryDeck[]; onDone: () => voi
       </div>
 
       <div className="mt-4">
-        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/40">
+        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
           Link the submission decks used in this cycle ({playbook.house}-tagged uploads)
         </div>
         {houseDecks.length === 0 ? (
-          <p className="text-[12px] text-white/35">
+          <p className="text-[12px] text-white/55">
             No {playbook.house}-tagged decks in the library yet — upload them in the Briefing composer below, then link them here to unlock the evidence-vs-result comparison.
           </p>
         ) : (
@@ -353,7 +353,7 @@ function ResultForm({ decks, onDone }: { decks: LibraryDeck[]; onDone: () => voi
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
           Save result & run the comparison
         </button>
-        <span className="text-[11.5px] text-white/35">Feedback is observational (n= shown) — never predictive.</span>
+        <span className="text-[11.5px] text-white/55">Feedback is observational (n= shown) — never predictive.</span>
       </div>
     </Pane>
   );

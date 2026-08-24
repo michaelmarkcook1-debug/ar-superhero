@@ -36,7 +36,7 @@ export default function FutureBriefingOpportunities() {
           </span>
           <div>
             <Eyebrow tone="teal">Future Briefing Opportunities</Eyebrow>
-            <p className="mt-1 text-[12px] leading-snug text-white/45">
+            <p className="mt-1 text-[12px] leading-snug text-white/65">
               Events to prepare for in the next {horizon} days
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function FutureBriefingOpportunities() {
       {/* Body */}
       <div className="flex-1">
         {isLoading ? (
-          <p className="py-8 text-center text-[13px] text-white/40" data-testid="future-briefing-loading">
+          <p className="py-8 text-center text-[13px] text-white/60" data-testid="future-briefing-loading">
             Loading calendar…
           </p>
         ) : isError ? (
@@ -65,7 +65,7 @@ export default function FutureBriefingOpportunities() {
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-center" data-testid="future-briefing-empty">
             <CalendarClock className="h-7 w-7 text-white/15" />
             <p className="text-[13px] font-medium text-white/55">No events in the next {horizon} days</p>
-            <p className="text-[11.5px] text-white/35">Pre-alerts appear here as briefing windows approach.</p>
+            <p className="text-[11.5px] text-white/55">Pre-alerts appear here as briefing windows approach.</p>
           </div>
         ) : (
           <ul className="space-y-2.5" data-testid="future-briefing-list">
@@ -108,13 +108,13 @@ export default function FutureBriefingOpportunities() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/35">
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
                     {formatDate(ev.date)}
                     {ev.endDate && ` – ${formatDate(ev.endDate)}`} · {ev.tag}
                   </p>
                   <div className="mt-1.5 flex items-start gap-1.5 text-[11.5px] leading-snug text-white/55">
                     <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-[#63d7de]" />
-                    <span><span className="text-white/40">AR prep — </span>{ev.recommendedAction}</span>
+                    <span><span className="text-white/60">AR prep — </span>{ev.recommendedAction}</span>
                   </div>
                 </div>
               </li>

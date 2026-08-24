@@ -55,7 +55,7 @@ export default function Landing() {
             <span className={`block text-[15px] font-semibold tracking-tight ${dark ? "text-white" : "text-[#123d2c]"}`}>
               AR Super<span className="text-[#a88945]">Hero</span>
             </span>
-            <span className={`mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em] ${dark ? "text-white/45" : "text-[#123d2c]/45"}`}>
+            <span className={`mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em] ${dark ? "text-white/65" : "text-[#123d2c]/45"}`}>
               by AnalystGenius
             </span>
           </span>

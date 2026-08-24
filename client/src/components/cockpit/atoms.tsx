@@ -58,7 +58,7 @@ export function Eyebrow({
   tone?: "muted" | "gold" | "teal";
 }) {
   const tones: Record<string, string> = {
-    muted: "text-white/40",
+    muted: "text-white/60",
     gold: "text-[#d5b46b]",
     teal: "text-[#63d7de]",
   };
@@ -209,7 +209,7 @@ export function SourceTag({
   tag?: "demo" | "external signal" | "internal";
 }) {
   return (
-    <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+    <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55">
       <span className="font-mono">{source}</span>
       {tag && (
         <>
@@ -219,7 +219,7 @@ export function SourceTag({
               "rounded-full border px-1.5 py-0.5 text-[9.5px] tracking-[0.18em]",
               tag === "demo" && "border-[#d5b46b]/30 text-[#d5b46b]",
               tag === "external signal" && "border-[#63d7de]/30 text-[#63d7de]",
-              tag === "internal" && "border-[#3d8f6d]/26 text-white/40"
+              tag === "internal" && "border-[#3d8f6d]/26 text-white/60"
             )}
           >
             {tag}
@@ -244,10 +244,10 @@ export function NumberMark({
       <div className="font-mono text-[32px] font-medium leading-none tracking-tight text-[#f0dca8] tabular-nums md:text-[36px]">
         {value}
       </div>
-      <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/45">
+      <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/65">
         {label}
       </div>
-      {sub && <div className="text-[11.5px] leading-snug text-white/40">{sub}</div>}
+      {sub && <div className="text-[11.5px] leading-snug text-white/60">{sub}</div>}
     </div>
   );
 }
@@ -321,10 +321,10 @@ export function SubNav<T extends string>({
                 : "border-[#3d8f6d]/24 bg-[#1a5540]/[0.18] text-white/60 hover:border-[#3d8f6d]/36 hover:text-white/90"
             )}
           >
-            {it.icon && <span className={on ? "text-[#d5b46b]" : "text-white/40"}>{it.icon}</span>}
+            {it.icon && <span className={on ? "text-[#d5b46b]" : "text-white/60"}>{it.icon}</span>}
             {it.label}
             {it.hint && (
-              <span className={cn("font-mono text-[9.5px] uppercase tracking-[0.16em]", on ? "text-[#d5b46b]/70" : "text-white/30")}>
+              <span className={cn("font-mono text-[9.5px] uppercase tracking-[0.16em]", on ? "text-[#d5b46b]/70" : "text-white/50")}>
                 {it.hint}
               </span>
             )}
