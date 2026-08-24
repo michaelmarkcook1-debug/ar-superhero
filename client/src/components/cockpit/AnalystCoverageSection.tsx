@@ -43,6 +43,20 @@ function coverageList(c: string | string[]): string[] {
   }
 }
 
+/**
+ * Commentary older than this is still real coverage, but must not read as a
+ * CURRENT perception of the vendor. It is labelled rather than hidden.
+ */
+const STALE_AFTER_MONTHS = 24;
+
+function monthsOld(d: string | null): number | null {
+  if (!d) return null;
+  const iso = /^\d{4}$/.test(d) ? `${d}-06-30` : /^\d{4}-\d{2}$/.test(d) ? `${d}-15` : d;
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return null;
+  return (Date.now() - then.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+}
+
 function formatDate(d: string | null, precision: string | null): string | null {
   if (!d) return null;
   if (precision === "year") return d;
@@ -163,6 +177,18 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
                             </p>
                           )}
                           <div className="mt-2 flex flex-wrap items-center gap-2">
+                            {(() => {
+                              const age = monthsOld(r.published_date);
+                              if (age === null || age < STALE_AFTER_MONTHS) return null;
+                              return (
+                                <span
+                                  className="rounded-full border border-[#d5b46b]/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]"
+                                  title="Older than two years — historic coverage, not a current read"
+                                >
+                                  dated · {Math.round(age / 12)}y old
+                                </span>
+                              );
+                            })()}
                             {when && (
                               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">{when}</span>
                             )}

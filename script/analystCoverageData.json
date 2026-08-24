@@ -1,0 +1,792 @@
+[
+  {
+    "name": "Pranati Dave",
+    "firm": "Everest Group",
+    "role": "Vice President",
+    "coverage": ["Banking and financial services (BFS) IT services", "IT services", "business process services", "financial crime and compliance services"],
+    "profile_url": "https://www.everestgrp.com/team/pranati-dave/",
+    "vendor_commentary": [
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted (then titled Practice Director) on Virtusa's Leader position in Everest Group's Banking and Financial Services IT Services Specialists PEAK Matrix Assessment 2025, attributing its standing to digital engineering focus and a go-to-market strategy anchored in partnerships, offerings and domain competencies.",
+        "quote": "Virtusa's sustained focus on digital engineering excellence and a differentiated go-to-market strategy",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-named-a-leader-in-everest-group-banking-and-financial-services-it-services-specialists-peak-matrix-assessment-2025-302426562.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-04-14"
+      },
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Leader position in Everest Group's Payments IT Services PEAK Matrix 2025, describing its payments positioning as combining hands-on delivery in large transformation programmes with a set of accelerators.",
+        "quote": "Capgemini has strengthened its market positioning in payments IT services by combining hands-on delivery in large payments transformation programs",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-is-named-a-leader-by-everest-group-in-payments-it-services-peak-matrix-2025/",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-04-08"
+      }
+    ]
+  },
+  {
+    "name": "Zachariah K Chirayil",
+    "firm": "Everest Group",
+    "role": "Practice Director",
+    "coverage": ["Cloud services", "AWS services", "Microsoft Azure services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted on Virtusa's Major Contender and Star Performer position in Everest Group's AWS Services PEAK Matrix Assessment 2024, citing its AWS collaboration, generative AI and Data Labs work, and client-reported infrastructure expertise.",
+        "quote": "Virtusa has strategically collaborated with AWS, reinforcing its commitment to innovation, cost optimization, and seamless modernization",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-recognized-as-a-star-performer-in-everest-groups-aws-services-peak-matrix-2024-302380563.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-02-20"
+      },
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted on Virtusa's Major Contender and Star Performer position in Everest Group's Microsoft Azure Services PEAK Matrix Assessment 2024, citing Azure specializations across DevOps, security, application development and integration plus cost-optimization solutions.",
+        "quote": "Virtusa's comprehensive partnership with Microsoft Azure features extensive specializations across the cloud platform, including DevOps, security, application development, and integration",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-recognized-as-a-star-performer-in-everest-groups-azure-services-peak-matrix-2024-302382297.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-02-24"
+      }
+    ]
+  },
+  {
+    "name": "Mukesh Ranjan",
+    "firm": "Everest Group",
+    "role": "Vice President",
+    "coverage": ["Cloud services", "IT services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Quoted (then titled Practice Director) on Accenture's Leader position in the inaugural Everest Group Cloud Services PEAK Matrix Assessment 2022 for North America, describing its cloud services portfolio as focused on enabling digital transformation.",
+        "quote": "Accenture has built a strong cloud services portfolio with a focus on enabling digital transformation by leveraging cloud.",
+        "source_url": "https://newsroom.accenture.com/news/2022/accenture-named-a-leader-in-everest-groups-peak-matrix-for-cloud-services-in-north-america-and-europe",
+        "source_type": "vendor_press_release",
+        "published_date": "2022-02-23"
+      }
+    ]
+  },
+  {
+    "name": "Priyanka Mitra",
+    "firm": "Everest Group",
+    "role": "Vice President",
+    "coverage": ["Multi-process human resources outsourcing (MPHRO)", "HR operations and services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "ibm",
+        "stance_summary": "Quoted on IBM's Leader position in Everest Group's MPHRO Services PEAK Matrix Assessment 2025, describing IBM's approach as combining technology, operations and skills-focused talent management with AI-led capabilities and global delivery.",
+        "quote": "IBM offers a comprehensive approach to MPHRO by combining technology, operations, and skills-focused talent management",
+        "source_url": "https://www.ibm.com/new/announcements/ibm-has-been-named-a-leader-in-the-everest-group-multi-process-human-resources-outsourcing-services-peak-matrix",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-11-07"
+      }
+    ]
+  },
+  {
+    "name": "Shirley Hung",
+    "firm": "Everest Group",
+    "role": "Partner",
+    "coverage": ["Procurement outsourcing", "finance and accounting outsourcing", "customer experience management services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Quoted on Accenture's Leader and Star Performer position in Everest Group's Procurement Outsourcing Services PEAK Matrix Assessment 2025, citing category expertise, digital solutions and end-to-end process experience.",
+        "quote": "Accenture continues to demonstrate comprehensive procurement outsourcing capabilities, combining deep and diverse category expertise",
+        "source_url": "https://www.accenture.com/us-en/insights/supply-chain/analyst-recognitions",
+        "source_type": "vendor_press_release",
+        "published_date": "2025"
+      }
+    ]
+  },
+  {
+    "name": "Vignesh Kannan",
+    "firm": "Everest Group",
+    "role": "Vice President",
+    "coverage": ["Supply chain management business process services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Quoted on Accenture's Leader and Star Performer position in Everest Group's Supply Chain Management BPS PEAK Matrix Assessment 2025, citing synergies across consulting, technology and managed services and expansion in APAC and LATAM.",
+        "quote": "Accenture continues to strengthen its position as a Leader in Everest Group's Supply Chain Management (SCM) BPS PEAK Matrix",
+        "source_url": "https://www.accenture.com/us-en/insights/supply-chain/analyst-recognitions",
+        "source_type": "vendor_press_release",
+        "published_date": "2025"
+      }
+    ]
+  },
+  {
+    "name": "Abhilasha Sharma",
+    "firm": "Everest Group",
+    "role": "Practice Director",
+    "coverage": ["Consumer packaged goods (CPG) services", "retail and CPG IT services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted in Cognizant's announcement of its Leader position in Everest Group's CPG Services PEAK Matrix Assessment 2025. Note: her quoted words describe CPG market conditions and what distinguishes providers generally, and do not name Cognizant.",
+        "quote": "Providers leveraging AI to enhance their domain-specific IPs and solutions in addition to offering full-stack capabilities are emerging as strategic partners",
+        "source_url": "https://news.cognizant.com/2025-10-22-Cognizant-Named-a-Leader-in-the-Everest-Group-CPG-Services-PEAK-Matrix-R-Assessment-2025",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-10-22"
+      }
+    ]
+  },
+  {
+    "name": "Sangamesh Kadagad",
+    "firm": "Everest Group",
+    "role": "Practice Director",
+    "coverage": ["ServiceNow services", "enterprise platform services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted on Cognizant's Leader position in Everest Group's ServiceNow Services PEAK Matrix Assessment 2025, saying Cognizant shows strong domain expertise across BFSI, healthcare and life sciences, and retail and CPG.",
+        "quote": "Cognizant demonstrates strong domain expertise across BFSI",
+        "source_url": "https://news.cognizant.com/2026-06-09-Cognizant-Named-a-Leader-in-Everest-Groups-ServiceNow-Services-PEAK-Matrix-R-Assessment-2025",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-06-09"
+      }
+    ]
+  },
+  {
+    "name": "Arpita Dwivedi",
+    "firm": "Everest Group",
+    "role": "Practice Director",
+    "coverage": ["Net zero consulting services", "sustainability services"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Quoted alongside Accenture's highest-designated Leader position on the Vision and Capability axis of Everest Group's Net Zero Consulting Services PEAK Matrix Assessment 2025. Note: her quoted words describe net zero market requirements and do not name Accenture.",
+        "quote": "Net zero is no longer a distant aspiration. It requires clear strategies, deep industry knowledge and strong execution.",
+        "source_url": "https://www.accenture.com/us-en/insights/supply-chain/analyst-recognitions",
+        "source_type": "vendor_press_release",
+        "published_date": "2025"
+      }
+    ]
+  },
+  {
+    "name": "Nitish Mittal",
+    "firm": "Everest Group",
+    "role": "Partner",
+    "coverage": ["Digital transformation and IT services in Europe and UK & Ireland", "AI, automation, cloud and IoT", "life sciences technology", "marketing, experience and sustainability"],
+    "profile_url": "https://www.everestgrp.com/team/nitish-mittal/",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Peter Bendor-Samuel",
+    "firm": "Everest Group",
+    "role": "Founder and Executive Chairman",
+    "coverage": ["Global services industry structure", "outsourcing and offshoring", "digital transformation services market"],
+    "profile_url": "https://www.everestgrp.com/about-us/leadership-team/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "In a bylined Forbes column he wrote that the Big Four accounting and auditing firms are emerging as challengers to Accenture, IBM and the Indian service providers in digital transformation services.",
+        "quote": "The Big 4 are emerging as formidable challengers to Accenture, IBM and the Indian service providers.",
+        "source_url": "https://www.forbes.com/sites/peterbendorsamuel/2018/11/14/big-4-becoming-formidable-challengers-in-digital-transformation-services/",
+        "source_type": "trade_press",
+        "published_date": "2018-11-14"
+      },
+      {
+        "vendor": "ibm",
+        "stance_summary": "In the same bylined Forbes column he named IBM, alongside Accenture and the Indian service providers, as an incumbent being challenged by the Big Four in digital transformation services.",
+        "quote": "The Big 4 are emerging as formidable challengers to Accenture, IBM and the Indian service providers.",
+        "source_url": "https://www.forbes.com/sites/peterbendorsamuel/2018/11/14/big-4-becoming-formidable-challengers-in-digital-transformation-services/",
+        "source_type": "trade_press",
+        "published_date": "2018-11-14"
+      }
+    ]
+  },
+  {
+    "name": "Phil Fersht",
+    "firm": "HFS Research",
+    "role": "CEO and Chief Analyst",
+    "coverage": ["Business and technology services", "Services-as-Software", "Generative Enterprise and AI in services", "process technologies and automation"],
+    "profile_url": "https://www.hfsresearch.com/team/philfersht/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "In a bylined HFS piece on Cognizant's CEO transition he wrote that Ravi Kumar's appointment brings credibility and stability to Cognizant, citing his enterprise leadership contacts and industry standing.",
+        "quote": "Kumar's appointment brings immediate credibility and stability to Cognizant, with deep enterprise leadership contacts, respect across the industry",
+        "source_url": "https://www.hfsresearch.com/news/cognizant-looks-to-get-its-mojo-back-under-new-ceo-ravi-kumar-s/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2023-01-17"
+      },
+      {
+        "vendor": "ibm",
+        "stance_summary": "Named lead author of an HFS piece arguing IBM Consulting has rebuilt its consulting model around assets, outcomes and a productized platform, and that IBM must now sell beyond the CIO.",
+        "quote": "IBM Consulting has rewritten the consulting model around Services-as-Software",
+        "source_url": "https://www.hfsresearch.com/research/ibm-trust-stack-moment-cio/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2026-05-13"
+      }
+    ]
+  },
+  {
+    "name": "Saurabh Gupta",
+    "firm": "HFS Research",
+    "role": "President, Research and Advisory Services",
+    "coverage": ["Strategic research agenda", "AI and automation", "cloud, blockchain and Web3", "business operations frameworks (OneOffice, OneEcosystem)"],
+    "profile_url": "https://www.hfsresearch.com/team/saurabh-gupta/",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Named author of an HFS analysis of Accenture's Reinvention Services reorganisation, reporting that Accenture is doubling down on its 'One Accenture' growth model while flagging execution challenges.",
+        "quote": "Accenture has announced a bold move to double down on its 'One Accenture' growth model",
+        "source_url": "https://www.hfsresearch.com/research/accenture-bets-big-reinvention/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-06-30"
+      }
+    ]
+  },
+  {
+    "name": "Ashish Chaturvedi",
+    "firm": "HFS Research",
+    "role": "Executive Research Leader",
+    "coverage": ["Supply chain operations", "retail and CPG", "business services", "enterprise AI and data-driven transformation"],
+    "profile_url": "https://www.hfsresearch.com/team/ashish-chaturvedi/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted (then titled Practice Leader) on Cognizant's Leader position in HFS Horizons for services to the platform economy, saying Cognizant has executed complex, high-value projects for platform players from tech start-ups to born-digital enterprises.",
+        "quote": "Cognizant has executed some of the most complex and high-value projects for a large number of platform players",
+        "source_url": "https://news.cognizant.com/HFS_Horizon_Report",
+        "source_type": "vendor_press_release",
+        "published_date": "2023"
+      },
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Market Leader position in HFS Horizons: Intelligent Supply Chain Services 2025, linking its generative and agentic AI investments and engineering depth to a shift from reactive to insight-led decision making.",
+        "quote": "Capgemini's investments in generative and agentic AI, paired with trusted data foundations and engineering depth",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/hfs-research-recognizes-capgemini-as-market-leader-in-intelligent-supply-chain-services-2025/",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-01-07"
+      }
+    ]
+  },
+  {
+    "name": "Joel Martin",
+    "firm": "HFS Research",
+    "role": "Executive Research Leader",
+    "coverage": ["Telecommunications and IT services", "Microsoft partner ecosystem", "quantum computing", "cloud services consumption and network transformation"],
+    "profile_url": "https://www.hfsresearch.com/team/joel-martin/",
+    "vendor_commentary": [
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted on Virtusa's Enterprise Innovator position in HFS Horizons: High-Tech Services 2024, saying Virtusa fosters a collaborative, agile client environment and helps clients break down organisational silos.",
+        "quote": "Virtusa stands out through its ability to foster a collaborative and agile environment with clients.",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-recognized-as-enterprise-innovator-in-hfs-horizons-high-tech-services-2024-report-302214484.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2024-08-06"
+      },
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Market Leader position in HFS Horizons for High-Tech services 2024, describing its chip-to-industry mindset connecting chip design, software engineering and business execution.",
+        "quote": "Capgemini brings the thought leadership needed by high-tech firms who are activating their ecosystem",
+        "source_url": "https://www.capgemini.com/us-en/news/analyst-recognition/hfs-research-recognizes-capgemini-as-a-market-leader-in-its-horizons-report-for-high-tech-services-2024/",
+        "source_type": "vendor_press_release",
+        "published_date": "2024-07-23"
+      }
+    ]
+  },
+  {
+    "name": "Divya Iyer",
+    "firm": "HFS Research",
+    "role": "Practice Leader",
+    "coverage": ["Banking and financial services", "capital markets", "lending and mortgage services"],
+    "profile_url": "https://www.hfsresearch.com/team/divya-iyer/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted on Cognizant's Horizon 3 Market Leader position in HFS Horizons for mortgage reinvention 2025, saying Cognizant is central to lender platform modernisation and that its consumable, as-a-service engagement models lower the barrier to transformation.",
+        "quote": "Cognizant's right in the thick of it. They're helping the industry toughen up against macro shocks, rising CX demands",
+        "source_url": "https://www.cognizant.com/us/en/recognitions/hfs-horizon-best-service-providers-mortgage-reinvention-2025",
+        "source_type": "vendor_press_release",
+        "published_date": "2025"
+      }
+    ]
+  },
+  {
+    "name": "Hridika Biswas",
+    "firm": "HFS Research",
+    "role": "Associate Practice Leader",
+    "coverage": ["Business services (finance & accounting, source-to-pay)", "process intelligence", "intelligent document processing", "automation"],
+    "profile_url": "https://www.hfsresearch.com/team/hridika-biswas/",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Market Leader position in HFS Horizons: Insurance Services 2025, saying its strength is translating transformation vision into enterprise execution by combining insurance domain knowledge, GenAI plays and modular IP.",
+        "quote": "Capgemini's strength lies in how it translates transformation vision into enterprise execution.",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-is-recognized-as-a-leader-in-hfs-horizons-insurance-services-2025-report/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-07-14"
+      }
+    ]
+  },
+  {
+    "name": "Srini Vaddepalli",
+    "firm": "HFS Research",
+    "role": "Practice Leader",
+    "coverage": ["Sourcing and procurement services", "source-to-pay operations", "AI and automation in procurement"],
+    "profile_url": "https://www.hfsresearch.com/team/srini-vaddepalli/",
+    "vendor_commentary": [
+      {
+        "vendor": "ibm",
+        "stance_summary": "Quoted (name rendered 'Srini Vadepalli' in the release) on IBM's Leader position in HFS Horizons: Sourcing and Procurement Services 2025, saying IBM is advancing procurement orchestration with automation and AI-augmented agents across source-to-pay.",
+        "quote": "IBM is advancing procurement orchestration with increased automation and AI augmented agents in the Source-to-Pay value chain",
+        "source_url": "https://www.ibm.com/new/announcements/ibm-named-a-leader-in-the-2025-hfs-horizons-for-sourcing-and-procurement-services",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-01-27"
+      }
+    ]
+  },
+  {
+    "name": "Dominique Raviart",
+    "firm": "NelsonHall",
+    "role": "IT Services Practice Manager",
+    "coverage": ["IT services research", "quality engineering and software testing", "engineering and R&D services", "IT services vendor financial performance"],
+    "profile_url": "https://www.linkedin.com/in/dominiqueraviart/",
+    "vendor_commentary": [
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted on Virtusa's Leader positions in NelsonHall's 2024 Quality Engineering NEAT, saying Virtusa is increasing QE automation and investing in GenAI use cases such as test case optimisation and defect triaging.",
+        "quote": "Virtusa is focused on increasing the level of automation in QE, investing in GenAI",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-positioned-as-a-leader-in-nelsonhalls-2024-quality-engineering-neat-report-for-multiple-market-segments-302336364.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2024-12-24"
+      }
+    ]
+  },
+  {
+    "name": "Andy Efstathiou",
+    "firm": "NelsonHall",
+    "role": "Banking Operations & Transformation Research Director",
+    "coverage": ["Banking operations and transformation", "wealth and asset management services", "mortgage and loan services", "banking automation and fintech services"],
+    "profile_url": "https://reimagine.nelson-hall.com/analysts/13",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Leader position in NelsonHall's Wealth and Asset Management Services NEAT, describing Capgemini's wealth and asset management business as large and mature and positioned to grow through consulting and solutions. Capgemini's release misspells his surname as 'Efsthathiou'.",
+        "quote": "Capgemini has a large and mature wealth and asset management business that is well positioned to grow",
+        "source_url": "https://www.capgemini.com/us-en/news/capgemini-named-a-leader-in-wealth-and-asset-management-services-by-nelsonhall/",
+        "source_type": "vendor_press_release",
+        "published_date": "2019-12-19"
+      }
+    ]
+  },
+  {
+    "name": "John Willmott",
+    "firm": "NelsonHall",
+    "role": null,
+    "coverage": ["Business process services and IT services research (firm-wide)"],
+    "profile_url": "https://reimagine.nelson-hall.com/analysts/3",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Jan Erik Aase",
+    "firm": "ISG",
+    "role": "Partner and Global Head, ISG Provider Lens / ISG Research",
+    "coverage": ["IT and business process outsourcing landscape", "service provider research and assessment"],
+    "profile_url": "https://isg-one.com/about-us/people/jan-erik-aase",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Steve Hall",
+    "firm": "ISG",
+    "role": "Chief AI Officer",
+    "coverage": ["Enterprise AI strategy", "service provider selection", "digital transformation and technology adoption at scale"],
+    "profile_url": "https://isg-one.com/about-us/people/steven-e-hall",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Stanton Jones",
+    "firm": "ISG",
+    "role": "Distinguished Analyst",
+    "coverage": ["Global IT services sector", "ISG Index managed services and cloud contract data", "buy-side and sell-side market analysis"],
+    "profile_url": "https://isg-one.com/about-us/people/stanton-jones",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Heiko Henkes",
+    "firm": "ISG",
+    "role": "Managing Director and Principal Analyst",
+    "coverage": ["ISG Provider Lens for Digital Infrastructure and Intelligent Operations", "cloud and AI ISV ecosystems"],
+    "profile_url": "https://isg-one.com/about-us/people/heiko-henkes",
+    "vendor_commentary": []
+  },
+  {
+    "name": "Gowtham Sampath",
+    "firm": "ISG",
+    "role": "Assistant Director and Principal Analyst",
+    "coverage": ["Banking industry services", "analytics solutions and services", "data, analytics and AI services"],
+    "profile_url": "https://isg-one.com/about-us/people/gowtham-sampath",
+    "vendor_commentary": [
+      {
+        "vendor": "virtusa",
+        "stance_summary": "Quoted (name rendered 'Gowtham Kumar Sampath' in the release) on Virtusa's Leader positions in two midsize-market quadrants of the ISG Provider Lens Generative AI Services 2025 study, describing it as combining vertical-aware consulting with engineering depth via its AI Lab and Helio platform.",
+        "quote": "Virtusa blends vertical-aware consulting with engineering depth, using its AI Lab and Helio platform",
+        "source_url": "https://www.prnewswire.com/news-releases/virtusa-named-the-leader-in-isg-provider-lens-generative-ai-services-2025-study-302595018.html",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-10-27"
+      }
+    ]
+  },
+  {
+    "name": "Yash Jethani",
+    "firm": "ISG",
+    "role": "Senior Manager and Principal Analyst",
+    "coverage": ["Technology, media and telecom services", "telecom managed and next-gen IT services"],
+    "profile_url": "https://isg-one.com/about-us/people/yash-jethani",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted on Cognizant's Leader positions in the 2025 ISG Provider Lens Telecom, Media and Entertainment Industry Services report, attributing its telecom managed services position to AIOps-driven automation and 5G operational readiness.",
+        "quote": "Cognizant stands out in North America's telecom managed services through AIOps-driven automation and 5G operational readiness",
+        "source_url": "https://news.cognizant.com/2026-02-03-Cognizant-Recognized-as-a-Leader-in-the-2025-ISG-Provider-Lens-TM-Telecom,-Media,-and-Entertainment-Industry-Services-Report",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-02-03"
+      }
+    ]
+  },
+  {
+    "name": "Swapnil Bhatnagar",
+    "firm": "Avasant",
+    "role": "Partner",
+    "coverage": ["Digital transformation", "intelligent automation, hybrid cloud, AI and IoT", "IT strategy and RadarView provider assessments"],
+    "profile_url": "https://avasant.com/thought-leader/swapnil-bhatnagar/",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted (then titled Senior Research Director) on Capgemini's Leader classification in Avasant's Data Center Managed Services 2023-2024 RadarView, citing its services and proprietary solutions portfolio, partner initiatives and enterprise-aligned investments.",
+        "quote": "With a comprehensive portfolio of services and proprietary solutions, strategic partner initiatives, and investments aligned with enterprise focus areas",
+        "source_url": "https://www.capgemini.com/us-en/news/analyst-recognition/capgemini-recognized-as-a-leader-in-the-avasant-data-center-managed-services-2023-2024-radarview/",
+        "source_type": "vendor_press_release",
+        "published_date": "2024-04-03"
+      }
+    ]
+  },
+  {
+    "name": "Chandrika Dutt",
+    "firm": "Avasant",
+    "role": "Research Director",
+    "coverage": ["Artificial intelligence and generative AI", "intelligent automation", "data and analytics", "quantum computing"],
+    "profile_url": "https://avasant.com/thought-leader/chandrika-dutt/",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted (then titled Principal Analyst) on Capgemini's Leader ranking in Avasant's Intelligent Automation Services RadarView, citing its innovation-as-a-service offering and its investment in the FastTrack Hub repository of reusable automation assets.",
+        "quote": "Capgemini has also made heavy investments in FastTrack Hub, a repository of reusable and off-the-shelf automation assets",
+        "source_url": "https://www.capgemini.com/news/press-releases/leader-ranking-avasant-radarview-for-intelligent-automation-services/",
+        "source_type": "vendor_press_release",
+        "published_date": "2021-04-13"
+      }
+    ]
+  },
+  {
+    "name": "Gaurav Dewan",
+    "firm": "Avasant",
+    "role": "Research Director",
+    "coverage": ["Cybersecurity services", "digital workplace and end-user computing services", "enterprise applications modernization"],
+    "profile_url": "https://avasant.com/analyst-connect-2025/",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "Quoted on Capgemini's Leader classification in Avasant's Cybersecurity Services 2025 RadarView, attributing it to a comprehensive, industry-centric and innovation-driven approach including OT/IoT partnerships and generative AI in its identity practice.",
+        "quote": "Capgemini's comprehensive, industry-centric, and innovation-driven approach has led it to be categorized as a leader",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-recognized-as-a-leader-in-avasants-cybersecurity-services-2025-radarview/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-05-06"
+      }
+    ]
+  },
+  {
+    "name": "Jyotika Jain",
+    "firm": "Avasant",
+    "role": "Lead Analyst",
+    "coverage": ["High-tech industry digital services", "manufacturing and consumer industry megatrends"],
+    "profile_url": "https://avasant.com/analyst-connect-2025/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted on Cognizant's Leader classification in Avasant's High-Tech Industry Digital Services 2024-2025 RadarView, citing the Belcan and Mobica acquisitions and innovation centres with Salesforce, Pega and Qualcomm.",
+        "quote": "Cognizant's acquisition of specialized companies such as Belcan and Mobica has enhanced its digital engineering proficiency",
+        "source_url": "https://news.cognizant.com/2025-04-23-Cognizant-Recognized-by-Avasant-as-a-Leader-in-the-High-Tech-Industry-Digital-Services-2024-2025-RadarView-TM",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-04-23"
+      }
+    ]
+  },
+  {
+    "name": "Norkit Lepcha",
+    "firm": "Avasant",
+    "role": "Lead Analyst",
+    "coverage": ["High-tech digital services", "AI-native engineering and edge AI", "retail and CPG digital services"],
+    "profile_url": "https://avasant.com/thought-leader/norkit-lepcha/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Quoted on Cognizant's Leader classification in Avasant's High-Tech Digital Services 2026 RadarView, citing Flowsource, Neuro Edge and APEx, its three-vector AI strategy and Agent Foundry platform.",
+        "quote": "Cognizant supports this transformation through AI-led, engineering-driven solutions.",
+        "source_url": "https://news.cognizant.com/2026-05-22-Cognizant-Recognized-by-Avasant-as-a-Leader-in-the-High-Tech-Digital-Services-2026-RadarView-TM",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-05-22"
+      }
+    ]
+  },
+  {
+    "name": "Eratha Poongkuntran",
+    "firm": "Avasant",
+    "role": "Research Leader",
+    "coverage": ["Healthcare and life sciences digital services", "BFSI and healthcare industry megatrends"],
+    "profile_url": "https://avasant.com/analyst-connect-2025/",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "Co-authored Avasant's recap of Cognizant's Health Sciences analyst and advisor day, writing that organisations like Cognizant are leading with solutions for healthcare and life sciences stakeholders, and recommending Cognizant push further into GenAI diagnostics and global partnerships.",
+        "quote": "Organizations like Cognizant are leading the charge by offering impactful solutions",
+        "source_url": "https://avasant.com/report/cognizants-strategic-advances-in-health-sciences-a-recap-of-analyst-and-advisor-day/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2024-12"
+      }
+    ]
+  },
+  {
+    "name": "Bill Martorelli",
+    "firm": "Forrester",
+    "role": "Principal Analyst",
+    "coverage": ["Cloud services", "technology outsourcing", "cloud partnerships", "application management services"],
+    "profile_url": "https://www.forrester.com/analyst-bio/bill-martorelli/BIO801",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "As lead author of The Forrester Wave: Application Modernization And Multicloud Managed Services, Q1 2025, he wrote that Capgemini is a transformational player with increasing focus on outcome-based relationships.",
+        "quote": "Capgemini is a transformational player with an increasing focus on outcome-based relationships.",
+        "source_url": "https://www.capgemini.com/news/press-releases/capgemini-recognized-as-a-leader-in-application-modernization-and-multicloud-managed-servicesby-independent-research-firm/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-04-02"
+      },
+      {
+        "vendor": "ibm",
+        "stance_summary": "In his Forrester blog introducing the same Wave he placed IBM in the Strong Performers tier rather than among the Leaders.",
+        "quote": "Another six vendors — IBM, Wipro, NTT DATA, EPAM, Deloitte, and Tech Mahindra — are Strong Performers",
+        "source_url": "https://www.forrester.com/blogs/introducing-the-forrester-wave-application-modernization-and-multicloud-managed-services-q1-2025/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-03-05"
+      },
+      {
+        "vendor": "virtusa",
+        "stance_summary": "In the same blog he placed Virtusa in the Contenders tier of the application modernization and multicloud managed services Wave.",
+        "quote": "LTIMindtree, Virtusa, and Mphasis are Contenders.",
+        "source_url": "https://www.forrester.com/blogs/introducing-the-forrester-wave-application-modernization-and-multicloud-managed-services-q1-2025/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-03-05"
+      }
+    ]
+  },
+  {
+    "name": "Ted Schadler",
+    "firm": "Forrester",
+    "role": "VP, Principal Analyst",
+    "coverage": ["Serving technology executives (CIOs, CTOs)", "high-performance IT strategy", "technology service provider markets"],
+    "profile_url": "https://www.forrester.com/analyst-bio/ted-schadler/BIO1707",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "In his bylined Forrester blog on technology service provider acquisitions he reported that over the past two years Accenture accounted for almost half of the acquisitions Forrester tracked, adding 66 firms.",
+        "quote": "Accenture accounted for almost half of the acquisitions tracked, adding 66 firms",
+        "source_url": "https://www.forrester.com/blogs/technology-service-provider-acquisitions-a-strategic-shift-to-ai-and-industry-services-is-underway/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-04-23"
+      },
+      {
+        "vendor": "cognizant",
+        "stance_summary": "In the same blog he cited Cognizant's acquisition of Thirdera as an example of providers buying ServiceNow skills.",
+        "quote": "Cognizant acquired US-based Thirdera",
+        "source_url": "https://www.forrester.com/blogs/technology-service-provider-acquisitions-a-strategic-shift-to-ai-and-industry-services-is-underway/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-04-23"
+      },
+      {
+        "vendor": "capgemini",
+        "stance_summary": "As co-author of Forrester's review of Q2 2025 technology services earnings he reported Capgemini's full-year revenue guidance range.",
+        "quote": "Capgemini forecasts between -1% and +1% change in revenue",
+        "source_url": "https://www.forrester.com/blogs/the-ai-effect-what-q2-2025-technology-services-earnings-mean-for-technology-executives/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-10-03"
+      }
+    ]
+  },
+  {
+    "name": "Ashutosh Sharma",
+    "firm": "Forrester",
+    "role": "VP, Principal Analyst",
+    "coverage": ["Global lead for Forrester's partners practice", "technology leadership", "digital business", "sourcing and partner management"],
+    "profile_url": "https://www.forrester.com/analyst-bio/ashutosh-sharma/BIO9464",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "As co-author of Forrester's review of Q2 2025 technology services earnings he reported that Accenture's new bookings fell 7% in local currency while its revenue rose 7% in constant currency.",
+        "quote": "Accenture's new bookings were down 7% in local currency",
+        "source_url": "https://www.forrester.com/blogs/the-ai-effect-what-q2-2025-technology-services-earnings-mean-for-technology-executives/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-10-03"
+      },
+      {
+        "vendor": "cognizant",
+        "stance_summary": "In the same earnings review he reported Cognizant's growth projection for the remainder of the year.",
+        "quote": "Cognizant projects 4-6% growth for the rest of the year",
+        "source_url": "https://www.forrester.com/blogs/the-ai-effect-what-q2-2025-technology-services-earnings-mean-for-technology-executives/",
+        "source_type": "analyst_firm_page",
+        "published_date": "2025-10-03"
+      }
+    ]
+  },
+  {
+    "name": "Paul Miller",
+    "firm": "Forrester",
+    "role": "VP, Principal Analyst",
+    "coverage": ["Smart manufacturing", "connected product engineering services", "digital twins and industrial assets"],
+    "profile_url": "https://www.forrester.com/analyst-bio/paul-miller/BIO10024",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "As author of The Forrester Wave: Connected Product Engineering Services, Q4 2025 he wrote that Capgemini is a good choice for most connected product initiatives.",
+        "quote": "Capgemini is a good choice for most connected product initiatives",
+        "source_url": "https://www.capgemini.com/us-en/news/press-releases/capgemini-is-recognized-as-a-leader-in-connected-product-engineering-services-by-independent-research-firm/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-11-06"
+      }
+    ]
+  },
+  {
+    "name": "Dario Maisto",
+    "firm": "Forrester",
+    "role": "Principal Analyst",
+    "coverage": ["Digital sovereignty", "cloud platforms and cloud services", "SAP services in Europe", "EMEA research"],
+    "profile_url": "https://www.forrester.com/analyst-bio/dario-maisto/BIO20009",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "As author of The Forrester Wave: SAP Services In Europe, Q2 2025 (credited there as Senior Analyst) he wrote that customers particularly appreciate that Capgemini's teams can break down delivery silos.",
+        "quote": "Customers particularly appreciate that Capgemini's teams can break down delivery silos",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-named-a-leader-and-customer-favorite-in-the-forrester-wave-sap-services-in-europe-q2-2025/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-06-05"
+      }
+    ]
+  },
+  {
+    "name": "Jason Bremner",
+    "firm": "IDC",
+    "role": "Research Vice President, IT Consulting and Systems Integration Services",
+    "coverage": ["IT consulting and systems integration services", "Salesforce implementation services", "packaged application implementation services"],
+    "profile_url": "https://my.idc.com/getdoc.jsp?containerId=PRF004816",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "On the IDC MarketScape: Worldwide Salesforce Implementation Services 2025-2026 he said Capgemini has elevated its Salesforce services practice by aligning to Salesforce's agentic AI direction.",
+        "quote": "Capgemini has built on its previous strengths and capabilities and elevated its Salesforce services practice in the past few years",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-recognized-as-a-leader-in-the-idc-marketscape-worldwide-salesforce-implementation-services-2025-2026-vendor-assessment/",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-01-07"
+      },
+      {
+        "vendor": "accenture",
+        "stance_summary": "On the same IDC MarketScape he attributed Accenture's Leaders placement to a portfolio spanning strategy, consulting, technology and operations, a large global delivery network and investment in industry-specific IP.",
+        "quote": "Accenture is positioned in the Leaders category based on a comprehensive portfolio spanning strategy, consulting, technology, and operations",
+        "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-12"
+      }
+    ]
+  },
+  {
+    "name": "Leslie Rosenberg",
+    "firm": "IDC",
+    "role": "Research Vice President, Network Life Cycle and Infrastructure Services",
+    "coverage": ["Network life cycle services", "network consulting services", "infrastructure services"],
+    "profile_url": "https://my.idc.com/getdoc.jsp?containerId=PRF002779",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "On the IDC MarketScape: Worldwide Network Consulting Services 2026 she said Accenture's network consulting practice operates at the intersection of financial rigour and technical depth, embedding TBM and TCO modelling into advisory engagements.",
+        "quote": "Accenture's Network consulting practice stands out for its ability to operate at the intersection of financial rigor and technical depth",
+        "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-06"
+      }
+    ]
+  },
+  {
+    "name": "Douglas Hayward",
+    "firm": "IDC",
+    "role": "Senior Research Director",
+    "coverage": ["Worldwide customer experience services", "digital strategy and agency services", "Adobe Experience Cloud professional services"],
+    "profile_url": "https://my.idc.com/getdoc.jsp?containerId=PRF004618",
+    "vendor_commentary": [
+      {
+        "vendor": "cognizant",
+        "stance_summary": "On the IDC MarketScape: Worldwide Adobe Experience Cloud Professional Services 2024-2025 he cited Cognizant's global network of client-facing innovation facilities and IP assets as positioning it to help clients drive value from Adobe technology.",
+        "quote": "Cognizant is well positioned to help clients think creatively and drive value from Adobe technology.",
+        "source_url": "https://news.cognizant.com/2025-03-19-Cognizant-Recognized-as-a-Leader-in-the-IDC-MarketScape-Worldwide-Adobe-Experience-Cloud-Professional-Services-2024-2025-Vendor-Assessment",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-03-19"
+      }
+    ]
+  },
+  {
+    "name": "Mukesh Dialani",
+    "firm": "IDC",
+    "role": "Research Vice President",
+    "coverage": ["Digital engineering services", "product and software engineering services", "Industrial IoT and Industry 4.0 services"],
+    "profile_url": "https://my.idc.com/getdoc.jsp?containerId=PRF002978",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "On the IDC MarketScape: Worldwide Industrial IoT End-to-End Engineering and Life-Cycle Services 2025 he identified Capgemini's comprehensive Industrial IoT and Industry 4.0 portfolio, delivery ecosystem, talent management and AI/GenAI investment as strengths.",
+        "quote": "IDC identifies Capgemini's strength as its comprehensive service portfolio across Industrial IoT and Industry 4.0",
+        "source_url": "https://www.capgemini.com/news/analyst-recognition/capgemini-named-a-leader-in-the-idc-marketscape-worldwide-industrial-iot-end-to-end-engineering-and-life-cycle-services-2025-vendor-assessment/",
+        "source_type": "vendor_press_release",
+        "published_date": "2025-09-05"
+      }
+    ]
+  },
+  {
+    "name": "Jennifer Hamel",
+    "firm": "IDC",
+    "role": "Senior Research Director, Enterprise Intelligence Services",
+    "coverage": ["AI services", "data modernization services", "analytics and intelligent automation services"],
+    "profile_url": "https://my.idc.com/getdoc.jsp?containerId=PRF005186",
+    "vendor_commentary": [
+      {
+        "vendor": "capgemini",
+        "stance_summary": "On the IDC MarketScape: Worldwide Data Modernization Services 2024 she identified Capgemini's strategies around offerings, client adoption, portfolio, sales, marketing and go-to-market alliances as key strengths.",
+        "quote": "IDC considers Capgemini's strategies around offerings, client adoption, portfolio, sales, marketing, and go-to-market alliances as key strengths.",
+        "source_url": "https://www.capgemini.com/news/press-releases/capgemini-is-recognized-as-a-leader-in-idc-marketscape-worldwide-data-modernization-services-2024/",
+        "source_type": "vendor_press_release",
+        "published_date": "2024-12-05"
+      }
+    ]
+  },
+  {
+    "name": "Sundar Viswanathan",
+    "firm": "Gartner",
+    "role": "Senior Director Analyst",
+    "coverage": ["IT sourcing, procurement and vendor management", "digital technology and business consulting services", "provider selection, pricing and negotiation"],
+    "profile_url": "https://www.gartner.com/en/experts/sundar-viswanathan",
+    "vendor_commentary": [
+      {
+        "vendor": "accenture",
+        "stance_summary": "Named as the lead author of the Gartner Magic Quadrant for Digital Technology and Business Consulting Services dated 12 January 2026, the inaugural edition in which Accenture was positioned as a Leader. Gartner publishes no analyst quote about the vendor.",
+        "quote": null,
+        "source_url": "https://newsroom.accenture.com/news/2026/accenture-named-a-leader-in-gartner-magic-quadrant-for-digital-technology-and-business-consulting-services",
+        "source_type": "vendor_press_release",
+        "published_date": "2026-01-12"
+      }
+    ]
+  }
+]
