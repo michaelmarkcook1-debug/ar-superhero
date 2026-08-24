@@ -86,7 +86,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 <span
                   className={cn(
                     "mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em]",
-                    lightMode ? "text-[#123d2c]/45" : "text-white/60"
+                    lightMode ? "text-[#123d2c]/75" : "text-white/60"
                   )}
                 >
                   by AnalystGenius
@@ -100,7 +100,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 data-testid="link-admin"
                 className={cn(
                   "hidden text-[11px] uppercase tracking-[0.16em] transition md:inline",
-                  lightMode ? "text-[#123d2c]/45 hover:text-[#123d2c]/75" : "text-white/60 hover:text-white/70"
+                  lightMode ? "text-[#123d2c]/75 hover:text-[#123d2c]/95" : "text-white/60 hover:text-white/70"
                 )}
               >
                 Admin
@@ -112,7 +112,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] transition",
                   lightMode
-                    ? "border-[#123d2c]/12 bg-white/45 text-[#123d2c]/70 hover:bg-white/70"
+                    ? "border-[#123d2c]/12 bg-white/45 text-[#123d2c]/75 hover:bg-white/70"
                     : "border-[#3d8f6d]/26 bg-[#1a5540]/[0.22] text-white/65 hover:bg-[#1a5540]/[0.34] hover:text-white"
                 )}
               >
@@ -125,7 +125,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] transition",
                   lightMode
-                    ? "border-[#123d2c]/12 bg-white/45 text-[#123d2c]/70 hover:bg-white/70"
+                    ? "border-[#123d2c]/12 bg-white/45 text-[#123d2c]/75 hover:bg-white/70"
                     : "border-[#3d8f6d]/26 bg-[#1a5540]/[0.22] text-white/65 hover:bg-[#1a5540]/[0.34] hover:text-white"
                 )}
               >
@@ -162,7 +162,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                     <span
                       className={cn(
                         "font-mono text-[10px] tracking-[0.2em]",
-                        active ? "text-[#a88945]" : lightMode ? "text-[#123d2c]/32" : "text-white/55"
+                        active ? "text-[#a88945]" : lightMode ? "text-[#123d2c]/75" : "text-white/55"
                       )}
                     >
                       {mode.glyph}
@@ -186,7 +186,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
           <div
             className={cn(
               "mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-6 py-4 text-[10.5px] uppercase tracking-[0.18em] lg:px-10",
-              lightMode ? "text-[#123d2c]/42" : "text-white/55"
+              lightMode ? "text-[#123d2c]/75" : "text-white/55"
             )}
           >
             <span>AnalystGenius · Intelligence layer</span>
