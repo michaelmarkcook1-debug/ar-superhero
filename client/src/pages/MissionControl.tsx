@@ -26,6 +26,7 @@ import {
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
+import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
 
 export default function MissionControl() {
   const { competitors, setCompetitors } = useCompetitorSelection();
@@ -377,6 +378,12 @@ export default function MissionControl() {
           Public analyst rankings — real, cited placements by analyst firm,
           click through to the 2-year history per firm.
       ==================================================================== */}
+      {/* ====================================================================
+          Individual analyst coverage — named analysts per firm and what they
+          have actually published about the selected vendor.
+      ==================================================================== */}
+      <AnalystCoverageSection vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
+
       <PublicRankingsSection />
     </div>
   );

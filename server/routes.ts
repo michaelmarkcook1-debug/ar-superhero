@@ -35,6 +35,7 @@ import { analyzeRfp } from "./services/rfpAnalyzer";
 import { analystStore } from "./services/analystStore";
 import { suggestStanceFromSignals, confirmStance } from "./services/perceptionEngine";
 import { publicRankingsStore } from "./services/publicRankingsStore";
+import { analystCoverageStore } from "./services/analystCoverageStore";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -873,6 +874,65 @@ export async function registerRoutes(
     if (!parse.success) return res.status(400).json({ error: parse.error.issues });
     try {
       const created = await publicRankingsStore.insertRanking(parse.data);
+      res.json(created);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Analyst coverage — named individuals and what they have published about a
+  // tracked vendor. Validation enforces the factual-data rule at the boundary:
+  // a stance may only be stored WITH a real source_url, so no opinion can be
+  // attributed to a real person without a citation.
+  // --------------------------------------------------------------------------
+
+  const coverageSchema = z
+    .object({
+      analyst_name: z.string().min(2).max(160),
+      firm: z.string().min(2).max(120),
+      role: z.string().max(240).nullable().optional(),
+      coverage: z.array(z.string().max(120)).max(20).optional(),
+      profile_url: z.string().url().max(600).nullable().optional(),
+      vendor_id: z.string().max(40).nullable().optional(),
+      stance_summary: z.string().max(600).nullable().optional(),
+      quote: z.string().max(400).nullable().optional(),
+      source_url: z.string().url().max(600).nullable().optional(),
+      source_type: z.enum(["vendor_press_release", "analyst_firm_page", "trade_press", "other"]).nullable().optional(),
+      published_date: z.string().max(10).nullable().optional(),
+      date_precision: z.enum(["day", "month", "year"]).nullable().optional(),
+    })
+    .refine((d) => !d.stance_summary || Boolean(d.source_url), {
+      message: "stance_summary requires a source_url — a named analyst's position may not be stored uncited.",
+      path: ["source_url"],
+    })
+    .refine((d) => !d.quote || Boolean(d.source_url), {
+      message: "quote requires a source_url.",
+      path: ["source_url"],
+    })
+    .refine((d) => !d.stance_summary || Boolean(d.vendor_id), {
+      message: "stance_summary requires a vendor_id — a stance must be about a named vendor.",
+      path: ["vendor_id"],
+    });
+
+  app.get("/api/analyst-coverage", async (req, res) => {
+    try {
+      const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId : undefined;
+      res.json(await analystCoverageStore.list(vendorId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  app.post("/api/analyst-coverage", async (req, res) => {
+    const parse = coverageSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const { coverage, ...rest } = parse.data;
+      const created = await analystCoverageStore.insert({
+        ...rest,
+        coverage: coverage ? JSON.stringify(coverage) : "[]",
+      });
       res.json(created);
     } catch (err) {
       res.status(503).json({ error: (err as Error).message });

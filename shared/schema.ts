@@ -277,6 +277,43 @@ export const insertPublicAnalystRankingSchema = createInsertSchema(public_analys
 export type InsertPublicAnalystRanking = z.infer<typeof insertPublicAnalystRankingSchema>;
 
 // ============================================================================
+// Analyst coverage — INDIVIDUAL, NAMED analysts and what they have actually
+// published about a tracked vendor.
+//
+// This concerns real people, so the bar is higher than anywhere else in the
+// product: analyst_name / firm / profile_url identify a real person, and a row
+// only carries a stance when that stance traces to a real source_url. A row
+// with vendor_id = null is a verified analyst who covers the space but for whom
+// no commentary on our vendors was found — that is a legitimate, useful record
+// and must never be filled in with an inferred opinion. `quote` is verbatim or
+// null; it is never paraphrased into quotation marks.
+// ============================================================================
+export const analyst_coverage = sqliteTable("analyst_coverage", {
+  id: text("id").primaryKey(),
+  analyst_name: text("analyst_name").notNull(),
+  firm: text("firm").notNull(),
+  role: text("role"),
+  coverage: text("coverage").notNull().default("[]"), // JSON string[]
+  profile_url: text("profile_url"),
+  // null = verified analyst, no commentary found on our tracked vendors.
+  vendor_id: text("vendor_id"),
+  stance_summary: text("stance_summary"),
+  quote: text("quote"), // verbatim only, else null
+  source_url: text("source_url"),
+  source_type: text("source_type"),
+  published_date: text("published_date"),
+  date_precision: text("date_precision"),
+  created_at: integer("created_at").notNull(),
+});
+
+export type AnalystCoverage = typeof analyst_coverage.$inferSelect;
+export const insertAnalystCoverageSchema = createInsertSchema(analyst_coverage).partial({
+  id: true,
+  created_at: true,
+});
+export type InsertAnalystCoverage = z.infer<typeof insertAnalystCoverageSchema>;
+
+// ============================================================================
 // Tasks (suggested only in MVP)
 // ============================================================================
 export const tasks = sqliteTable("tasks", {
