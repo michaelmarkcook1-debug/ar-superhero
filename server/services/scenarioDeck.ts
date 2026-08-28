@@ -673,7 +673,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           await loadPlacements(vendor.id, req.competitorTickers),
           {
             title: "Published placements across the field",
-            note: "Real, cited analyst placements for you and the named competitors over the last two years.",
+            note: "Real, cited analyst placements on record for you and the named competitors.",
           }
         );
         break;
@@ -839,7 +839,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           vendorName,
           await loadPlacements(vendor.id, req.competitorTickers),
           {
-            title: "The published analyst record — last two years",
+            title: "The published analyst record",
             note: "Real, cited placements across the analyst firms covering this market.",
           }
         );

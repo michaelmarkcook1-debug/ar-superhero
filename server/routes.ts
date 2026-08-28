@@ -20,7 +20,7 @@ import {
   agFetch,
   getEndpoint,
 } from "./services/agApi";
-import { getArBrief } from "./services/agIntelligence";
+import { getArBrief, verifiedGapHeadline, verifiedInsight } from "./services/agIntelligence";
 import express from "express";
 import { randomUUID } from "node:crypto";
 import { ingestPptx } from "./services/deckIngest";
@@ -99,6 +99,50 @@ export async function registerRoutes(
         .json({ success: false, error: `Endpoint '${endpoint.key}' requires a ?ticker= query param` });
     }
     const result = await agFetch(endpoint.path, query);
+
+    // Apply the same claim verification the derived AR brief applies, HERE at
+    // the proxy, so every consumer gets it. Previously only the brief path was
+    // gated, which left the platform pages rendering AG's raw editorial — the
+    // exact contradiction the gate exists to stop (a firm measured "aligned"
+    // at the lowest gap in the set carrying the headline "the most
+    // under-recognized provider in AG's tracking set").
+    const body = result.body as any;
+    if (result.status === 200 && body) {
+      if (endpoint.key === "narrative-reality-gap" && body.gap) {
+        const g = body.gap;
+        // The gap payload carries its own gapScore and direction, so it is
+        // self-verifiable. No peer set here, so a superlative that cannot be
+        // checked is treated as unsupported rather than waved through.
+        g.headline = verifiedGapHeadline(
+          g.headline ?? null,
+          g.gapScore ?? null,
+          g.direction ?? null,
+          body.providerName ?? g.providerName ?? query.ticker ?? "This provider",
+          []
+        );
+      }
+      if (endpoint.key === "snapshot" && body.snapshot) {
+        const snap = body.snapshot;
+        // agInsight needs the measured direction, which the snapshot does not
+        // carry — fetch the gap for the same ticker to verify against.
+        try {
+          const gapRes = await agFetch("narrative-reality-gap", { ticker: query.ticker });
+          const gap = (gapRes.body as any)?.gap;
+          if (gap) {
+            snap.agInsight = verifiedInsight(
+              snap.agInsight ?? null,
+              gap.gapScore ?? null,
+              gap.direction ?? null,
+              []
+            );
+          }
+        } catch {
+          // Gap unavailable: leave the insight as-is rather than dropping real
+          // content on a transient failure.
+        }
+      }
+    }
+
     res.status(result.status).json(result.body);
   });
 

@@ -268,10 +268,24 @@ export async function buildPersonaBriefing(
 
   let headline: string;
   if (rank > 0 && scored.length > 1) {
+    const top = scored[0].v;
+    // A tie must not read as a lead. The sort is stable and the focal row is
+    // first, so an equal score would otherwise render "X leads this peer set".
+    const tiedAtTop = scored.filter((s) => s.v === top);
     const leader = scored[0].row;
-    headline = leader.isFocal
-      ? `${focal.name} leads this peer set on ${metricName} (${scored[0].v}).`
-      : `${focal.name} ranks ${rank} of ${scored.length} on ${metricName} — ${leader.name} leads at ${scored[0].v}.`;
+    if (leader.isFocal && tiedAtTop.length > 1) {
+      const others = tiedAtTop.filter((s) => !s.row.isFocal).map((s) => s.row.name);
+      headline = `${focal.name} is level at the top of this peer set on ${metricName} (${top}), tied with ${others.join(", ")}.`;
+    } else if (leader.isFocal) {
+      headline = `${focal.name} leads this peer set on ${metricName} (${top}).`;
+    } else {
+      headline = `${focal.name} ranks ${rank} of ${scored.length} on ${metricName} — ${leader.name} leads at ${top}.`;
+    }
+    // The rank denominator counts only firms AG gives a value for, so say when
+    // that is a smaller set than the scorecard shows.
+    if (scored.length < peerRows.length) {
+      headline += ` (${peerRows.length - scored.length} of ${peerRows.length} firms have no ${metricName} in AG and are excluded from that rank.)`;
+    }
   } else {
     headline = `${focal.name}: peer comparison on ${metricName} is incomplete — AG carries no value for some of this set.`;
   }
@@ -389,11 +403,24 @@ export async function buildPersonaBriefing(
       );
     }
     if (focalT.aiSkillDensityPct != null) {
-      const denser = talentReads.filter((r) => r && (r.aiSkillDensityPct ?? 0) > (focalT.aiSkillDensityPct ?? 0));
+      // Only firms that actually REPORT a density can be compared. Coercing a
+      // missing value to 0 would mean no peer ever exceeds the focal firm, and
+      // the branch below would assert "highest in this peer set" off the back
+      // of absent data — a superlative manufactured from nothing. Same shape
+      // as the attrition ranking above: filter nulls, require a real
+      // comparison set, and state the denominator.
+      const withDensity = talentReads.filter(
+        (r): r is TalentRead => !!r && r.aiSkillDensityPct != null
+      );
+      const denser = withDensity.filter(
+        (r) => (r.aiSkillDensityPct as number) > (focalT.aiSkillDensityPct as number)
+      );
       talentAnalysis.push(
-        denser.length === 0
-          ? `AI skill density ${focalT.aiSkillDensityPct}% is the highest in this peer set — a defensible engineering-depth claim.`
-          : `AI skill density ${focalT.aiSkillDensityPct}%; ${denser.length} peer(s) in this set report higher.`
+        withDensity.length < 2
+          ? `AI skill density ${focalT.aiSkillDensityPct}%; no peer in this set reports the figure, so there is nothing to compare it against.`
+          : denser.length === 0
+            ? `AI skill density ${focalT.aiSkillDensityPct}% is the highest of the ${withDensity.length} firms reporting it here — a defensible engineering-depth claim.`
+            : `AI skill density ${focalT.aiSkillDensityPct}%; ${denser.length} of the ${withDensity.length} firms reporting it are higher.`
       );
     }
     if (focalT.headcountYoY != null && focalT.headcountYoY < 0) {

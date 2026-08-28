@@ -177,8 +177,14 @@ function claimedDirection(headline: string): GapDir {
   const h = headline.toLowerCase();
   // Directional leans are checked first, so a headline that names a lean is
   // never mistaken for an alignment claim because it also says "aligned".
-  if (/under-recognis|under-recogniz|under-narrat|under-distribut|under-told|under-represent/.test(h)) return "under";
-  if (/over-hyped|over-stat|over-claim|over-represent|ahead of (its|their) delivery/.test(h)) return "over";
+  // Hyphen, space and closed-up spellings all count. Matching only the
+  // hyphenated form let a plain contradiction ("overhyped relative to
+  // delivery", "the most underrecognized provider") pass BOTH checks, because
+  // the superlative check only fires on "most/least/highest" wording.
+  if (/under[-\s]?recognis|under[-\s]?recogniz|under[-\s]?narrat|under[-\s]?distribut|under[-\s]?told|under[-\s]?represent|under[-\s]?appreciat|reality (?:is )?(?:running |runs )?ahead of (?:the |its |their )?(?:story|narrative)/.test(h))
+    return "under";
+  if (/over[-\s]?hyp|over[-\s]?stat|over[-\s]?claim|over[-\s]?represent|over[-\s]?sold|ahead of (?:its|their) delivery|narrative (?:runs |running |outpaces|is ahead)/.test(h))
+    return "over";
   // Alignment claims. AG has shipped "narrative and reality are close" on a
   // firm measured over-hyped at gap 15, which reads as a clean bill of health
   // the measurement does not support. Kept narrow — the phrase must actually
@@ -229,16 +235,20 @@ export function verifiedGapHeadline(
     return derivedHeadline(focalName, score, direction);
   }
 
-  // 2. Superlative contradiction — only checkable against the tracked set.
+  // 2. Superlative claims. A rank assertion is only publishable if we can
+  //    actually check it. An UNCHECKABLE superlative is treated as unsupported
+  //    and replaced — the alternative is shipping "the most under-recognized
+  //    provider in AG's tracking set" on the strength of no comparison at all,
+  //    which is precisely the claim that started this.
   if (/\b(most|least|highest|lowest|biggest|largest|widest|#1|number one)\b/i.test(headline)) {
-    const peers = competitors.filter((c) => typeof c.gapScore === "number");
-    if (peers.length && typeof score === "number") {
-      const beaten = peers.filter((c) => (c.gapScore as number) > score);
-      if (beaten.length) return derivedHeadline(focalName, score, direction);
-    }
-    // A superlative on a firm measured "aligned" is unsupportable regardless
-    // of the peer set — aligned means least divergent, not most.
+    // Aligned means least divergent, so a superlative is unsupportable outright.
     if (measured === "aligned") return derivedHeadline(focalName, score, direction);
+    const peers = competitors.filter((c) => typeof c.gapScore === "number");
+    if (!peers.length || typeof score !== "number") {
+      return derivedHeadline(focalName, score, direction);
+    }
+    const beaten = peers.filter((c) => (c.gapScore as number) > score);
+    if (beaten.length) return derivedHeadline(focalName, score, direction);
   }
 
   return headline;

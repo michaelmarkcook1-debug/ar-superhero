@@ -84,7 +84,7 @@ export default function PublicRankingsSection() {
     <section className="mb-14" data-testid="public-rankings-section">
       <div className="mb-7 flex items-baseline justify-between">
         <div>
-          <Eyebrow className="text-white/65">Public analyst rankings · last two years</Eyebrow>
+          <Eyebrow className="text-white/65">Public analyst rankings · all logged placements</Eyebrow>
           <p className="mt-1.5 text-[12.5px] text-white/60">
             Every entry is a real, cited placement — click a firm to see the full history and sources.
           </p>
@@ -163,7 +163,7 @@ export default function PublicRankingsSection() {
           {activeFirm && (
             <>
               <DialogHeader>
-                <Glyph className="mb-1">{sortedActiveEntries.length} placement{sortedActiveEntries.length === 1 ? "" : "s"} · last two years</Glyph>
+                <Glyph className="mb-1">{sortedActiveEntries.length} placement{sortedActiveEntries.length === 1 ? "" : "s"} · all logged</Glyph>
                 <DialogTitle className="text-[18px] font-semibold leading-snug text-[#f4eed8]">{activeFirm}</DialogTitle>
               </DialogHeader>
               <ul className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
