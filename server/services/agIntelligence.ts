@@ -311,16 +311,51 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
 
   if (!agConfigured()) return { ...empty, reason: "AG_API_KEY not configured" };
 
-  // Fetch focal signals + competitor snapshots in parallel.
-  const [snapR, gapR, repR, ...compRs] = await Promise.all([
+  // Fetch focal signals + competitor snapshots in parallel, plus the provider
+  // catalogue (see assessmentFor below for why the catalogue is needed).
+  const [snapR, gapR, repR, catR, ...compRs] = await Promise.all([
     agFetch("providers/snapshot", { ticker: focalTicker }),
     agFetch("narrative-reality-gap", { ticker: focalTicker }),
     agFetch("reputation-tracker/trends", { ticker: focalTicker }),
+    agFetch("providers", {}),
     ...competitorTickers.flatMap((t) => [
       agFetch("providers/snapshot", { ticker: t }),
       agFetch("narrative-reality-gap", { ticker: t }),
     ]),
   ]);
+
+  // ---------------------------------------------------------------------
+  // AG snapshot defect: providers/snapshot returns
+  //     assessmentScore = min(assessmentScore, aiReadinessScore)
+  // Measured 2026-08-28: the rule held for 24/24 sampled providers, and 0 of
+  // the 66 providers in the CATALOGUE have the two scores equal — so they are
+  // genuinely distinct metrics and the snapshot is collapsing one onto the
+  // other. It only ever loses information: 7 of 24 sampled were understated,
+  // by up to 53 points (Capgemini -19, Cognizant -18, Virtusa -24).
+  //
+  // That is not a uniform error — it silently penalises every firm whose
+  // assessment exceeds its AI readiness while leaving the others correct, so a
+  // peer comparison built on it is actively misleading rather than merely
+  // imprecise. The catalogue value is used for assessmentScore where the two
+  // disagree; everything else still comes from the snapshot. This corrects a
+  // measurement defect, it does not invent a measurement.
+  // ---------------------------------------------------------------------
+  const catalogue: any[] = ok(catR)?.providers ?? [];
+  const catalogueScore = (ticker: string): number | null => {
+    const p = catalogue.find((c) => c?.ticker === ticker);
+    return typeof p?.assessmentScore === "number" ? p.assessmentScore : null;
+  };
+  /** Assessment score with the snapshot's min() collapse corrected. */
+  const assessmentFor = (ticker: string, s: any): number | null => {
+    const snapVal = typeof s?.assessmentScore === "number" ? s.assessmentScore : null;
+    const catVal = catalogueScore(ticker);
+    if (snapVal === null) return catVal;
+    if (catVal === null) return snapVal;
+    // Collapse signature: snapshot equals aiReadiness AND the catalogue holds a
+    // higher, distinct assessment. Prefer the uncollapsed catalogue value.
+    if (snapVal === s?.aiReadinessScore && catVal > snapVal) return catVal;
+    return snapVal;
+  };
 
   const snap = ok(snapR)?.snapshot ?? null;
   const gap = ok(gapR)?.gap ?? null;
@@ -459,7 +494,7 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
     competitors.push({
       ticker: competitorTickers[i],
       name: cSnap?.displayName ?? cSnap?.name ?? cGap?.providerName ?? competitorTickers[i],
-      assessmentScore: cSnap?.assessmentScore ?? null,
+      assessmentScore: assessmentFor(competitorTickers[i], cSnap),
       aiReadinessScore: cSnap?.aiReadinessScore ?? null,
       revenueGrowthYoy: cSnap?.revenueGrowthYoy ?? null,
       gapDirection: cGap?.direction ?? null,
@@ -507,7 +542,7 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
     focal: {
       ticker: focalTicker,
       name: focalName,
-      assessmentScore: snap?.assessmentScore ?? null,
+      assessmentScore: assessmentFor(focalTicker, snap),
       aiReadinessScore: snap?.aiReadinessScore ?? null,
       revenueUsd: snap?.revenueUsd ?? null,
       revenueGrowthYoy: snap?.revenueGrowthYoy ?? null,
