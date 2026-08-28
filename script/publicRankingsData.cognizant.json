@@ -37,18 +37,6 @@
   },
   {
     "vendor_id": "cognizant",
-    "analyst_firm": "Forrester",
-    "report_name": "The Forrester Wave: Intelligent Process Automation & RPA Services, Q1 2026",
-    "category": "Intelligent process automation & RPA services",
-    "placement": "Contender",
-    "published_date": "2026",
-    "date_precision": "year",
-    "source_url": "https://codeninety.com/reports/forrester-wave-intelligent-process-automation-2026",
-    "source_type": "other",
-    "summary": "Third-party summary places Cognizant in the Contender tier; lower confidence source."
-  },
-  {
-    "vendor_id": "cognizant",
     "analyst_firm": "IDC",
     "report_name": "IDC MarketScape: U.S. Value-Based Healthcare Analytics 2025 Vendor Assessment",
     "category": "U.S. value-based healthcare analytics",
@@ -386,7 +374,7 @@
   {
     "vendor_id": "cognizant",
     "analyst_firm": "ISG",
-    "report_name": "ISG Provider Lens Application Quality Assurance Services 2025 — APAC, Europe, and U.S.",
+    "report_name": "ISG Provider Lens Application Quality Assurance Services 2025 \u2014 APAC, Europe, and U.S.",
     "category": "Application quality assurance services",
     "placement": "Leader",
     "published_date": "2025",
@@ -398,7 +386,7 @@
   {
     "vendor_id": "cognizant",
     "analyst_firm": "ISG",
-    "report_name": "ISG Provider Lens Application Managed Services 2025 — APAC, Europe, and U.S.",
+    "report_name": "ISG Provider Lens Application Managed Services 2025 \u2014 APAC, Europe, and U.S.",
     "category": "Application managed services",
     "placement": "Leader",
     "published_date": "2025",
@@ -413,7 +401,7 @@
     "report_name": "ISG Provider Lens Oracle Cloud and Technology Ecosystem 2025 (U.S. edition)",
     "category": "Oracle cloud and technology ecosystem",
     "placement": "Leader",
-    "published_date": "2026-01-19",
+    "published_date": "2026-03-09",
     "date_precision": "day",
     "source_url": "https://news.cognizant.com/2026-03-09-Cognizant-Recognized-as-a-Leader-in-the-2025-ISG-Provider-Lens-TM-Oracle-Cloud-and-Technology-Ecosystem-Report",
     "source_type": "vendor_press_release",
@@ -448,12 +436,12 @@
     "analyst_firm": "ISG",
     "report_name": "ISG Star of Excellence 2025",
     "category": "Customer experience awards (not a quadrant placement)",
-    "placement": "Excellence Award Winner / CX Star Performer",
+    "placement": "Regional Award \u2014 APAC; CX Star Performer \u2014 Oracle Cloud and Technology Ecosystem",
     "published_date": "2025-11-19",
     "date_precision": "day",
     "source_url": "https://isg-one.com/providers/star-of-excellence/2025-awards",
     "source_type": "analyst_firm_page",
-    "summary": "ISG gave Cognizant an Asia Pacific regional award and CX Star Performer."
+    "summary": "ISG gave Cognizant the APAC regional award and a CX Star Performer award for the Oracle Cloud and Technology Ecosystem category."
   },
   {
     "vendor_id": "cognizant",
@@ -533,8 +521,8 @@
     "report_name": "Market Readiness Index 2026",
     "category": "UK supplier readiness for AI-led transformation",
     "placement": "Leading Pack",
-    "published_date": "2026-04",
-    "date_precision": "month",
+    "published_date": "2026-07-01",
+    "date_precision": "day",
     "source_url": "https://news.cognizant.com/Cognizant-Named-Leading-Pack-in-TechMarketView-Market-Readiness-Index-2026",
     "source_type": "vendor_press_release",
     "summary": "TechMarketView placed Cognizant in its top tier of 10 UK suppliers."
