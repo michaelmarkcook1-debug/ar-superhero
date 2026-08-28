@@ -868,12 +868,24 @@
     "analyst_firm": "ISG",
     "report_name": "ISG Star of Excellence 2024 Awards",
     "category": "Customer experience / service delivery excellence (award)",
-    "placement": "Client Champion",
+    "placement": "Overall Star of Excellence Award; CX Partnership — most collaborative partner",
     "published_date": "2024-11-20",
     "date_precision": "day",
     "source_url": "https://www.businesswire.com/news/home/20241120079157/en/ISG-Presents-2024-ISG-Star-of-Excellence-Awards-to-Accenture-Capgemini-Persistent-Systems",
     "source_type": "trade_press",
-    "summary": "ISG named Capgemini a Client Champion alongside Accenture and Persistent Systems."
+    "summary": "ISG gave Capgemini an overall Star of Excellence Award and the CX Partnership award for most collaborative partner."
+  },
+  {
+    "vendor_id": "capgemini",
+    "analyst_firm": "ISG",
+    "report_name": "ISG Star of Excellence 2025 Awards",
+    "category": "Customer experience awards (not a quadrant placement)",
+    "placement": "Client Champion",
+    "published_date": "2025-11",
+    "date_precision": "month",
+    "source_url": "https://isg-one.com/providers/star-of-excellence/2025-awards",
+    "source_type": "analyst_firm_page",
+    "summary": "ISG named Capgemini a Client Champion in its 2025 Star of Excellence awards, alongside HCLTech and Hexaware."
   },
   {
     "vendor_id": "capgemini",
