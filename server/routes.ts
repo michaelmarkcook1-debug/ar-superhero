@@ -365,7 +365,7 @@ export async function registerRoutes(
       const filename = String(req.query.filename ?? "").trim() || "untitled.pptx";
       const house = String(req.query.house ?? "").trim().toLowerCase();
       if (!HOUSE_IDS.has(house)) {
-        return res.status(400).json({ error: `house must be one of: ${[...HOUSE_IDS].join(", ")}` });
+        return res.status(400).json({ error: `house must be one of: ${Array.from(HOUSE_IDS).join(", ")}` });
       }
       const isDemo = req.query.demo === "1" || req.query.demo === "true";
       const body = req.body as Buffer;

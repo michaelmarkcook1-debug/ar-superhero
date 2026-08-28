@@ -73,6 +73,9 @@ export type ArBrief = {
   };
   gapAnalysis?: ArGapAnalysis;
   movement?: MovementReport;
+  /** Reputation lens movement (last two periods), verbatim from AG trends.
+   *  The server has always sent this; the client type simply omitted it. */
+  reputationLenses?: { name: string; prev: number; last: number; delta: number; span: string }[];
   competitorTickers: string[];
   emergencies: ArBriefItem[];
   highlights: ArBriefItem[];
