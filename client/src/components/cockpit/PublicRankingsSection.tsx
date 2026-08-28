@@ -80,6 +80,12 @@ export default function PublicRankingsSection() {
     return b.published_date.localeCompare(a.published_date);
   });
 
+  // Provenance strength. A placement confirmed on the analyst firm's own page is
+  // stronger evidence than the same placement claimed on the vendor's recognition
+  // hub or press release. Both are real citations, so both are shown — but the
+  // split is stated rather than left for the reader to tally link by link.
+  const firmConfirmed = sortedActiveEntries.filter((e) => e.source_type === "analyst_firm_page").length;
+
   return (
     <section className="mb-14" data-testid="public-rankings-section">
       <div className="mb-7 flex items-baseline justify-between">
@@ -165,6 +171,13 @@ export default function PublicRankingsSection() {
               <DialogHeader>
                 <Glyph className="mb-1">{sortedActiveEntries.length} placement{sortedActiveEntries.length === 1 ? "" : "s"} · all logged</Glyph>
                 <DialogTitle className="text-[18px] font-semibold leading-snug text-[#f4eed8]">{activeFirm}</DialogTitle>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-white/60">
+                  {firmConfirmed === sortedActiveEntries.length
+                    ? "Every placement here is confirmed on the analyst firm's own page."
+                    : firmConfirmed === 0
+                      ? "All of these are vendor-reported. None is confirmed on an analyst-firm page — the placement may still be genuine, but the citation is the vendor's own."
+                      : `${firmConfirmed} of ${sortedActiveEntries.length} are confirmed on the analyst firm's own page; the rest are vendor-reported.`}
+                </p>
               </DialogHeader>
               <ul className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
                 {sortedActiveEntries.map((e) => (

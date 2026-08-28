@@ -55,7 +55,7 @@
     "placement": "Leader",
     "published_date": "2025",
     "date_precision": "year",
-    "source_url": "https://www.accenture.com/us-en/insights/consulting/analyst-recognitions",
+    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
     "source_type": "vendor_press_release",
     "summary": "Accenture was a Leader in the 2025 edition, later rebranded PCOTS for 2026."
   },
@@ -187,9 +187,9 @@
     "placement": "Leader",
     "published_date": "2026-05",
     "date_precision": "month",
-    "source_url": "https://www.ey.com/en_gl/newsroom/2026/07/ey-named-a-leader-in-the-forrester-wave-ai-consulting-services-q2-2026",
-    "source_type": "trade_press",
-    "summary": "EY's own release names the same four Leaders — PwC, Accenture, EY and IBM — independently corroborating Accenture's placement."
+    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+    "source_type": "vendor_press_release",
+    "summary": "Accenture reports Leader status in this Wave on its own recognition hub. Not independently corroborated by an analyst-firm page."
   },
   {
     "vendor_id": "accenture",
@@ -259,7 +259,7 @@
     "placement": "Leader",
     "published_date": "2025-10",
     "date_precision": "month",
-    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+    "source_url": "https://www.accenture.com/us-en/insights/strategy/analyst-recognitions",
     "source_type": "vendor_press_release",
     "summary": "IDC named Accenture a Leader in AI services for national civilian government."
   },
@@ -307,7 +307,7 @@
     "placement": "Leader",
     "published_date": "2025-12",
     "date_precision": "month",
-    "source_url": "https://www.accenture.com/us-en/insights/cybersecurity/analyst-recognitions",
+    "source_url": "https://www.accenture.com/us-en/insights/finance-risk/analyst-recognitions",
     "source_type": "vendor_press_release",
     "summary": "IDC named Accenture a Leader in enterprise GRC services."
   },
@@ -319,9 +319,9 @@
     "placement": "Leader and Star Performer",
     "published_date": "2025-10-29",
     "date_precision": "day",
-    "source_url": "https://www.everestgrp.com/report/egr-2025-71-r-7627/",
-    "source_type": "analyst_firm_page",
-    "summary": "Everest Group's own report page confirms this assessment; Accenture is a Leader and Star Performer among 27 providers."
+    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+    "source_type": "vendor_press_release",
+    "summary": "Accenture reports Leader and Star Performer status on its own recognition hub. Everest Group’s public report page confirms the report and that Accenture was covered, but does not state a placement."
   },
   {
     "vendor_id": "accenture",
@@ -331,9 +331,9 @@
     "placement": "Leader and Star Performer",
     "published_date": "2025-11-13",
     "date_precision": "day",
-    "source_url": "https://www.everestgrp.com/report/egr-2025-44-r-7704/",
-    "source_type": "analyst_firm_page",
-    "summary": "Everest Group's own report page confirms Accenture as a top Leader and Star Performer in D&A services."
+    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+    "source_type": "vendor_press_release",
+    "summary": "Accenture reports Leader and Star Performer status on its own recognition hub. Everest Group’s public report page confirms the report and that Accenture was covered, but does not state a placement."
   },
   {
     "vendor_id": "accenture",
@@ -343,9 +343,9 @@
     "placement": "Leader and Star Performer",
     "published_date": "2025-12-02",
     "date_precision": "day",
-    "source_url": "https://www.everestgrp.com/report/egr-2025-50-r-7754/",
-    "source_type": "analyst_firm_page",
-    "summary": "Everest Group's own report page confirms Accenture as a top Leader and Star Performer for ServiceNow services."
+    "source_url": "https://www.accenture.com/us-en/insights/ai-data/analyst-recognitions",
+    "source_type": "vendor_press_release",
+    "summary": "Accenture reports Leader and Star Performer status on its own recognition hub. Everest Group’s public report page confirms the report and that Accenture was covered, but does not state a placement."
   },
   {
     "vendor_id": "accenture",
