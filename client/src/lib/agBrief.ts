@@ -56,6 +56,11 @@ export type MovementReport = {
 export type ArBrief = {
   live: boolean;
   degraded?: boolean;
+  // AG was unreachable, so the server served the last complete live read.
+  // Real measured data of a known age — not demo content.
+  stale?: boolean;
+  staleSinceIso?: string;
+  staleAgeMinutes?: number;
   reason?: string;
   generatedAt: string;
   focal?: {

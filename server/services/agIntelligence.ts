@@ -1,4 +1,5 @@
 import { agConfigured, agFetch } from "./agApi";
+import { loadLastGood, saveLastGood } from "./briefCache";
 import { captureSignals, deriveMovement, type MovementReport } from "./signalHistory";
 
 // ============================================================================
@@ -114,6 +115,12 @@ export interface ArBrief {
   // A degraded brief is never cached, so the next request retries fresh rather
   // than serving blank scores for the whole cache window.
   degraded?: boolean;
+  // Set when AG was unreachable and we served the last COMPLETE live read
+  // instead of dropping to demo content. The data is real and measured; only
+  // its age is in question, so the exact age is carried for honest labelling.
+  stale?: boolean;
+  staleSinceIso?: string;
+  staleAgeMinutes?: number;
 }
 
 interface SentimentSeries {
@@ -122,6 +129,10 @@ interface SentimentSeries {
 }
 
 const _cache = new Map<string, { brief: ArBrief; at: number }>();
+// Last COMPLETE live build per cache key, kept beyond the serving TTL. When AG
+// is unreachable this is served — labelled with its age — in preference to
+// demo content. Real data of a known age beats invented data of no age.
+const _lastGood = new Map<string, { brief: ArBrief; at: number }>();
 
 function ok(r: { status: number; body: unknown }): any | null {
   if (r.status < 200 || r.status >= 300) return null;
@@ -596,6 +607,39 @@ async function buildBrief(competitorTickers: string[], focalTicker: string): Pro
   };
 }
 
+/**
+ * Prefer the last COMPLETE live read over an incomplete one. Returns a copy
+ * flagged `stale` with its exact age so the UI can say how old it is; returns
+ * `current` unchanged when there is nothing better to serve.
+ */
+async function staleOr(cacheKey: string, current: ArBrief, now: number): Promise<ArBrief>;
+async function staleOr(cacheKey: string, current: null, now: number): Promise<ArBrief | null>;
+async function staleOr(cacheKey: string, current: ArBrief | null, now: number): Promise<ArBrief | null> {
+  // In-process first (free); fall back to the durable copy, which is what makes
+  // this survive the cold start an outage typically coincides with.
+  const good = _lastGood.get(cacheKey) ?? (await loadLastGood(cacheKey));
+  if (!good) return current;
+  const ageMinutes = Math.max(0, Math.round((now - good.at) / 60_000));
+  return {
+    ...good.brief,
+    stale: true,
+    staleSinceIso: new Date(good.at).toISOString(),
+    staleAgeMinutes: ageMinutes,
+    sourceNote:
+      `AnalystGenius is not responding right now — showing the last complete live read, taken ${describeAge(ageMinutes)}. ` +
+      "Every figure below is real AnalystGenius data from that read, not demo content.",
+  };
+}
+
+function describeAge(minutes: number): string {
+  if (minutes < 1) return "moments ago";
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
 export async function getArBrief(
   opts: { competitors?: string[]; force?: boolean; focalTicker?: string } = {}
 ): Promise<ArBrief> {
@@ -616,9 +660,19 @@ export async function getArBrief(
     // Cache only a COMPLETE live build. A degraded brief (focal snapshot
     // failed → blank scores) is returned but never cached, so the next request
     // retries fresh instead of serving blanks for the whole cache window.
-    if (brief.live && !brief.degraded) _cache.set(cacheKey, { brief, at: now });
-    return brief;
+    if (brief.live && !brief.degraded) {
+      _cache.set(cacheKey, { brief, at: now });
+      _lastGood.set(cacheKey, { brief, at: now });
+      void saveLastGood(cacheKey, brief, now);
+      return brief;
+    }
+    // Incomplete build. Before dropping to demo content, fall back to the last
+    // complete live read if we have one — it is real, measured data, and its
+    // age is disclosed rather than hidden.
+    return await staleOr(cacheKey, brief, now);
   } catch (err) {
+    const fallback = await staleOr(cacheKey, null, Date.now());
+    if (fallback) return fallback;
     return {
       live: false,
       reason: err instanceof Error ? err.message : "derivation failed",

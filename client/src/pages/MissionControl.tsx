@@ -28,14 +28,27 @@ import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOppo
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
 
+/** Human-readable age for the stale-read notice. Mirrors the server wording. */
+function describeAge(minutes: number): string {
+  if (minutes < 1) return "moments ago";
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
 export default function MissionControl() {
   const { competitors, setCompetitors } = useCompetitorSelection();
   const { focalVendorId, setFocalVendorId } = useFocalVendor();
   const { data: arBrief } = useArBrief(competitors, vendorTicker(focalVendorId));
   // A degraded brief (focal snapshot failed → blank scores) is treated as
   // not-fully-live so the cockpit shows complete labelled demo content rather
-  // than half-empty live panels.
+  // than half-empty live panels. A *stale* brief is different: AG was
+  // unreachable, so the server served the last complete live read. That is real
+  // measured data, so it renders as live — with its age stated, not hidden.
   const live = Boolean(arBrief?.live) && !arBrief?.degraded;
+  const stale = live && Boolean(arBrief?.stale);
 
   // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
   // "What changed" = REAL captured movement over the last 14 days (our own
@@ -114,6 +127,17 @@ export default function MissionControl() {
 
       {live && arBrief ? (
         <section className="mb-12">
+          {stale && (
+            <p
+              data-testid="ag-stale-notice"
+              className="mb-3 rounded-lg border border-[#a88945]/35 bg-[#a88945]/[0.10] px-3 py-2 text-[12.5px] leading-relaxed text-[#f0dca8]"
+            >
+              AnalystGenius is not responding right now. Every figure below is real AnalystGenius data
+              from the last complete read
+              {typeof arBrief.staleAgeMinutes === "number" ? `, taken ${describeAge(arBrief.staleAgeMinutes)}` : ""} —
+              not demo content.
+            </p>
+          )}
           <NarrativeGapHero brief={arBrief} />
         </section>
       ) : (
