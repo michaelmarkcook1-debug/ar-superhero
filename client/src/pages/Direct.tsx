@@ -33,6 +33,7 @@ import {
   type GenericUploadedItem,
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
+import WorkSeedDialog, { type SeedRequest } from "@/components/cockpit/WorkSeedDialog";
 
 export default function Direct() {
   const [tab, setTab] = useState<"briefings" | "documents" | "pipeline">("briefings");
@@ -45,6 +46,7 @@ export default function Direct() {
   // One vendor context across the cockpit, shared with Mission Control and Succeed.
   const { focalVendorId, setFocalVendorId } = useFocalVendor();
   const vendorId = focalVendorId || VENDOR_OPTIONS[0].id;
+  const [seedRequest, setSeedRequest] = useState<SeedRequest | null>(null);
   const selected = LENSES.find((l) => l.id === selectedId) || LENSES[0];
 
   async function downloadScenarioDeck(personaId: LensId, scenario: PersonaScenarioId, houseId: AnalystHouseId) {
@@ -161,6 +163,7 @@ export default function Direct() {
         active={tab}
         onChange={setTab}
       />
+      <WorkSeedDialog request={seedRequest} onClose={() => setSeedRequest(null)} />
 
       {tab === "briefings" && (
         <>
@@ -425,6 +428,24 @@ export default function Direct() {
                 {downloading !== null ? "Generating…" : "Generate this briefing"}
                 <FileDown className="h-3.5 w-3.5" />
               </button>
+              {scenarioId !== "standard" && (
+                <button
+                  type="button"
+                  data-testid="button-seed-scenario"
+                  onClick={() =>
+                    setSeedRequest({
+                      kind: "scenario",
+                      vendorId,
+                      personaId: selected.id,
+                      scenarioId,
+                      houseId: scenariosForPersona(selected.id).find((s) => s.id === scenarioId)?.houseScoped ? scenarioHouse : undefined,
+                    })
+                  }
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-5 py-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#9fe3e8] transition hover:bg-[#00a7b7]/[0.14]"
+                >
+                  Start work on this · WorkEngine
+                </button>
+              )}
             </div>
           )}
           <button

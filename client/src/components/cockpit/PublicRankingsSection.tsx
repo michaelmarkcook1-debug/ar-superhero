@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import WorkSeedDialog, { type SeedRequest } from "@/components/cockpit/WorkSeedDialog";
 import { cn } from "@/lib/utils";
 import { VENDOR_OPTIONS } from "@/lib/cockpit";
 
@@ -59,6 +60,7 @@ function formatPublished(published_date: string, precision: string): string {
 export default function PublicRankingsSection() {
   const { data, isLoading, isError } = useQuery<RankingRow[]>({ queryKey: ["/api/public-rankings"] });
   const [activeFirm, setActiveFirm] = useState<string | null>(null);
+  const [seedRequest, setSeedRequest] = useState<SeedRequest | null>(null);
 
   const rows = data ?? [];
 
@@ -209,6 +211,14 @@ export default function PublicRankingsSection() {
                     >
                       {SOURCE_TYPE_LABEL[e.source_type] ?? e.source_type} <ExternalLink className="h-3 w-3" />
                     </a>
+                    <button
+                      type="button"
+                      onClick={() => setSeedRequest({ kind: "evaluation", vendorId: e.vendor_id, firm: e.analyst_firm, reportName: e.report_name })}
+                      data-testid={`ranking-seed-${e.id}`}
+                      className="ml-3 mt-2 inline-flex items-center rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                    >
+                      Prepare next cycle
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -216,6 +226,7 @@ export default function PublicRankingsSection() {
           )}
         </DialogContent>
       </Dialog>
+      <WorkSeedDialog request={seedRequest} onClose={() => setSeedRequest(null)} />
     </section>
   );
 }

@@ -37,6 +37,7 @@ import { suggestStanceFromSignals, confirmStance } from "./services/perceptionEn
 import { publicRankingsStore } from "./services/publicRankingsStore";
 import { analystCoverageStore } from "./services/analystCoverageStore";
 import { syncRosterFromCoverage, vendorAnalystView } from "./services/rosterSync";
+import { buildWorkSeed } from "./services/workSeed";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -718,6 +719,31 @@ export async function registerRoutes(
   // coverage (what each named analyst has published, with its source) merged
   // with the roster (what the AR team has recorded about the relationship).
   // Registered before the :id routes so the literal segment is not read as an id.
+  // "Start work on this": a WorkEngine hand-off built only from real material
+  // SuperHero holds — a named analyst's sourced coverage, a scenario with the
+  // live read and placements, or an evaluation with a cited placement history.
+  const seedSchema = z.discriminatedUnion("kind", [
+    z.object({ kind: z.literal("analyst-briefing"), vendorId: z.string().min(1), analystKey: z.string().min(3) }),
+    z.object({
+      kind: z.literal("scenario"),
+      vendorId: z.string().min(1),
+      personaId: z.string().min(1),
+      scenarioId: z.string().min(1),
+      houseId: z.enum(["gartner", "forrester", "idc", "hfs", "nelsonhall", "isg", "everest"]).optional(),
+    }),
+    z.object({ kind: z.literal("evaluation"), vendorId: z.string().min(1), firm: z.string().min(1), reportName: z.string().min(1) }),
+  ]);
+  app.post("/api/workengine/seed", async (req, res) => {
+    const parse = seedSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      res.json(await buildWorkSeed(parse.data));
+    } catch (err) {
+      const message = (err as Error).message;
+      res.status(/not in the coverage|Unknown briefing|No cited placement/.test(message) ? 404 : 503).json({ error: message });
+    }
+  });
+
   app.get("/api/analysts/vendor-view", async (req, res) => {
     const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId.trim() : "";
     if (!vendorId) return res.status(400).json({ error: "vendorId is required" });

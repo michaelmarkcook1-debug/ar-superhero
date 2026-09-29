@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { ArrowUpRight, ExternalLink, UserRound } from "lucide-react";
 import { Pane, Eyebrow, HairLine } from "@/components/cockpit/atoms";
 import { VENDOR_OPTIONS } from "@/lib/cockpit";
+import WorkSeedDialog, { type SeedRequest } from "@/components/cockpit/WorkSeedDialog";
 
 // ============================================================================
 // Your analysts — the AR morning question, answered from real data.
@@ -71,6 +73,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
     queryKey: [`/api/analysts/vendor-view?vendorId=${encodeURIComponent(effectiveVendor)}`],
   });
 
+  const [seedRequest, setSeedRequest] = useState<SeedRequest | null>(null);
   const summary = data?.summary;
   const shown = (data?.analysts ?? []).slice(0, SHOW);
   const more = Math.max(0, (data?.analysts.length ?? 0) - SHOW);
@@ -151,12 +154,22 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
                       )}
                     </div>
                   </div>
-                  {a.last_interaction_at !== null && (
-                    <div className="shrink-0 text-right font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
-                      last contact{" "}
-                      {new Date(a.last_interaction_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                    </div>
-                  )}
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    {a.last_interaction_at !== null && (
+                      <div className="text-right font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                        last contact{" "}
+                        {new Date(a.last_interaction_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setSeedRequest({ kind: "analyst-briefing", vendorId: effectiveVendor, analystKey: a.key })}
+                      data-testid={`your-analyst-seed-${a.key.replace(/[^a-z0-9]+/g, "-")}`}
+                      className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                    >
+                      Prepare briefing
+                    </button>
+                  </div>
                 </li>
               );
             })}
@@ -189,6 +202,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
           </>
         )}
       </Pane>
+      <WorkSeedDialog request={seedRequest} onClose={() => setSeedRequest(null)} />
     </section>
   );
 }
