@@ -49,6 +49,19 @@ export function RatingPill({
   rating: string;
   confidence: number;
 }) {
+  // An analyst seeded from public coverage carries no relationship judgement
+  // yet. Say so, rather than dressing a default up as a grade with a
+  // confidence figure beside it.
+  if (rating === "Unrated") {
+    return (
+      <span
+        className="inline-flex items-center rounded-md border border-border/70 bg-transparent px-2 py-0.5 text-[11px] text-muted-foreground"
+        title="No relationship rating recorded yet"
+      >
+        Unrated
+      </span>
+    );
+  }
   // Single muted pill — rating left, confidence dot right.
   // Color reserved for primary/accent moments per design system.
   return (

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronRight, FileDown, FileText, Calendar, Target } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { storedCompetitorTickers } from "@/lib/agBrief";
+import { storedCompetitorTickers, useFocalVendor } from "@/lib/agBrief";
 import AssessmentPlaybooks from "@/components/cockpit/AssessmentPlaybooks";
 import BriefingComposer from "@/components/cockpit/BriefingComposer";
 import AssessmentResults from "@/components/cockpit/AssessmentResults";
@@ -57,7 +57,10 @@ export default function Succeed() {
   const [extraUploads, setExtraUploads] = useState<SucceedUpload[]>([]);
   const [generatingDeckId, setGeneratingDeckId] = useState<string | null>(null);
   const [deckError, setDeckError] = useState<string | null>(null);
-  const [selectedVendorId, setSelectedVendorId] = useState<string>("capgemini");
+  // One vendor context across the cockpit: the selection Mission Control and
+  // Direct share, persisted, rather than a page-local default.
+  const { focalVendorId, setFocalVendorId } = useFocalVendor();
+  const selectedVendorId = focalVendorId || VENDOR_OPTIONS[0].id;
   const selected = liveMoments.find((m) => m.id === selectedId) || liveMoments[0];
   const selectedVendor =
     VENDOR_OPTIONS.find((vendor) => vendor.id === selectedVendorId) ?? VENDOR_OPTIONS[0];
@@ -189,15 +192,15 @@ export default function Succeed() {
         <div className="mt-7 inline-flex flex-wrap items-center gap-3 rounded-2xl border border-[#a88945]/25 bg-[#a88945]/[0.06] px-4 py-3">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#d5b46b]">
-              Demo vendor
+              Briefing on
             </div>
             <div className="mt-0.5 text-[13px] text-white/55">
-              Generated briefing decks use this vendor context.
+              Shared with Mission Control and Direct. Generated decks use this company.
             </div>
           </div>
           <select
             value={selectedVendorId}
-            onChange={(event) => setSelectedVendorId(event.target.value)}
+            onChange={(event) => setFocalVendorId(event.target.value)}
             data-testid="select-briefing-deck-vendor"
             className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
           >

@@ -123,9 +123,9 @@ export default function Enable() {
           Enable the business to <span className="text-[#a88945]">sell and build market presence.</span>
         </h1>
         <p className="mt-5 max-w-2xl text-[15.5px] leading-relaxed text-white/55 md:text-[16.5px]">
-          Analyst-informed proof and guidance for internal teams. No public
-          campaigns — every artefact here is for sellers, pursuit teams, and
-          internal marketing.
+          Analyst-informed proof and guidance for the people who sell and
+          position the firm: sellers, pursuit teams and internal marketing.
+          Everything here is internal-only by design.
         </p>
       </section>
 
@@ -143,7 +143,7 @@ export default function Enable() {
           subtitle="Sales decks, approved proof points, case studies, references, messaging drafts, campaign plans, thought-leadership drafts, website copy, enablement notes, claim lists, recognition snippets, internal comms drafts. Each upload is audited for proof clearance, claim risk, and presence-gap fit."
           types={ENABLE_MATERIAL_TYPES}
           onSimulatedUpload={handleSimulatedUpload}
-          permissionNote="Outputs are internal-only. Sales-safe proof is cleared for buyer-facing reuse; restricted proof shows its permitted audience. No public campaign generation in this release."
+          permissionNote="Outputs are internal-only. Sales-safe proof is cleared for buyer-facing reuse; restricted proof shows its permitted audience."
         />
       </section>
         </>
@@ -183,10 +183,10 @@ export default function Enable() {
           accent="gold"
           eyebrow="Enable decision model"
           title="From upload to sales-safe guidance."
-          description="Six stages turn raw enablement material into cleared proof, restricted claims, audience-permitted reuse, presence-gap mapping, and internal thought-leadership prompts. No public campaign generation in this release."
+          description="Six stages turn raw enablement material into cleared proof, restricted claims, audience-permitted reuse, presence-gap mapping, and internal thought-leadership prompts."
           stages={ENABLE_DECISION_STAGES}
           impacts={ENABLE_MODEL_IMPACTS}
-          finalNote="All outputs are internal-only. Sellers see sales-safe proof; marketing sees restricted claims to avoid. Public campaign generation is out of scope for the MVP."
+          finalNote="All outputs are internal-only. Sellers see sales-safe proof; marketing sees restricted claims to avoid."
         />
       </section>
       )}
@@ -446,7 +446,7 @@ function PresenceContent() {
         <DeliverablesPanel
           eyebrow="Build market presence deliverables"
           title="Internal guidance for marketing and AR."
-          description="AnalystGenius templates for the Build market presence workstream. Outputs guide internal marketing, narrative shaping, and recognition usage. No public campaign generation in MVP."
+          description="AnalystGenius templates for the Build market presence workstream. Outputs guide internal marketing, narrative shaping, and recognition usage."
           templates={ENABLE_PRESENCE_DELIVERABLES}
           accent="teal"
           guardrailNote={ENABLE_DELIVERABLES_NOTE}
@@ -458,7 +458,7 @@ function PresenceContent() {
         <SectionTitle
           eyebrow="Thought leadership opportunities"
           title="Where AR could spark the next conversation."
-          description="Internal prompts only — none of these run as public campaigns in this release."
+          description="Internal prompts for AR, Strategy and Marketing to take forward."
         />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {OPPORTUNITIES.map((o) => (

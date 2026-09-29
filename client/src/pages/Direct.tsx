@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowRight, ChevronRight, AlertTriangle, Sparkles, FileDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { storedCompetitorTickers } from "@/lib/agBrief";
+import { storedCompetitorTickers, useFocalVendor } from "@/lib/agBrief";
 import { scenariosForPersona, type PersonaScenarioId } from "@shared/briefingScenarios";
 import { HOUSE_PLAYBOOKS, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 import {
@@ -42,7 +42,9 @@ export default function Direct() {
   const [contextOpen, setContextOpen] = useState(false);
   const [scenarioId, setScenarioId] = useState<PersonaScenarioId | "standard">("standard");
   const [scenarioHouse, setScenarioHouse] = useState<AnalystHouseId>("gartner");
-  const [vendorId, setVendorId] = useState(VENDOR_OPTIONS[0].id);
+  // One vendor context across the cockpit, shared with Mission Control and Succeed.
+  const { focalVendorId, setFocalVendorId } = useFocalVendor();
+  const vendorId = focalVendorId || VENDOR_OPTIONS[0].id;
   const selected = LENSES.find((l) => l.id === selectedId) || LENSES[0];
 
   async function downloadScenarioDeck(personaId: LensId, scenario: PersonaScenarioId, houseId: AnalystHouseId) {
@@ -182,15 +184,15 @@ export default function Direct() {
         <div className="mt-7 inline-flex flex-wrap items-center gap-3 rounded-2xl border border-[#a88945]/25 bg-[#a88945]/[0.06] px-4 py-3">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#d5b46b]">
-              Vendor
+              Briefing on
             </div>
             <div className="mt-0.5 text-[13px] text-white/55">
-              Generated persona and scenario decks brief for this company.
+              Shared with Mission Control and Succeed. Persona and scenario decks brief for this company.
             </div>
           </div>
           <select
             value={vendorId}
-            onChange={(event) => setVendorId(event.target.value)}
+            onChange={(event) => setFocalVendorId(event.target.value)}
             data-testid="select-persona-deck-vendor"
             className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
           >

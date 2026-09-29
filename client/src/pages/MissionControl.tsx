@@ -1,32 +1,15 @@
 import { Link } from "wouter";
-import { ArrowUpRight, Activity, AlertTriangle, Sparkles } from "lucide-react";
+import { ArrowUpRight, AlertTriangle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArBrief, useCompetitorSelection, useFocalVendor } from "@/lib/agBrief";
 import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
-import {
-  MODES,
-  BRIEF_ITEMS,
-  MOMENTS,
-  EVIDENCE_GAPS,
-  LENSES,
-  SELL_PROOF,
-  CLAIMS_TO_AVOID,
-  PRESENCE_GAPS,
-  VENDOR_OPTIONS,
-  vendorTicker,
-} from "@/lib/cockpit";
-import {
-  Pane,
-  Eyebrow,
-  StatusDot,
-  ReadinessBar,
-  HairLine,
-  Glyph,
-} from "@/components/cockpit/atoms";
+import { MODES, BRIEF_ITEMS, VENDOR_OPTIONS, vendorTicker } from "@/lib/cockpit";
+import { Pane, Eyebrow } from "@/components/cockpit/atoms";
 import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
 import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
+import YourAnalystsPanel from "@/components/cockpit/YourAnalystsPanel";
 
 /** Human-readable age for the stale-read notice. Mirrors the server wording. */
 function describeAge(minutes: number): string {
@@ -81,15 +64,6 @@ export default function MissionControl() {
   const exposed = live
     ? arBrief!.emergencies.filter((e) => !e.id.startsWith("div-"))
     : BRIEF_ITEMS.filter((b) => b.category === "exposed");
-
-  const exposedMoments = MOMENTS.filter((m) =>
-    ["Weak", "Missing", "Unsupported"].includes(m.readiness)
-  );
-  const onTrackMoments = MOMENTS.filter((m) => m.status === "On track" || m.status === "Submitted");
-
-  const highGaps = EVIDENCE_GAPS.filter((g) => g.severity === "High");
-  const restrictedClaims = CLAIMS_TO_AVOID.length;
-  const presenceGapCount = PRESENCE_GAPS.length;
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
@@ -158,6 +132,12 @@ export default function MissionControl() {
       )}
 
       {/* ====================================================================
+          Your analysts — who is writing about us, who do we owe a call.
+          Real named people from coverage, merged with the roster.
+      ==================================================================== */}
+      <YourAnalystsPanel vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
+
+      {/* ====================================================================
           What changed / Where exposed — supporting the hero
       ==================================================================== */}
       <section className="mb-14">
@@ -192,6 +172,21 @@ export default function MissionControl() {
       </section>
 
       {/* ====================================================================
+          AG Pulse — competitive read (live). Gap analysis now leads as hero.
+      ==================================================================== */}
+      {live && arBrief && (
+        <section className="mb-14 space-y-5">
+          <div className="flex items-baseline justify-between">
+            <Eyebrow className="text-white/65">AG Pulse · Competitive read</Eyebrow>
+            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+              Your set vs the field
+            </div>
+          </div>
+          <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
+        </section>
+      )}
+
+      {/* ====================================================================
           Briefing opportunities — current + future (core AR function,
           reinstated to the main view rather than gated behind a side tab)
       ==================================================================== */}
@@ -207,21 +202,6 @@ export default function MissionControl() {
           <FutureBriefingOpportunities />
         </div>
       </section>
-
-      {/* ====================================================================
-          AG Pulse — competitive read (live). Gap analysis now leads as hero.
-      ==================================================================== */}
-      {live && arBrief && (
-        <section className="mb-14 space-y-5">
-          <div className="flex items-baseline justify-between">
-            <Eyebrow className="text-white/65">AG Pulse · Competitive read</Eyebrow>
-            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
-              Your set vs the field
-            </div>
-          </div>
-          <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
-        </section>
-      )}
 
       {/* ====================================================================
           Tri-mode cockpit
@@ -242,159 +222,6 @@ export default function MissionControl() {
           {MODES.map((mode, i) => (
             <ModeCard key={mode.id} mode={mode} index={i} />
           ))}
-        </div>
-      </section>
-
-      {/* ====================================================================
-          Snapshots — three thin panes summarising each mode
-      ==================================================================== */}
-      <section className="mb-14">
-        <div className="mb-5 flex items-center gap-2">
-          <Eyebrow className="text-white/65">Mode snapshots</Eyebrow>
-          <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
-            demo data
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Succeed snapshot */}
-        <Pane glow="gold" className="p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Glyph>I · Succeed</Glyph>
-            </div>
-            <Link
-              href="/succeed"
-              data-testid="snapshot-succeed-link"
-              className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/55 transition hover:text-[#d5b46b]"
-            >
-              Open <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="mb-5">
-            <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
-              Analyst moments in flight
-            </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
-              {MOMENTS.length} active across {new Set(MOMENTS.map((m) => m.model)).size} assessment
-              models. {exposedMoments.length} exposed today.
-            </p>
-          </div>
-          <ul className="space-y-2.5">
-            {MOMENTS.slice(0, 4).map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-[12.5px] font-medium text-white/85">
-                    {m.topic}
-                  </div>
-                  <div className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
-                    {m.model} · Due {m.due}
-                  </div>
-                </div>
-                <ReadinessBar band={m.readiness} size="sm" />
-              </li>
-            ))}
-          </ul>
-          <HairLine className="my-5" />
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <MiniStat value={String(highGaps.length)} label="High gaps" />
-            <MiniStat value={String(exposedMoments.length)} label="Exposed" />
-            <MiniStat value={String(onTrackMoments.length)} label="On track" />
-          </div>
-        </Pane>
-
-        {/* Direct snapshot */}
-        <Pane className="p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <Glyph>II · Direct</Glyph>
-            <Link
-              href="/direct"
-              data-testid="snapshot-direct-link"
-              className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/55 transition hover:text-[#d5b46b]"
-            >
-              Open <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="mb-5">
-            <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
-              Leaders needing briefings
-            </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
-              {LENSES.length} stakeholder lenses. Four flagged for AR action this
-              week.
-            </p>
-          </div>
-          <ul className="space-y-1">
-            {LENSES.slice(0, 5).map((l) => (
-              <li
-                key={l.id}
-                className="flex items-center justify-between gap-3 border-b border-white/[0.04] py-2 last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/50">
-                    {l.label.slice(0, 3)}
-                  </span>
-                  <span className="text-[13px] text-white/80">{l.label}</span>
-                </div>
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
-                  {l.briefing.bullets.length} actions
-                </span>
-              </li>
-            ))}
-          </ul>
-          <HairLine className="my-5" />
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <MiniStat value="4" label="To brief" />
-            <MiniStat value="7" label="Actions due" />
-            <MiniStat value="12" label="Lenses gen'd" />
-          </div>
-        </Pane>
-
-        {/* Enable snapshot */}
-        <Pane glow="teal" className="p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <Glyph>III · Enable</Glyph>
-            <Link
-              href="/enable"
-              data-testid="snapshot-enable-link"
-              className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/55 transition hover:text-[#d5b46b]"
-            >
-              Open <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="mb-5">
-            <div className="text-[18px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
-              Sales-safe proof + claims to avoid
-            </div>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-white/65">
-              Approved proof for sellers and the claims that would be challenged
-              if used.
-            </p>
-          </div>
-          <ul className="space-y-2.5">
-            {SELL_PROOF.slice(0, 4).map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
-              >
-                <StatusDot status={p.status} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[12.5px] font-medium text-white/85">
-                    {p.title}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <HairLine className="my-5" />
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <MiniStat value={String(SELL_PROOF.filter((p) => p.status === "safe").length)} label="Safe" />
-            <MiniStat value={String(restrictedClaims)} label="Avoid" />
-            <MiniStat value={String(presenceGapCount)} label="Presence gaps" />
-          </div>
-        </Pane>
         </div>
       </section>
 
@@ -559,18 +386,5 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
         </div>
       </div>
     </Link>
-  );
-}
-
-function MiniStat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <div className="font-mono text-[18px] font-medium leading-none text-[#f0dca8] tabular-nums">
-        {value}
-      </div>
-      <div className="mt-1 text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60">
-        {label}
-      </div>
-    </div>
   );
 }

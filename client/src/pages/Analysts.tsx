@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, RefreshCw } from "lucide-react";
 import {
   Card,
   Chip,
@@ -39,6 +39,24 @@ export default function Analysts() {
     },
   });
 
+  // Fill the roster from public coverage: real named analysts with sourced
+  // positions. Seeded rows arrive Unrated / Unclassified; nothing hand-set is
+  // overwritten. Idempotent, so it is safe to run again as coverage grows.
+  const syncFromCoverage = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/analysts/sync-from-coverage", {});
+      return (await res.json()) as {
+        coverageRows: number;
+        people: number;
+        created: number;
+        widened: number;
+        unchanged: number;
+        rosterTotal: number;
+      };
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/analysts"] }),
+  });
+
   const tiers = useMemo(
     () => Array.from(new Set((analysts ?? []).map((a) => a.firm_tier))).sort(),
     [analysts]
@@ -65,19 +83,43 @@ export default function Analysts() {
               : `${(analysts ?? []).length} tracked analysts · ${firms.length} firm${firms.length === 1 ? "" : "s"}`}
           </h1>
           <p className="mt-2 text-[13.5px] text-muted-foreground max-w-2xl leading-relaxed">
-            Live from the AR relationship database. Stance shown is the latest confirmed record — upload
-            notes, write-ups, or interactions from Command Centre to feed the perception engine a fresh suggestion.
+            Live from the AR relationship database. Analysts seeded from public coverage stay Unrated and
+            Unclassified until you set them. Stance shown is the latest confirmed record — upload notes,
+            write-ups, or interactions from Command Centre to feed the perception engine a fresh suggestion.
           </p>
         </div>
-        <button
-          onClick={() => setAddOpen((v) => !v)}
-          data-testid="button-toggle-add-analyst"
-          className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-3 h-9 text-[12.5px] font-medium text-primary hover-elevate shrink-0"
-        >
-          {addOpen ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-          {addOpen ? "Cancel" : "Add analyst"}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => syncFromCoverage.mutate()}
+            disabled={syncFromCoverage.isPending}
+            data-testid="button-sync-roster"
+            title="Add every named analyst from public coverage who is not on the roster yet"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary px-3 h-9 text-[12.5px] font-medium text-foreground/85 hover-elevate disabled:opacity-50"
+          >
+            {syncFromCoverage.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            Sync from coverage
+          </button>
+          <button
+            onClick={() => setAddOpen((v) => !v)}
+            data-testid="button-toggle-add-analyst"
+            className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-3 h-9 text-[12.5px] font-medium text-primary hover-elevate"
+          >
+            {addOpen ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+            {addOpen ? "Cancel" : "Add analyst"}
+          </button>
+        </div>
       </div>
+
+      {syncFromCoverage.isSuccess && (
+        <p className="text-[12.5px] text-muted-foreground" data-testid="sync-roster-result">
+          Synced from {syncFromCoverage.data.coverageRows} coverage rows ({syncFromCoverage.data.people} people):{" "}
+          {syncFromCoverage.data.created} added · {syncFromCoverage.data.widened} widened ·{" "}
+          {syncFromCoverage.data.unchanged} unchanged. {syncFromCoverage.data.rosterTotal} on the roster.
+        </p>
+      )}
+      {syncFromCoverage.isError && (
+        <p className="text-[12.5px] text-destructive">Sync failed: {(syncFromCoverage.error as Error).message}</p>
+      )}
 
       {addOpen && (
         <Card className="p-4">

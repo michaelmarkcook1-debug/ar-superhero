@@ -77,7 +77,7 @@ export const MODES: ModeDef[] = [
     glyph: "III",
     promise: "Help the business sell and build market presence.",
     oneLiner:
-      "Sales-safe proof, claims to avoid, and analyst-resonant narratives — without producing public campaigns.",
+      "Sales-safe proof, claims to avoid, and analyst-resonant narratives — internal-only by design.",
     metrics: [
       { label: "Approved proof", value: "14", sub: "Sales-safe snippets" },
       { label: "Restricted claims", value: "5", sub: "NDA · Unsupported" },
@@ -1527,7 +1527,7 @@ export const ENABLE_DECISION_STAGES: DecisionStage<EnableMaterialType>[] = [
   {
     id: "e5",
     label: "Thought leadership prompts",
-    short: "Briefing-grade only — no public campaigns.",
+    short: "Briefing-grade prompts for internal use.",
     feeds: ["thought-leadership", "campaign-plan", "enablement-note"],
     output: "Internal prompts for AR + Strategy + Marketing.",
     tone: "muted",
@@ -1865,7 +1865,7 @@ export const ENABLE_PRESENCE_DELIVERABLES: DeliverableTemplate[] = [
     id: "pres-leadership",
     name: "Thought Leadership Opportunity Brief",
     summary:
-      "Briefing-grade prompts for AR + Strategy + Marketing. Internal direction only — not a public campaign.",
+      "Briefing-grade prompts for AR, Strategy and Marketing, for internal direction.",
     formats: ["PPTX", "PDF"],
     primaryFormat: "PPTX",
     templateState: "AG curated",
@@ -1919,7 +1919,7 @@ export const ENABLE_PRESENCE_DELIVERABLES: DeliverableTemplate[] = [
 ];
 
 export const ENABLE_DELIVERABLES_NOTE =
-  "Enable produces internal guidance and controlled proof / claim artefacts. Public campaign assets are out of scope in MVP.";
+  "Enable produces internal guidance and controlled proof and claim artefacts. Every output is cleared for internal use; buyer-facing reuse is marked per item.";
 
 export const DIRECT_DELIVERABLES_NOTE =
   "Deliverables are AnalystGenius-controlled templates. Custom template authoring is out of scope in MVP.";

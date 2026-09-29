@@ -36,6 +36,7 @@ import { analystStore } from "./services/analystStore";
 import { suggestStanceFromSignals, confirmStance } from "./services/perceptionEngine";
 import { publicRankingsStore } from "./services/publicRankingsStore";
 import { analystCoverageStore } from "./services/analystCoverageStore";
+import { syncRosterFromCoverage, vendorAnalystView } from "./services/rosterSync";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -710,6 +711,31 @@ export async function registerRoutes(
       res.json(created);
     } catch (err) {
       res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // The "who is writing about us / who do I owe a call" answer for one vendor:
+  // coverage (what each named analyst has published, with its source) merged
+  // with the roster (what the AR team has recorded about the relationship).
+  // Registered before the :id routes so the literal segment is not read as an id.
+  app.get("/api/analysts/vendor-view", async (req, res) => {
+    const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId.trim() : "";
+    if (!vendorId) return res.status(400).json({ error: "vendorId is required" });
+    try {
+      res.json(await vendorAnalystView(vendorId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: analystStore.kind });
+    }
+  });
+
+  // Fill the roster from public coverage. Idempotent; never overwrites a
+  // rating, tier or role the AR team set by hand. Seeded rows are explicitly
+  // Unrated / Unclassified so no default reads as a measured opinion.
+  app.post("/api/analysts/sync-from-coverage", async (_req, res) => {
+    try {
+      res.json(await syncRosterFromCoverage());
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: analystStore.kind });
     }
   });
 
