@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { storedCompetitorTickers, useFocalVendor } from "@/lib/agBrief";
 import AssessmentPlaybooks from "@/components/cockpit/AssessmentPlaybooks";
 import BriefingComposer from "@/components/cockpit/BriefingComposer";
+import EvaluationAnniversariesPanel from "@/components/cockpit/EvaluationAnniversariesPanel";
 import AssessmentResults from "@/components/cockpit/AssessmentResults";
 import {
   MOMENTS,
@@ -212,6 +213,9 @@ export default function Succeed() {
           </select>
         </div>
       </section>
+
+      {/* Evaluation anniversaries — real placement ages, not a calendar */}
+      <EvaluationAnniversariesPanel vendorId={selectedVendorId} />
 
       {/* Headline numbers */}
       <section className="mb-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.26] md:grid-cols-5">

@@ -34,6 +34,7 @@ import {
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
 import WorkSeedDialog, { type SeedRequest } from "@/components/cockpit/WorkSeedDialog";
+import AsksPanel from "@/components/cockpit/AsksPanel";
 
 export default function Direct() {
   const [tab, setTab] = useState<"briefings" | "documents" | "pipeline">("briefings");
@@ -463,6 +464,9 @@ export default function Direct() {
           </div>
         </Pane>
       </section>
+
+      {/* Asks — what AR needs from this leader, tracked with owner, date, status */}
+      <AsksPanel vendorId={vendorId} personaId={selected.id} personaLabel={selected.label} stakeholder={selected.stakeholder} />
         </>
       )}
 

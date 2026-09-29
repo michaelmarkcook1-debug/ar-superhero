@@ -10,6 +10,7 @@ import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOppo
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
 import YourAnalystsPanel from "@/components/cockpit/YourAnalystsPanel";
+import ThisWeekPanel from "@/components/cockpit/ThisWeekPanel";
 
 /** Human-readable age for the stale-read notice. Mirrors the server wording. */
 function describeAge(minutes: number): string {
@@ -136,6 +137,9 @@ export default function MissionControl() {
           Real named people from coverage, merged with the roster.
       ==================================================================== */}
       <YourAnalystsPanel vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
+
+      {/* This week — the time axis: asks due, evaluation anniversaries, analysts owed a call */}
+      <ThisWeekPanel vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
 
       {/* ====================================================================
           What changed / Where exposed — supporting the hero

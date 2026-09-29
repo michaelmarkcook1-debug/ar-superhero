@@ -191,9 +191,24 @@ function connectorSource(ref: string, role: SeedSource["role"], note: string, cu
   };
 }
 
-/** "Report 2025", "Report, 2026", "Report 2025-26" → "Report". Same rule on both sides of a match. */
-function baseReportName(name: string): string {
-  return name.replace(/[,:;\s]*\b\d{4}(?:\s*[–-]\s*\d{2,4})?\s*$/, "").trim();
+/**
+ * The edition-independent name of a report, so editions of one series group
+ * together: "Report 2025", "Report, 2026", "Report 2025-26", "… 2025 Vendor
+ * Assessment" and "…, Q4 2025" all normalise to the same base. Years, year
+ * ranges and quarter markers are stripped anywhere in the name; nothing else
+ * is touched, so genuinely different reports stay distinct. Same rule is
+ * applied to both sides of every match.
+ */
+export function baseReportName(name: string): string {
+  return name
+    .replace(/\b(?:19|20)\d{2}(?:\s*[–-]\s*(?:(?:19|20)?\d{2}))?\b/g, " ")
+    .replace(/\bQ[1-4]\b/g, " ")
+    .replace(/\s*[–—-]\s*edition\b/gi, " ")
+    .replace(/\s+([,:;)])/g, "$1")
+    .replace(/\(\s*\)/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[\s,:;–-]+$/g, "")
+    .trim();
 }
 
 function requestId(kind: SeedKind): string {

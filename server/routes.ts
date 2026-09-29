@@ -38,6 +38,8 @@ import { publicRankingsStore } from "./services/publicRankingsStore";
 import { analystCoverageStore } from "./services/analystCoverageStore";
 import { syncRosterFromCoverage, vendorAnalystView } from "./services/rosterSync";
 import { buildWorkSeed } from "./services/workSeed";
+import { vendorEvaluationCalendar } from "./services/evaluationCalendar";
+import { askStore, ASK_STATUSES } from "./services/askStore";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -719,6 +721,78 @@ export async function registerRoutes(
   // coverage (what each named analyst has published, with its source) merged
   // with the roster (what the AR team has recorded about the relationship).
   // Registered before the :id routes so the literal segment is not read as an id.
+  // Evaluation anniversaries: the age of the last logged placement per
+  // evaluation series. Not a calendar — SuperHero holds no house agenda — and
+  // every row says so; see evaluationCalendar.ts for the bands.
+  app.get("/api/evaluations/calendar", async (req, res) => {
+    const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId.trim() : "";
+    if (!vendorId) return res.status(400).json({ error: "vendorId is required" });
+    try {
+      res.json(await vendorEvaluationCalendar(vendorId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
+  // Asks: what AR needs from a leader, with owner, due date and status. All
+  // user-entered; nothing here is seeded or suggested.
+  const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "due_date must be YYYY-MM-DD");
+  const insertAskSchema = z.object({
+    vendor_id: z.string().min(1).max(60),
+    persona_id: z.string().min(1).max(40),
+    title: z.string().min(1).max(300),
+    owner: z.string().max(200).optional().nullable(),
+    due_date: isoDate.optional().nullable(),
+    note: z.string().max(2000).optional().nullable(),
+  });
+  const patchAskSchema = z
+    .object({
+      title: z.string().min(1).max(300).optional(),
+      owner: z.string().max(200).nullable().optional(),
+      due_date: isoDate.nullable().optional(),
+      status: z.enum(ASK_STATUSES as [string, ...string[]]).optional(),
+      note: z.string().max(2000).nullable().optional(),
+    })
+    .strict();
+  app.get("/api/asks", async (req, res) => {
+    const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId : undefined;
+    const personaId = typeof req.query.personaId === "string" ? req.query.personaId : undefined;
+    try {
+      res.json(await askStore.list(vendorId, personaId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: askStore.kind });
+    }
+  });
+  app.post("/api/asks", async (req, res) => {
+    const parse = insertAskSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      res.json(await askStore.insert(parse.data));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: askStore.kind });
+    }
+  });
+  app.patch("/api/asks/:id", async (req, res) => {
+    const parse = patchAskSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const updated = await askStore.update(req.params.id, parse.data as any);
+      if (!updated) return res.status(404).json({ error: "Ask not found" });
+      res.json(updated);
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: askStore.kind });
+    }
+  });
+  app.delete("/api/asks/:id", async (req, res) => {
+    try {
+      const ok = await askStore.remove(req.params.id);
+      if (!ok) return res.status(404).json({ error: "Ask not found" });
+      res.json({ ok: true });
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message, backend: askStore.kind });
+    }
+  });
+
   // "Start work on this": a WorkEngine hand-off built only from real material
   // SuperHero holds — a named analyst's sourced coverage, a scenario with the
   // live read and placements, or an evaluation with a cited placement history.
