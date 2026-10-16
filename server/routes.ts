@@ -6,6 +6,7 @@ import { storage } from "./storage";
 import { CONNECTOR_DESCRIPTORS, getAdapter, getDescriptor } from "./connectors/registry";
 import { runSync } from "./services/sync";
 import { createBriefingDeck, getBriefingDeckFilename } from "./services/briefingDeck";
+import { createAnalystBriefingDeck } from "./services/analystBriefingDeck";
 import {
   createDirectPersonaDeck,
   getDirectPersonaDeckFilename,
@@ -366,6 +367,28 @@ export async function registerRoutes(
       competitorTickers: z.array(z.string()).max(8).optional(),
     })
     .refine((v) => Boolean(v.momentId) || Boolean(v.firm && v.reportName), "momentId, or firm and reportName, is required");
+
+  // Analyst briefing pack: one named analyst (from the coverage held for the
+  // vendor) → the briefing prepared from cited records. Same seed as the
+  // WorkEngine hand-off, produced here instead of by hand.
+  const analystBriefingSchema = z.object({
+    vendorId: z.string().min(1),
+    analystKey: z.string().min(3),
+    competitorTickers: z.array(z.string()).max(8).optional(),
+  });
+  app.post("/api/analyst-briefing-decks/generate", async (req: Request, res: Response) => {
+    const parse = analystBriefingSchema.safeParse(req.body);
+    if (!parse.success) return res.status(400).json({ error: parse.error.issues });
+    try {
+      const { buffer, filename } = await createAnalystBriefingDeck(parse.data);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.send(buffer);
+    } catch (err) {
+      const message = (err as Error).message;
+      res.status(/not in the coverage/.test(message) ? 404 : 500).json({ error: message });
+    }
+  });
 
   app.post("/api/briefing-decks/generate", async (req: Request, res: Response) => {
     const parse = briefingDeckSchema.safeParse(req.body);

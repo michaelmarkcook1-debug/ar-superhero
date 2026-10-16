@@ -442,7 +442,7 @@ export default function Direct() {
                   }
                   className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-5 py-2.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#9fe3e8] transition hover:bg-[#00a7b7]/[0.14]"
                 >
-                  Start work on this · WorkEngine
+                  Prepare this · deck
                 </button>
               )}
             </div>

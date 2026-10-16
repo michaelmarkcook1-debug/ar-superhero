@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { Check, Copy, FileDown, ExternalLink } from "lucide-react";
+import { Check, Copy, FileDown, ExternalLink, Presentation } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eyebrow, HairLine, Glyph } from "@/components/cockpit/atoms";
 import { apiRequest } from "@/lib/queryClient";
+import { storedCompetitorTickers } from "@/lib/agBrief";
 
 // ============================================================================
-// Start work on this — the WorkEngine hand-off.
+// Prepare this — one click to the deck.
 //
-// SuperHero assembles the goal, the sources with their provenance, and the
-// capabilities a playbook may name; the person takes the prompt into Claude
-// with the WorkEngine skill. Nothing is sent anywhere from here: the prompt is
-// copied and the request envelope downloaded, so the person’s own WorkEngine
-// sign-in carries the work. Every figure shown is real and traces to a source.
+// SuperHero assembles the goal, the sources with their provenance and the
+// caveats, then builds the deck itself from those records: an analyst
+// briefing pack, a scenario briefing, or an evaluation defence pack. The
+// WorkEngine hand-off (prompt + request.json) is kept behind a disclosure for
+// anyone who wants to take the same seed into a longer piece of work. Every
+// figure shown is real and traces to a source.
 // ============================================================================
 
 export type SeedRequest =
@@ -46,6 +48,42 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
   const [seed, setSeed] = useState<WorkSeed | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [building, setBuilding] = useState(false);
+  const [deckError, setDeckError] = useState<string | null>(null);
+
+  // The deck route for each seed kind. The scenario kind defaults its house
+  // the same way the Direct page does when none was chosen.
+  function deckCall(r: SeedRequest): { path: string; body: Record<string, unknown> } {
+    const competitorTickers = storedCompetitorTickers();
+    if (r.kind === "analyst-briefing") return { path: "/api/analyst-briefing-decks/generate", body: { vendorId: r.vendorId, analystKey: r.analystKey, competitorTickers } };
+    if (r.kind === "scenario") return { path: "/api/persona-decks/scenario", body: { personaId: r.personaId, scenarioId: r.scenarioId, houseId: r.houseId ?? "gartner", vendorId: r.vendorId, competitorTickers } };
+    return { path: "/api/briefing-decks/generate", body: { firm: r.firm, reportName: r.reportName, vendorId: r.vendorId, competitorTickers } };
+  }
+
+  async function createDeck() {
+    if (!request) return;
+    setBuilding(true);
+    setDeckError(null);
+    try {
+      const { path, body } = deckCall(request);
+      const response = await apiRequest("POST", path, body);
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = match?.[1] ?? "briefing-pack.pptx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setDeckError(e instanceof Error ? e.message : "Deck generation failed");
+    } finally {
+      setBuilding(false);
+    }
+  }
 
   useEffect(() => {
     setSeed(null);
@@ -95,9 +133,9 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
     <Dialog open={!!request} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl border-[#3d8f6d]/24 bg-[#0c1a15] text-[#e7e3d8]" data-testid="work-seed-dialog">
         <DialogHeader>
-          <Glyph className="mb-1">Start work on this · WorkEngine hand-off</Glyph>
+          <Glyph className="mb-1">Prepare this · deck from AR SuperHero records</Glyph>
           <DialogTitle className="text-[18px] font-semibold leading-snug text-[#f4eed8]">
-            {seed?.title ?? (error ? "Could not build this seed" : "Assembling the seed…")}
+            {seed?.title ?? (error ? "Could not prepare this" : "Reading the records…")}
           </DialogTitle>
         </DialogHeader>
 
@@ -108,6 +146,32 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
             <div>
               <Eyebrow className="mb-1.5 text-white/60">Goal</Eyebrow>
               <p className="text-[13.5px] leading-relaxed text-white/85">{seed.goal}</p>
+            </div>
+
+            <div className="rounded-xl border border-[#a88945]/35 bg-[#a88945]/[0.08] px-4 py-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[13.5px] font-semibold text-[#f4eed8]">Create the deck</div>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-white/65">
+                    Built here from the sources and caveats below, in the AnalystGenius house style. Nothing is invented; where a record is missing the slide says so.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={createDeck}
+                  disabled={building}
+                  data-testid="work-seed-create-deck"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-[#a88945] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0c1a15] transition hover:bg-[#d5b46b] disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Presentation className="h-4 w-4" />
+                  {building ? "Building…" : "Create deck · PPT"}
+                </button>
+              </div>
+              {deckError && (
+                <p className="mt-2 text-[12px] text-[#e89797]" data-testid="work-seed-deck-error">
+                  {deckError}
+                </p>
+              )}
             </div>
 
             {seed.context.length > 0 && (
@@ -179,7 +243,11 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
 
             <HairLine />
 
-            <div>
+            <details className="group" data-testid="work-seed-handoff">
+              <summary className="cursor-pointer list-none text-[12px] font-medium uppercase tracking-[0.16em] text-white/60 transition hover:text-[#f0dca8]">
+                <span className="mr-1 inline-block transition group-open:rotate-90">›</span> Hand off to WorkEngine instead
+              </summary>
+            <div className="mt-3">
               <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
                 <Eyebrow className="text-white/60">Hand-off prompt · paste into Claude with the WorkEngine skill</Eyebrow>
                 <div className="flex items-center gap-2">
@@ -214,6 +282,7 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
                 shown, so nothing is retyped and nothing is invented.
               </p>
             </div>
+            </details>
           </div>
         )}
       </DialogContent>
