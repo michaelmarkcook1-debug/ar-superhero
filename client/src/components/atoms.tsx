@@ -175,7 +175,7 @@ export function AnalystAvatar({ initials, size = 28 }: { initials: string; size?
   return (
     <div
       className="flex shrink-0 items-center justify-center rounded-full border border-border bg-secondary text-foreground font-semibold"
-      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      style={{ width: size, height: size, fontSize: Math.max(11, Math.round(size * 0.36)) }}
     >
       {initials}
     </div>

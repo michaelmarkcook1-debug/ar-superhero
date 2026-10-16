@@ -157,7 +157,7 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
                             href={r.profile_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[11px] text-[#d5b46b] transition hover:text-[#f0dca8]"
+                            className="inline-flex min-h-6 items-center text-[11px] text-[#d5b46b] transition hover:text-[#f0dca8]"
                           >
                             profile
                           </a>

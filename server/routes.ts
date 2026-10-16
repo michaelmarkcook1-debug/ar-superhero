@@ -54,6 +54,24 @@ export async function registerRoutes(
   // AnalystGenius intelligence API proxy (key stays server-side)
   // --------------------------------------------------------------------------
 
+  // Liveness + which backends this deployment is wired to. No secrets.
+  app.get("/api/health", async (_req, res) => {
+    let db: "ok" | "unavailable" = "unavailable";
+    try {
+      await deckStore.list();
+      db = "ok";
+    } catch {
+      db = "unavailable";
+    }
+    res.status(db === "ok" ? 200 : 503).json({
+      ok: db === "ok",
+      db,
+      dbBackend: deckStore.kind,
+      analystGenius: agConfigured() ? "configured" : "not configured",
+      time: new Date().toISOString(),
+    });
+  });
+
   app.get("/api/ag/status", async (_req, res) => {
     const endpoints = AG_ENDPOINTS.map((e) => ({ key: e.key, label: e.label, requiresTicker: e.requiresTicker }));
     if (!agConfigured()) {
