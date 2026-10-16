@@ -41,7 +41,9 @@ export type ModeDef = {
   glyph: string; // Single-character glyph for the cockpit cards
   promise: string;
   oneLiner: string;
-  metrics: { label: string; value: string; sub?: string }[];
+  /** What the mode holds — named surfaces, not counts. Counts belong to the
+   *  live panels below the cards, where each one has a source. */
+  inside: string[];
 };
 
 export const MODES: ModeDef[] = [
@@ -49,14 +51,10 @@ export const MODES: ModeDef[] = [
     id: "succeed",
     label: "Succeed",
     glyph: "I",
-    promise: "Prepare, prove, and perform in analyst moments.",
+    promise: "Win the analyst evaluations that matter.",
     oneLiner:
-      "Evaluation readiness, RFI workspace, briefing prep, and outcome learning for every active analyst moment.",
-    metrics: [
-      { label: "Active moments", value: "6", sub: "Across 6 assessment models" },
-      { label: "Readiness exposure", value: "2", sub: "Weak · Missing" },
-      { label: "Evidence gaps open", value: "9", sub: "3 high impact" },
-    ],
+      "Each evaluation that has placed you, how long since it last did, what the house evaluates, who covers you there, and a defence pack per cycle.",
+    inside: ["Evaluation anniversaries", "Defence packs", "House playbooks · results"],
   },
   {
     id: "direct",
@@ -65,11 +63,7 @@ export const MODES: ModeDef[] = [
     promise: "Turn analyst intelligence into internal action.",
     oneLiner:
       "Stakeholder lenses that tell each leader what they need to know — and what AR needs from them this week.",
-    metrics: [
-      { label: "Leaders to brief", value: "4", sub: "Exec · Strategy · Commercial · Delivery" },
-      { label: "Actions due", value: "7", sub: "2 overdue" },
-      { label: "Lenses generated", value: "12", sub: "Last 14 days" },
-    ],
+    inside: ["Seven leader lenses", "Asks with owners and dates", "Quarterly briefing decks"],
   },
   {
     id: "enable",
@@ -78,97 +72,7 @@ export const MODES: ModeDef[] = [
     promise: "Help the business sell and build market presence.",
     oneLiner:
       "Sales-safe proof, claims to avoid, and analyst-resonant narratives — internal-only by design.",
-    metrics: [
-      { label: "Approved proof", value: "14", sub: "Sales-safe snippets" },
-      { label: "Restricted claims", value: "5", sub: "NDA · Unsupported" },
-      { label: "Presence gaps", value: "3", sub: "Narrative · Visibility" },
-    ],
-  },
-];
-
-// ---------------------------------------------------------------------------
-// AR SuperHero Brief — what changed, where exposed, who needs action
-// ---------------------------------------------------------------------------
-
-export type BriefItem = {
-  id: string;
-  category: "changed" | "exposed" | "action" | "impact";
-  title: string;
-  detail: string;
-  source: string;
-  tag?: "demo" | "external signal" | "internal";
-};
-
-export const BRIEF_ITEMS: BriefItem[] = [
-  {
-    id: "b1",
-    category: "changed",
-    title: "Application modernisation criteria tightened mid-cycle",
-    detail:
-      "Composable architecture and refactor playbooks are weighing more heavily in this year's evaluation. Northstar's current submission leans on legacy lift-and-shift case studies.",
-    source: "AnalystGenius intelligence layer",
-    tag: "internal",
-  },
-  {
-    id: "b2",
-    category: "changed",
-    title: "Two BFSI references reused across three active moments",
-    detail:
-      "Reference concentration risk: a single client withdrawal would dent readiness on three submissions simultaneously.",
-    source: "AR SuperHero portfolio scan",
-    tag: "internal",
-  },
-  {
-    id: "b3",
-    category: "exposed",
-    title: "Generative enterprise services — OneEcosystem narrative is Weak",
-    detail:
-      "Submission references two hyperscaler partners only. Multi-tier ecosystem narrative (hyperscaler + ISV + regional) is missing.",
-    source: "AR SuperHero readiness scan",
-    tag: "internal",
-  },
-  {
-    id: "b4",
-    category: "exposed",
-    title: "AI-assisted developer co-pilot evidence is Unsupported",
-    detail:
-      "Two BFSI deals could close the gap with named references; both are still pre-disclosure.",
-    source: "Sales pipeline · AR SuperHero",
-    tag: "internal",
-  },
-  {
-    id: "b5",
-    category: "action",
-    title: "Brief the BFSI CCO before Tuesday's pursuit review",
-    detail:
-      "Commercial lens shows two named pursuits anchored on analyst-visible positioning. Two-pager required, 3 approved proof items ready.",
-    source: "Direct · Commercial lens",
-    tag: "internal",
-  },
-  {
-    id: "b6",
-    category: "action",
-    title: "Confirm interaction record from yesterday's BFSI deep-dive",
-    detail:
-      "Candidate record auto-created from calendar and analyst portal sync. Three follow-ups proposed — needs AR confirmation before logging.",
-    source: "AR platform sync",
-    tag: "internal",
-  },
-  {
-    id: "b7",
-    category: "impact",
-    title: "Evidence gaps closed this quarter",
-    detail: "11 closed · 4 opened · net +7. AI-assisted dev tooling remains the top open gap.",
-    source: "AR SuperHero ledger",
-    tag: "internal",
-  },
-  {
-    id: "b8",
-    category: "impact",
-    title: "Leader briefings prepared",
-    detail: "9 lens briefings generated · 7 acted on · 2 awaiting acknowledgement.",
-    source: "Direct ledger",
-    tag: "internal",
+    inside: ["Sales-safe proof", "Claims to avoid", "RFP analysis"],
   },
 ];
 

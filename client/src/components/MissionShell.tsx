@@ -1,6 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useAppTheme } from "@/lib/theme";
+import { useFocalVendor } from "@/lib/agBrief";
+import { VENDOR_OPTIONS } from "@/lib/cockpit";
 import { Logo } from "./Logo";
 import { ArrowLeft, Moon, Sun } from "lucide-react";
 import heroMotif from "@/assets/ar-superhero-mobius-hero.webp";
@@ -13,6 +15,8 @@ const MODES = [
 ];
 
 export function MissionShell({ children }: { children: React.ReactNode }) {
+  const { focalVendorId } = useFocalVendor();
+  const focalLabel = VENDOR_OPTIONS.find((v) => v.id === focalVendorId)?.label ?? VENDOR_OPTIONS[0].label;
   const [location] = useLocation();
   const { isDark, toggleTheme } = useAppTheme();
   const lightMode = !isDark;
@@ -191,7 +195,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
           >
             <span>AnalystGenius · Intelligence layer</span>
             <span className="flex items-center gap-3">
-              <span>Demo customer: Northstar Digital Services</span>
+              <span data-testid="shell-focal-vendor">Preparing: {focalLabel}</span>
               <span className={cn("h-1 w-1 rounded-full", lightMode ? "bg-[#123d2c]/18" : "bg-white/20")} />
               <span>Source-traced · UK English</span>
             </span>

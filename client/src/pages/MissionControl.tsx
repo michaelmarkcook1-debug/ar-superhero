@@ -3,7 +3,7 @@ import { ArrowUpRight, AlertTriangle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useArBrief, useCompetitorSelection, useFocalVendor } from "@/lib/agBrief";
 import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
-import { MODES, BRIEF_ITEMS, VENDOR_OPTIONS, vendorTicker } from "@/lib/cockpit";
+import { MODES, VENDOR_OPTIONS, vendorTicker } from "@/lib/cockpit";
 import { Pane, Eyebrow } from "@/components/cockpit/atoms";
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
@@ -51,7 +51,7 @@ export default function MissionControl() {
     ? movement?.items.length
       ? movement.items
       : quarterMoves
-    : BRIEF_ITEMS.filter((b) => b.category === "changed");
+    : [];
   const changedNote = live
     ? movement?.items.length
       ? `Captured movement, last ${movement.windowDays} days`
@@ -63,7 +63,7 @@ export default function MissionControl() {
   // the exposure feed.
   const exposed = live
     ? arBrief!.emergencies.filter((e) => !e.id.startsWith("div-"))
-    : BRIEF_ITEMS.filter((b) => b.category === "exposed");
+    : [];
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-6 py-10 lg:px-10 lg:py-14">
@@ -151,11 +151,11 @@ export default function MissionControl() {
           <Eyebrow className="text-white/65">The brief · What changed &amp; where exposed</Eyebrow>
           <div
             className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50"
-            title={live ? arBrief?.sourceNote : "Demo content — no live AnalystGenius connection."}
+            title={live ? arBrief?.sourceNote : "No AnalystGenius read is available; nothing is shown in its place."}
           >
             {live && arBrief
               ? `Live · ${new Date(arBrief.generatedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`
-              : "Demo view · seeded"}
+              : "AnalystGenius read unavailable"}
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -165,6 +165,7 @@ export default function MissionControl() {
             label="What changed"
             note={changedNote}
             items={changed}
+            empty={live ? "No movement captured in the window and no lens moved quarter-on-quarter." : "The AnalystGenius read is unavailable, so no movement can be shown. Nothing is shown in its place."}
             icon={<Sparkles className="h-3.5 w-3.5" />}
           />
           <BriefBucket
@@ -172,6 +173,7 @@ export default function MissionControl() {
             tone="teal"
             label="Where exposed"
             items={exposed}
+            empty={live ? "AnalystGenius flags no exposure for this company right now." : "The AnalystGenius read is unavailable, so no exposure can be shown. Nothing is shown in its place."}
             icon={<AlertTriangle className="h-3.5 w-3.5" />}
           />
         </div>
@@ -199,9 +201,6 @@ export default function MissionControl() {
         <div className="mb-7 flex items-baseline justify-between">
           <div className="flex items-center gap-2">
             <Eyebrow className="text-white/65">Choose your mode</Eyebrow>
-            <span className="rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
-              demo data
-            </span>
           </div>
           <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
             Three modes · One cockpit
@@ -246,6 +245,7 @@ function BriefBucket({
   tone,
   label,
   items,
+  empty,
   icon,
   note,
   topSlot,
@@ -254,6 +254,8 @@ function BriefBucket({
   tone: "gold" | "teal";
   label: string;
   items: BucketItem[];
+  /** Shown when there are no items; says why, never fills the gap. */
+  empty?: string;
   icon: React.ReactNode;
   note?: string;
   topSlot?: React.ReactNode;
@@ -280,6 +282,11 @@ function BriefBucket({
 
       {note && <div className="text-[12px] leading-snug text-white/60">{note}</div>}
       {topSlot}
+      {items.length === 0 && (
+        <p className="text-[12.5px] leading-relaxed text-white/60" data-testid={`brief-bucket-empty-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+          {empty ?? "Nothing on record in this window."}
+        </p>
+      )}
 
       {/* Provenance rides on the item's tooltip, not the page. Severity is the
           only thing that earns pixels here — it changes what AR does next. */}
@@ -353,26 +360,13 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
           {mode.oneLiner}
         </p>
 
-        <div className="grid grid-cols-3 gap-3 border-t border-[#3d8f6d]/[0.16] pt-5">
-          {mode.metrics.map((metric) => (
-            <div key={metric.label}>
-              <div
-                className="font-mono text-[22px] font-medium leading-none tabular-nums"
-                style={{ color: accentLight }}
-              >
-                {metric.value}
-              </div>
-              <div className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/65">
-                {metric.label}
-              </div>
-              {metric.sub && (
-                <div className="mt-1 text-[10.5px] leading-snug text-white/55">
-                  {metric.sub}
-                </div>
-              )}
-            </div>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-[#3d8f6d]/[0.16] pt-5">
+          {mode.inside.map((item) => (
+            <li key={item} className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-white/65">
+              {item}
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </Link>
   );
