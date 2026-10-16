@@ -11,7 +11,7 @@ import { storedCompetitorTickers } from "@/lib/agBrief";
 // Evaluation anniversaries — how long since each evaluation last placed the
 // vendor. The honest form of a calendar: SuperHero holds no house research
 // agenda, so nothing here is a date. An approaching anniversary is a prompt to
-// check the house's agenda; a long gap is a prompt to verify the record.
+// check the house’s agenda; a long gap is a prompt to verify the record.
 // ============================================================================
 
 type Band = "recent" | "approaching" | "anniversary" | "verify";
@@ -81,7 +81,7 @@ export default function EvaluationAnniversariesPanel({
   const [packError, setPackError] = useState<string | null>(null);
 
   // The defence pack for one evaluation series: the AnalystGenius read, the
-  // cited record in that evaluation, the house's rules, who covers you there,
+  // cited record in that evaluation, the house’s rules, who covers you there,
   // and the evidence to supply. Generated server-side, downloaded here.
   async function downloadDefencePack(s: Series) {
     setPackKey(s.key);
@@ -120,7 +120,7 @@ export default function EvaluationAnniversariesPanel({
     <section className={compact ? "" : "mb-14"} data-testid="evaluation-anniversaries">
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
         <Eyebrow className="text-white/65">Evaluation anniversaries · {vendorLabel}</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {data
             ? `${data.counts.series} evaluations on record · ${data.counts.anniversary} at anniversary · ${data.counts.verify} to verify`
             : "From the placement history"}
@@ -152,7 +152,7 @@ export default function EvaluationAnniversariesPanel({
               <li key={s.key} className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1.5 py-3" data-testid={`eval-series-${s.band}`}>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full border px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] ${BAND_CLASS[s.band]}`}>
+                    <span className={`rounded-full border px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] ${BAND_CLASS[s.band]}`}>
                       {BAND_LABEL[s.band]}
                     </span>
                     <span className="text-[13.5px] font-semibold text-[#e7e3d8]">{s.report}</span>
@@ -174,7 +174,7 @@ export default function EvaluationAnniversariesPanel({
                   {!compact && <p className="mt-1 text-[11.5px] leading-relaxed text-white/50">{s.note}</p>}
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  <div className="text-right font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
+                  <div className="text-right font-mono text-[11px] uppercase tracking-[0.16em] text-white/55">
                     {Math.round(s.monthsSinceLast)} mo ago
                   </div>
                   <button
@@ -182,7 +182,7 @@ export default function EvaluationAnniversariesPanel({
                     onClick={() => downloadDefencePack(s)}
                     disabled={packKey !== null}
                     data-testid={`eval-defence-pack-${s.key.replace(/[^a-z0-9]+/g, "-")}`}
-                    className="rounded-full border border-[#a88945]/35 bg-[#a88945]/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f0dca8] transition hover:border-[#d5b46b]/55 hover:bg-[#a88945]/[0.14] disabled:cursor-wait disabled:opacity-60"
+                    className="rounded-full border border-[#a88945]/35 bg-[#a88945]/[0.07] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f0dca8] transition hover:border-[#d5b46b]/55 hover:bg-[#a88945]/[0.14] disabled:cursor-wait disabled:opacity-60"
                   >
                     {packKey === s.key ? "Generating" : "Defence pack · PPT"}
                   </button>

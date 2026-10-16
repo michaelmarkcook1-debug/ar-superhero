@@ -82,8 +82,8 @@ export default function PublicRankingsSection() {
     return b.published_date.localeCompare(a.published_date);
   });
 
-  // Provenance strength. A placement confirmed on the analyst firm's own page is
-  // stronger evidence than the same placement claimed on the vendor's recognition
+  // Provenance strength. A placement confirmed on the analyst firm’s own page is
+  // stronger evidence than the same placement claimed on the vendor’s recognition
   // hub or press release. Both are real citations, so both are shown — but the
   // split is stated rather than left for the reader to tally link by link.
   const firmConfirmed = sortedActiveEntries.filter((e) => e.source_type === "analyst_firm_page").length;
@@ -97,7 +97,7 @@ export default function PublicRankingsSection() {
             Every entry is a real, cited placement — click a firm to see the full history and sources.
           </p>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           By analyst firm
         </div>
       </div>
@@ -175,10 +175,10 @@ export default function PublicRankingsSection() {
                 <DialogTitle className="text-[18px] font-semibold leading-snug text-[#f4eed8]">{activeFirm}</DialogTitle>
                 <p className="mt-1 text-[11.5px] leading-relaxed text-white/60">
                   {firmConfirmed === sortedActiveEntries.length
-                    ? "Every placement here is confirmed on the analyst firm's own page."
+                    ? "Every placement here is confirmed on the analyst firm’s own page."
                     : firmConfirmed === 0
-                      ? "All of these are vendor-reported. None is confirmed on an analyst-firm page — the placement may still be genuine, but the citation is the vendor's own."
-                      : `${firmConfirmed} of ${sortedActiveEntries.length} are confirmed on the analyst firm's own page; the rest are vendor-reported.`}
+                      ? "All of these are vendor-reported. None is confirmed on an analyst-firm page — the placement may still be genuine, but the citation is the vendor’s own."
+                      : `${firmConfirmed} of ${sortedActiveEntries.length} are confirmed on the analyst firm’s own page; the rest are vendor-reported.`}
                 </p>
               </DialogHeader>
               <ul className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
@@ -189,13 +189,13 @@ export default function PublicRankingsSection() {
                     data-testid={`ranking-entry-${e.id}`}
                   >
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-[#3d8f6d]/26 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-white/60">
+                      <span className="rounded-full border border-[#3d8f6d]/26 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/60">
                         {vendorLabel(e.vendor_id)}
                       </span>
-                      <span className="rounded-full border border-[#a88945]/30 bg-[#a88945]/[0.08] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
+                      <span className="rounded-full border border-[#a88945]/30 bg-[#a88945]/[0.08] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
                         {e.placement}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">
                         {formatPublished(e.published_date, e.date_precision)}
                       </span>
                     </div>
@@ -215,7 +215,7 @@ export default function PublicRankingsSection() {
                       type="button"
                       onClick={() => setSeedRequest({ kind: "evaluation", vendorId: e.vendor_id, firm: e.analyst_firm, reportName: e.report_name })}
                       data-testid={`ranking-seed-${e.id}`}
-                      className="ml-3 mt-2 inline-flex items-center rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                      className="ml-3 mt-2 inline-flex items-center rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
                     >
                       Prepare next cycle
                     </button>

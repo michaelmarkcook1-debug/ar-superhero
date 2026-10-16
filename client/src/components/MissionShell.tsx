@@ -24,7 +24,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        "relative min-h-screen text-[#e7e3d8] transition-colors duration-500",
+        "relative min-h-dvh text-[#e7e3d8] transition-colors duration-500",
         lightMode ? "bg-[#fdf6eb] mission-light" : "bg-[#081410]"
       )}
     >
@@ -57,7 +57,13 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#a88945]/30 to-transparent" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div className="relative z-10 flex min-h-dvh flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-[#a88945] focus:px-4 focus:py-2 focus:text-[12px] focus:font-semibold focus:uppercase focus:tracking-[0.14em] focus:text-[#0c1a15]"
+        >
+          Skip to content
+        </a>
         {/* Top brand bar */}
         <header
           className={cn(
@@ -89,7 +95,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 </span>
                 <span
                   className={cn(
-                    "mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em]",
+                    "mt-0.5 block text-[11px] font-medium uppercase tracking-[0.2em]",
                     lightMode ? "text-[#123d2c]/75" : "text-white/60"
                   )}
                 >
@@ -103,7 +109,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                 href="/admin"
                 data-testid="link-admin"
                 className={cn(
-                  "hidden text-[11px] uppercase tracking-[0.16em] transition md:inline",
+                  "hidden min-h-6 items-center text-[11px] uppercase tracking-[0.16em] transition md:inline-flex",
                   lightMode ? "text-[#123d2c]/75 hover:text-[#123d2c]/95" : "text-white/60 hover:text-white/70"
                 )}
               >
@@ -141,7 +147,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
 
           {/* Mode rail */}
           <div className="mx-auto w-full max-w-[1440px] px-4 lg:px-10">
-            <nav className="flex items-center gap-1 overflow-x-auto pb-3 pt-1">
+            <nav aria-label="Modes" className="flex items-center gap-1 overflow-x-auto pb-3 pt-1">
               {MODES.map((mode) => {
                 const active =
                   mode.href === "/mission"
@@ -152,6 +158,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                     key={mode.href}
                     href={mode.href}
                     data-testid={`mode-${mode.label.toLowerCase().replace(/\s+/g, "-")}`}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
                       "group relative inline-flex shrink-0 items-center gap-2.5 rounded-full border px-4 py-2 text-[12.5px] font-medium tracking-wide transition",
                       active && !lightMode
@@ -165,7 +172,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
                   >
                     <span
                       className={cn(
-                        "font-mono text-[10px] tracking-[0.2em]",
+                        "font-mono text-[11px] tracking-[0.2em]",
                         active ? "text-[#a88945]" : lightMode ? "text-[#123d2c]/75" : "text-white/55"
                       )}
                     >
@@ -179,7 +186,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className={cn("flex-1", lightMode && "mission-light-content")}>{children}</main>
+        <main id="main" tabIndex={-1} className={cn("flex-1 outline-none", lightMode && "mission-light-content")}>{children}</main>
 
         <footer
           className={cn(
@@ -189,7 +196,7 @@ export function MissionShell({ children }: { children: React.ReactNode }) {
         >
           <div
             className={cn(
-              "mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-6 py-4 text-[10.5px] uppercase tracking-[0.18em] lg:px-10",
+              "mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-3 px-6 py-4 text-[11px] uppercase tracking-[0.18em] lg:px-10",
               lightMode ? "text-[#123d2c]/75" : "text-white/55"
             )}
           >

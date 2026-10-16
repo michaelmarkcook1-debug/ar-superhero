@@ -7,7 +7,7 @@ import { useAsks, daysUntil, DueBadge } from "@/components/cockpit/AsksPanel";
 import { useEvaluationCalendar } from "@/components/cockpit/EvaluationAnniversariesPanel";
 
 // ============================================================================
-// This week — the cockpit's time axis, from three real inputs:
+// This week — the cockpit’s time axis, from three real inputs:
 //   asks the AR person wrote (overdue, due within seven days),
 //   evaluations at or past their anniversary (from the placement history),
 //   analysts owed a call (from logged interactions — honestly none yet).
@@ -48,7 +48,7 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
     <section className="mb-14" data-testid="this-week">
       <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
         <Eyebrow className="text-white/65">This week · {vendorLabel}</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {overdue.length} overdue · {dueSoon.length} due in 7 days · {evals.length} evaluation{evals.length === 1 ? "" : "s"} to check
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
           {!asksQ.isLoading && overdue.length === 0 && dueSoon.length === 0 && (
             <p className="text-[12.5px] leading-relaxed text-white/60" data-testid="this-week-asks-empty">
               {open.length === 0
-                ? "No asks recorded yet. Write the first one on a leader's lens in Direct."
+                ? "No asks recorded yet. Write the first one on a leader’s lens in Direct."
                 : `${open.length} open, none due this week.`}
             </p>
           )}
@@ -72,7 +72,7 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
               {[...overdue, ...dueSoon].map((a) => (
                 <li key={a.id} className="border-l-2 border-[#a88945]/50 pl-3">
                   <div className="text-[12.5px] font-medium leading-snug text-[#e7e3d8]">{a.title}</div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[10.5px] text-white/55">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-white/55">
                     <span>{PERSONA_SHORT[a.persona_id] ?? a.persona_id}{a.owner ? ` · ${a.owner}` : ""}</span>
                     <DueBadge due={a.due_date} status={a.status} />
                   </div>
@@ -80,7 +80,7 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
               ))}
             </ul>
           )}
-          <Link href="/direct" className="mt-3 inline-flex items-center gap-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
+          <Link href="/direct" className="mt-3 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
             Leader lenses <ArrowUpRight className="h-3 w-3" />
           </Link>
         </Pane>
@@ -99,7 +99,7 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
               {evals.map((s) => (
                 <li key={s.key} className="border-l-2 border-[#3d8f6d]/[0.35] pl-3">
                   <div className="text-[12.5px] font-medium leading-snug text-[#e7e3d8]">{s.report}</div>
-                  <div className="mt-0.5 text-[10.5px] text-white/55">
+                  <div className="mt-0.5 text-[11px] text-white/55">
                     {s.firm} · last {Math.round(s.monthsSinceLast)} mo ago ·{" "}
                     <span className={s.band === "verify" ? "text-[#9fe3e8]" : "text-[#e5c989]"}>
                       {s.band === "verify" ? "verify record" : s.band === "anniversary" ? "at anniversary" : "approaching"}
@@ -109,8 +109,8 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
               ))}
             </ul>
           )}
-          <p className="mt-3 text-[10.5px] leading-relaxed text-white/45">Ages of last placements; SuperHero holds no house calendar.</p>
-          <Link href="/succeed" className="mt-2 inline-flex items-center gap-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
+          <p className="mt-3 text-[11px] leading-relaxed text-white/45">Ages of last placements; SuperHero holds no house calendar.</p>
+          <Link href="/succeed" className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
             All evaluations <ArrowUpRight className="h-3 w-3" />
           </Link>
         </Pane>
@@ -132,14 +132,14 @@ export default function ThisWeekPanel({ vendorId }: { vendorId: string }) {
               {owed.map((a) => (
                 <li key={`${a.name}|${a.firm}`} className="border-l-2 border-[#00a7b7]/40 pl-3">
                   <div className="text-[12.5px] font-medium leading-snug text-[#e7e3d8]">{a.name}</div>
-                  <div className="mt-0.5 text-[10.5px] text-white/55">
+                  <div className="mt-0.5 text-[11px] text-white/55">
                     {a.firm} · last contact {new Date(a.last_interaction_at as number).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          <Link href="/admin/analysts" className="mt-3 inline-flex items-center gap-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
+          <Link href="/admin/analysts" className="mt-3 inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
             Roster <ArrowUpRight className="h-3 w-3" />
           </Link>
         </Pane>

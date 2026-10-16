@@ -56,7 +56,7 @@ function ApprovalBadge({ approval }: { approval: DeliverableTemplate["approval"]
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.16em]",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.16em]",
         tones[approval]
       )}
     >
@@ -71,7 +71,7 @@ function TemplateStateBadge({ state }: { state: DeliverableTemplate["templateSta
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.16em]",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.16em]",
         isBeta
           ? "border-[#63d7de]/30 text-[#63d7de] bg-[#63d7de]/[0.05]"
           : "border-[#d5b46b]/30 text-[#d5b46b] bg-[#d5b46b]/[0.05]"
@@ -134,7 +134,7 @@ function DeliverableCard({
           {template.composedFrom.map((c) => (
             <span
               key={c}
-              className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.16] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
+              className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.16] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55"
             >
               {c}
             </span>
@@ -191,7 +191,7 @@ function ExportButton({
     return (
       <span
         data-testid={`export-${template.id}-${format}-done`}
-        className="inline-flex items-center gap-1.5 rounded-full border border-[#a5d8ab]/35 bg-[#a5d8ab]/[0.06] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[#a5d8ab]"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[#a5d8ab]/35 bg-[#a5d8ab]/[0.06] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#a5d8ab]"
       >
         <Check className="h-3 w-3" />
         Queued · {format}
@@ -205,7 +205,7 @@ function ExportButton({
         type="button"
         onClick={() => onExport(template.id, format)}
         data-testid={`export-${template.id}-${format}`}
-        className="group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#0c1a15] transition"
+        className="group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0c1a15] transition"
         style={{ background: accentLight }}
       >
         <Download className="h-3 w-3" />
@@ -220,7 +220,7 @@ function ExportButton({
       onClick={() => onExport(template.id, format)}
       data-testid={`export-${template.id}-${format}`}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition hover:bg-[#1a5540]/[0.26]",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] transition hover:bg-[#1a5540]/[0.26]",
         meta.ring,
         meta.tone
       )}

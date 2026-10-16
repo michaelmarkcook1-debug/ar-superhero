@@ -17,6 +17,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     document.documentElement.classList.toggle("dark", theme === "dark");
+    // Native form controls, scrollbars and the browser chrome follow the theme.
+    document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#081410" : "#fdf6eb");
   }, [theme]);
 
   const value = useMemo(

@@ -30,7 +30,7 @@ function NarrativeRow({ sig }: { sig: AgNarrativeSignal }) {
         {sig.themes?.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {sig.themes.map((t, i) => (
-              <span key={i} className="rounded-full bg-muted/50 px-2 py-0.5 text-[10.5px] text-muted-foreground">
+              <span key={i} className="rounded-full bg-muted/50 px-2 py-0.5 text-[11px] text-muted-foreground">
                 {t}
               </span>
             ))}
@@ -42,7 +42,7 @@ function NarrativeRow({ sig }: { sig: AgNarrativeSignal }) {
           {sig.sentiment > 0 ? "+" : ""}
           {sig.sentiment.toFixed(2)}
         </div>
-        <div className="text-[10.5px] text-muted-foreground">vol {sig.volume}</div>
+        <div className="text-[11px] text-muted-foreground">vol {sig.volume}</div>
       </div>
     </div>
   );
@@ -80,7 +80,7 @@ export default function PlatformCompetitive() {
               </div>
               <div className="shrink-0 text-center">
                 <div className="font-mono text-[34px] font-semibold leading-none text-primary">{gap.gapScore ?? "—"}</div>
-                <div className="mt-1 text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">gap score</div>
+                <div className="mt-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">gap score</div>
                 {gap.direction && (
                   <div className="mt-1.5 inline-block rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[11px] text-foreground/80">
                     {gap.direction}

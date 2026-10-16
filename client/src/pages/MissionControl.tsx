@@ -36,14 +36,14 @@ export default function MissionControl() {
   // Live AnalystGenius-derived brief when available; labelled demo seed otherwise.
   // "What changed" = REAL captured movement over the last 14 days (our own
   // snapshots of the live signals). Until the window fills, quarter-on-quarter
-  // lens movement (AG's own series) carries the section with an honest note.
+  // lens movement (AG’s own series) carries the section with an honest note.
   const movement = arBrief?.movement;
   const quarterMoves = (arBrief?.reputationLenses ?? [])
     .filter((l) => l.delta !== 0)
     .map((l) => ({
       id: `qm-${l.name}`,
       title: `${l.name} lens ${l.delta > 0 ? "up" : "down"} ${Math.abs(l.delta)} pts`,
-      detail: `${l.prev} → ${l.last} (${l.span}) — AG's own quarter-on-quarter series.`,
+      detail: `${l.prev} → ${l.last} (${l.span}) — AG’s own quarter-on-quarter series.`,
       source: "AG reputation-tracker/trends · sentimentTrend",
       severity: Math.abs(l.delta) >= 5 ? ("HIGH" as const) : ("MEDIUM" as const),
     }));
@@ -72,7 +72,7 @@ export default function MissionControl() {
       ==================================================================== */}
       {/* Focal vendor — which company the whole cockpit brief is about. */}
       <section className="mb-6 flex flex-wrap items-center gap-2" data-testid="focal-vendor-picker">
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/55">
+        <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55">
           Briefing on
         </span>
         {VENDOR_OPTIONS.map((v) => {
@@ -82,6 +82,7 @@ export default function MissionControl() {
               key={v.id}
               type="button"
               onClick={() => setFocalVendorId(on ? "" : v.id)}
+              aria-pressed={on}
               data-testid={`focal-vendor-${v.id}`}
               className={cn(
                 "rounded-full border px-3 py-1 text-[12px] font-medium transition",
@@ -150,7 +151,7 @@ export default function MissionControl() {
         <div className="mb-6 flex items-baseline justify-between">
           <Eyebrow className="text-white/65">The brief · What changed &amp; where exposed</Eyebrow>
           <div
-            className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50"
+            className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50"
             title={live ? arBrief?.sourceNote : "No AnalystGenius read is available; nothing is shown in its place."}
           >
             {live && arBrief
@@ -186,7 +187,7 @@ export default function MissionControl() {
         <section className="mb-14 space-y-5">
           <div className="flex items-baseline justify-between">
             <Eyebrow className="text-white/65">AG Pulse · Competitive read</Eyebrow>
-            <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+            <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
               Your set vs the field
             </div>
           </div>
@@ -202,7 +203,7 @@ export default function MissionControl() {
           <div className="flex items-center gap-2">
             <Eyebrow className="text-white/65">Choose your mode</Eyebrow>
           </div>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
             Three modes · One cockpit
           </div>
         </div>
@@ -275,7 +276,7 @@ function BriefBucket({
           </span>
           <Eyebrow tone={tone === "gold" ? "gold" : "teal"}>{label}</Eyebrow>
         </div>
-        <span className="font-mono text-[10px] tracking-[0.22em] text-white/50">
+        <span className="font-mono text-[11px] tracking-[0.22em] text-white/50">
           {glyph}
         </span>
       </div>
@@ -288,7 +289,7 @@ function BriefBucket({
         </p>
       )}
 
-      {/* Provenance rides on the item's tooltip, not the page. Severity is the
+      {/* Provenance rides on the item’s tooltip, not the page. Severity is the
           only thing that earns pixels here — it changes what AR does next. */}
       <ul className="space-y-3.5">
         {items.map((item) => (
@@ -324,7 +325,7 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
     <Link
       href={`/${mode.id}`}
       data-testid={`mode-card-${mode.id}`}
-      className="group relative block overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.18] bg-[#0c1a15] p-7 transition-all duration-500 hover:border-[#3d8f6d]/32 hover:bg-[#0c1018]"
+      className="group relative block overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.18] bg-[#0c1a15] p-7 transition duration-500 hover:border-[#3d8f6d]/32 hover:bg-[#0c1018]"
       style={{
         backgroundImage: `radial-gradient(circle at ${index === 1 ? "85%" : "15%"} 0%, ${accent}22, transparent 55%)`,
       }}
@@ -362,7 +363,7 @@ function ModeCard({ mode, index }: { mode: (typeof MODES)[number]; index: number
 
         <ul className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-[#3d8f6d]/[0.16] pt-5">
           {mode.inside.map((item) => (
-            <li key={item} className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-white/65">
+            <li key={item} className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/65">
               {item}
             </li>
           ))}

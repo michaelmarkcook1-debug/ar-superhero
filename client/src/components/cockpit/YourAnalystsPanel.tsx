@@ -82,7 +82,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
     <section className="mb-14" data-testid="your-analysts">
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
         <Eyebrow className="text-white/65">Your analysts · {vendorLabel}</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {summary
             ? `${summary.named} named · ${summary.withPosition} with a sourced position${
                 summary.stale > 0 ? ` · ${summary.stale} dated` : ""
@@ -132,7 +132,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
                           {when && <span className="font-mono uppercase tracking-[0.14em]">{when}</span>}
                           {a.stale && a.months_old !== null && (
                             <span
-                              className="rounded-full border border-[#d5b46b]/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]"
+                              className="rounded-full border border-[#d5b46b]/40 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]"
                               title="Older than two years — historic coverage, not a current read"
                             >
                               dated · {Math.round(a.months_old / 12)}y
@@ -156,7 +156,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
                     {a.last_interaction_at !== null && (
-                      <div className="text-right font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                      <div className="text-right font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                         last contact{" "}
                         {new Date(a.last_interaction_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                       </div>
@@ -165,7 +165,7 @@ export default function YourAnalystsPanel({ vendorId }: { vendorId: string }) {
                       type="button"
                       onClick={() => setSeedRequest({ kind: "analyst-briefing", vendorId: effectiveVendor, analystKey: a.key })}
                       data-testid={`your-analyst-seed-${a.key.replace(/[^a-z0-9]+/g, "-")}`}
-                      className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                      className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
                     >
                       Prepare briefing
                     </button>

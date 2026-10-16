@@ -416,7 +416,7 @@ export default function CommandCentre() {
                 <div className="px-5 py-4 text-[13px] text-muted-foreground">Loading analysts…</div>
               )}
               {analysts.isError && (
-                <div className="px-5 py-4 text-[13px] text-destructive">Couldn't load analysts.</div>
+                <div className="px-5 py-4 text-[13px] text-destructive">Couldn’t load analysts.</div>
               )}
               {!analysts.isLoading && !analysts.isError && analystRows.length === 0 && (
                 <div className="px-5 py-4 text-[13px] text-muted-foreground">No analysts on record yet.</div>
@@ -465,7 +465,7 @@ export default function CommandCentre() {
             <Card>
               <div className="flex flex-wrap items-center gap-1.5 mb-4">
                 {LENSES.map((l) => (
-                  <button
+                  <button type="button"
                     key={l.id}
                     onClick={() => setActiveLens(l.id)}
                     data-testid={`button-lens-${l.id}`}
@@ -503,7 +503,7 @@ export default function CommandCentre() {
                       <Eyebrow className="mb-2">Export internal briefing</Eyebrow>
                       <div className="grid grid-cols-2 gap-1.5">
                         {["PDF", "PPTX", "DOCX", "Markdown"].map((fmt) => (
-                          <button
+                          <button type="button"
                             key={fmt}
                             onClick={() => data.logExport(l.name, fmt)}
                             data-testid={`button-export-${l.id}-${fmt.toLowerCase()}`}
@@ -572,14 +572,14 @@ export default function CommandCentre() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] text-foreground/95 leading-relaxed">
-                    Your draft RFI submission does not yet align with HFS's OneEcosystem framework.
+                    Your draft RFI submission does not yet align with HFS’s OneEcosystem framework.
                     Consider broadening scope across your partner network and internal business units —
                     multi-tier ecosystem narratives tend to improve service-delivery effectiveness and
                     speed to market in this assessment.
                   </p>
 
                   {!supportOpen ? (
-                    <button
+                    <button type="button"
                       onClick={() => setSupportOpen(true)}
                       data-testid="button-support-find-out-more"
                       className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-medium text-primary hover:text-primary/85"
@@ -596,14 +596,14 @@ export default function CommandCentre() {
                       </p>
                       {!supportContacted ? (
                         <div className="mt-3 flex items-center gap-2">
-                          <button
+                          <button type="button"
                             onClick={() => setSupportContacted(true)}
                             data-testid="button-support-request-review"
                             className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/15 px-2.5 py-1.5 text-[12px] font-medium text-primary hover-elevate"
                           >
                             Request review
                           </button>
-                          <button
+                          <button type="button"
                             onClick={() => setSupportOpen(false)}
                             className="text-[12px] text-muted-foreground hover:text-foreground"
                           >
@@ -693,7 +693,7 @@ function MetricCard({
 }) {
   return (
     <div className="rounded-xl border border-card-border bg-card p-4">
-      <div className="text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </div>
       <div className="mt-2 text-[28px] font-semibold tracking-tight tabular text-foreground leading-none">
@@ -856,7 +856,7 @@ function StanceModal({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-md hover-elevate" aria-label="Close">
+          <button type="button" onClick={onClose} className="p-1.5 rounded-md hover-elevate" aria-label="Close">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -867,7 +867,7 @@ function StanceModal({
             <div className="text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground mb-2">Set stance manually</div>
             <div className="flex flex-wrap gap-1.5">
               {STANCE_OPTIONS.map((s) => (
-                <button
+                <button type="button"
                   key={s}
                   onClick={() => setStance(s)}
                   className={cn(
@@ -881,13 +881,13 @@ function StanceModal({
                 </button>
               ))}
             </div>
-            <textarea
+            <textarea aria-label="Note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               data-testid="textarea-stance-note"
               rows={2}
               placeholder="Evidence note (recommended) — quote, observed behaviour, public commentary."
-              className="mt-2.5 w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary/40"
+              className="mt-2.5 w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] focus:ring-1 focus:ring-primary/40"
             />
             {submitStance.isError && (
               <p className="mt-1.5 text-[12px] text-destructive">{(submitStance.error as Error).message}</p>
@@ -900,7 +900,7 @@ function StanceModal({
               Add a note, write-up, or interaction
             </div>
             <div className="flex flex-wrap gap-2 mb-2">
-              <select
+              <select aria-label="Signal kind"
                 value={signalKind}
                 onChange={(e) => setSignalKind(e.target.value as SignalKind)}
                 data-testid="select-signal-kind"
@@ -913,20 +913,21 @@ function StanceModal({
                 ))}
               </select>
               <input
-                value={signalTitle}
+                aria-label="Signal title"
+                  value={signalTitle}
                 onChange={(e) => setSignalTitle(e.target.value)}
                 placeholder={'Title — e.g. "Q2 briefing follow-up"'}
                 data-testid="input-signal-title"
                 className="flex-1 min-w-[160px] rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[12.5px] placeholder:text-muted-foreground/70"
               />
             </div>
-            <textarea
+            <textarea aria-label="Type the note here, or upload a document instead"
               value={signalContent}
               onChange={(e) => setSignalContent(e.target.value)}
               rows={3}
               placeholder="Type the note here, or upload a document instead."
               data-testid="textarea-signal-content"
-              className="w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary/40"
+              className="w-full rounded-md border border-input bg-card/60 px-3 py-2 text-[13px] placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] focus:ring-1 focus:ring-primary/40"
             />
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <button
@@ -950,7 +951,7 @@ function StanceModal({
                 {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
                 Upload document (.docx/.txt)
               </button>
-              <input
+              <input aria-label="Choose a file to upload"
                 ref={fileRef}
                 type="file"
                 accept=".docx,.txt"
@@ -982,7 +983,7 @@ function StanceModal({
             )}
             {priorSignals.length > 0 && (
               <div className="mt-3 pt-3 border-t border-border/60">
-                <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground mb-1.5">
+                <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground mb-1.5">
                   {priorSignals.length} signal{priorSignals.length === 1 ? "" : "s"} on record
                 </div>
                 <ul className="space-y-1">
@@ -1013,7 +1014,7 @@ function StanceModal({
                         {p.confidence}% · {formatRelativeAgo(new Date(p.recorded_at))}
                       </span>
                       {p.suggested && (
-                        <button
+                        <button type="button"
                           onClick={() => confirmSuggestion.mutate(p.id)}
                           disabled={confirmSuggestion.isPending}
                           data-testid={`button-confirm-stance-${p.id}`}
@@ -1036,10 +1037,10 @@ function StanceModal({
             Manual stance saves at <strong>full confidence</strong>.
           </span>
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="rounded-md border border-border bg-secondary px-3 h-9 text-[12.5px] hover-elevate">
+            <button type="button" onClick={onClose} className="rounded-md border border-border bg-secondary px-3 h-9 text-[12.5px] hover-elevate">
               Close
             </button>
-            <button
+            <button type="button"
               onClick={() => submitStance.mutate()}
               disabled={submitStance.isPending}
               data-testid="button-submit-stance"

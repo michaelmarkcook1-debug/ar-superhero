@@ -18,13 +18,13 @@ export function ScoreBar({ value, label }: { value: number | null | undefined; l
     <div className="w-full">
       {label && (
         <div className="mb-1 flex items-baseline justify-between">
-          <span className="text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">{label}</span>
+          <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{label}</span>
           <span className="font-mono text-[12px] tabular text-foreground">{value == null ? "—" : value}</span>
         </div>
       )}
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/60">
         <div
-          className="h-full rounded-full transition-all"
+          className="h-full rounded-full transition"
           style={{ width: `${value == null ? 0 : Math.max(2, Math.min(100, value))}%`, background: scoreColor(value) }}
         />
       </div>
@@ -142,12 +142,12 @@ export function ProviderPicker({
           <div className="absolute left-0 top-full z-50 mt-1.5 max-h-[360px] w-[320px] overflow-hidden rounded-lg border border-border bg-popover shadow-lg">
             <div className="flex items-center gap-2 border-b border-border px-3 py-2">
               <Search className="h-3.5 w-3.5 text-muted-foreground" />
-              <input
+              <input aria-label="Search 65 providers"
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search 65 providers…"
-                className="w-full bg-transparent text-[13px] outline-none placeholder:text-muted-foreground/70"
+                className="w-full bg-transparent text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] placeholder:text-muted-foreground/70"
               />
             </div>
             <div className="max-h-[300px] overflow-y-auto py-1">

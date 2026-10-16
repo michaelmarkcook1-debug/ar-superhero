@@ -53,7 +53,7 @@ export default function LeaderLens() {
 
       <div className="flex flex-wrap gap-1.5">
         {LENSES.map((l) => (
-          <button
+          <button type="button"
             key={l.id}
             onClick={() => setActive(l.id)}
             className={cn(
@@ -77,7 +77,7 @@ export default function LeaderLens() {
           </div>
           <div className="flex items-center gap-2">
             {["PDF", "PPTX", "DOCX", "Markdown"].map((fmt) => (
-              <button
+              <button type="button"
                 key={fmt}
                 onClick={() => data.logExport(lens.name, fmt)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-secondary px-2.5 py-1.5 text-[12px] hover-elevate"
@@ -118,7 +118,7 @@ export default function LeaderLens() {
       <section>
         <Eyebrow className="mb-3">Analysts in this briefing · grouped by rating</Eyebrow>
         {isLoading && <p className="text-[13px] text-muted-foreground">Loading…</p>}
-        {isError && <p className="text-[13px] text-destructive">Couldn't load analysts.</p>}
+        {isError && <p className="text-[13px] text-destructive">Couldn’t load analysts.</p>}
         {!isLoading && !isError && ratingOrder.length === 0 && (
           <p className="text-[13px] text-muted-foreground">No analysts on record yet.</p>
         )}

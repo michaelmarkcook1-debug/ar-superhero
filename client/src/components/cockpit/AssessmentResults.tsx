@@ -59,7 +59,7 @@ export default function AssessmentResults() {
           type="button"
           data-testid="button-log-result"
           onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.08] px-3.5 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:bg-[#a88945]/[0.14]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.08] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:bg-[#a88945]/[0.14]"
         >
           <Plus className="h-3 w-3" /> Log a published result
         </button>
@@ -99,18 +99,18 @@ export default function AssessmentResults() {
 function DirectionChip({ direction, prior, position }: { direction: StoredResult["direction"]; prior: string | null; position: string }) {
   if (direction === "improved")
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#f0dca8]">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-[#a88945]/40 bg-[#a88945]/[0.1] px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-[#f0dca8]">
         <TrendingUp className="h-3 w-3" /> {prior} → {position}
       </span>
     );
   if (direction === "declined")
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.12em] text-white/60">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/60">
         <TrendingDown className="h-3 w-3" /> {prior} → {position}
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/26 bg-[#1a5540]/20 px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.12em] text-white/70">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/26 bg-[#1a5540]/20 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-white/70">
       <Minus className="h-3 w-3" /> {position}
     </span>
   );
@@ -132,7 +132,7 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
             <div className="truncate text-[13.5px] font-semibold text-white/90">
               {house?.house ?? r.house} · {house?.assessment.name} — {r.segment}
             </div>
-            <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+            <div className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
               {r.cycleLabel} · published {r.publishedAt} · {r.linkedDeckIds.length} linked submission
               {r.linkedDeckIds.length === 1 ? "" : "s"}
             </div>
@@ -149,7 +149,7 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {r.strengths.length > 0 && (
               <div>
-                <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
+                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
                   Analyst-stated strengths (verbatim)
                 </div>
                 <ul className="space-y-1.5">
@@ -161,7 +161,7 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
             )}
             {r.cautions.length > 0 && (
               <div>
-                <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/50">
+                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/50">
                   Analyst-stated cautions (verbatim)
                 </div>
                 <ul className="space-y-1.5">
@@ -176,17 +176,17 @@ function ResultCard({ r, expanded, onToggle }: { r: StoredResult; expanded: bool
           {r.insights.length > 0 && (
             <>
               <HairLine className="my-4" />
-              <div className="mb-2 flex items-center gap-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#63d7de]">
+              <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#63d7de]">
                 <Sparkle className="h-3 w-3" /> What the loop noticed — evidence vs result
               </div>
               <ul className="space-y-2.5">
                 {r.insights.map((i, k) => (
                   <li key={k} className="rounded-lg border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.14] px-3.5 py-2.5">
-                    <span className="mr-2 rounded-sm border border-[#63d7de]/30 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-[#63d7de]">
+                    <span className="mr-2 rounded-sm border border-[#63d7de]/30 px-1.5 py-px font-mono text-[11px] uppercase tracking-[0.12em] text-[#63d7de]">
                       {KIND_LABEL[i.kind] ?? i.kind}
                     </span>
                     <span className="text-[12.5px] leading-relaxed text-white/80">{i.line}</span>
-                    <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-white/50">{i.source}</div>
+                    <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">{i.source}</div>
                   </li>
                 ))}
               </ul>
@@ -206,7 +206,7 @@ const areaCls =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">{label}</span>
       {children}
     </label>
   );
@@ -279,35 +279,35 @@ function ResultForm({ decks, onDone }: { decks: LibraryDeck[]; onDone: () => voi
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Field label={`Segment / study * (${playbook.assessment.name})`}>
-          <input value={segment} onChange={(e) => setSegment(e.target.value)} placeholder="e.g. Public Cloud IT Transformation Services" data-testid="input-result-segment" className={inputCls} />
+          <input aria-label="e.g. Public Cloud IT Transformation Services" value={segment} onChange={(e) => setSegment(e.target.value)} placeholder="e.g. Public Cloud IT Transformation Services" data-testid="input-result-segment" className={inputCls} />
         </Field>
         <Field label="Cycle label *">
-          <input value={cycleLabel} onChange={(e) => setCycleLabel(e.target.value)} placeholder="e.g. 2026 edition / H1 2026" data-testid="input-result-cycle" className={inputCls} />
+          <input aria-label="e.g. 2026 edition / H1 2026" value={cycleLabel} onChange={(e) => setCycleLabel(e.target.value)} placeholder="e.g. 2026 edition / H1 2026" data-testid="input-result-cycle" className={inputCls} />
         </Field>
         <Field label="Published date * (YYYY-MM-DD)">
-          <input value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} placeholder="2026-06-30" data-testid="input-result-date" className={inputCls} />
+          <input aria-label="2026-06-30" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} placeholder="2026-06-30" data-testid="input-result-date" className={inputCls} />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Position *">
-            <input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="e.g. Leader" data-testid="input-result-position" className={inputCls} />
+            <input aria-label="e.g. Leader" value={position} onChange={(e) => setPosition(e.target.value)} placeholder="e.g. Leader" data-testid="input-result-position" className={inputCls} />
           </Field>
           <Field label="Prior position">
-            <input value={priorPosition} onChange={(e) => setPriorPosition(e.target.value)} placeholder="e.g. Major Contender" data-testid="input-result-prior" className={inputCls} />
+            <input aria-label="e.g. Major Contender" value={priorPosition} onChange={(e) => setPriorPosition(e.target.value)} placeholder="e.g. Major Contender" data-testid="input-result-prior" className={inputCls} />
           </Field>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <Field label="Analyst-stated strengths — one per line, verbatim from the report">
-          <textarea value={strengths} onChange={(e) => setStrengths(e.target.value)} data-testid="input-result-strengths" className={areaCls} placeholder={"Paste the strengths exactly as published…"} />
+          <textarea aria-label="Paste the strengths exactly as published" value={strengths} onChange={(e) => setStrengths(e.target.value)} data-testid="input-result-strengths" className={areaCls} placeholder={"Paste the strengths exactly as published…"} />
         </Field>
         <Field label="Analyst-stated cautions — one per line, verbatim from the report">
-          <textarea value={cautions} onChange={(e) => setCautions(e.target.value)} data-testid="input-result-cautions" className={areaCls} placeholder={"Paste the cautions exactly as published…"} />
+          <textarea aria-label="Paste the cautions exactly as published" value={cautions} onChange={(e) => setCautions(e.target.value)} data-testid="input-result-cautions" className={areaCls} placeholder={"Paste the cautions exactly as published…"} />
         </Field>
       </div>
 
       <div className="mt-4">
-        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+        <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
           Link the submission decks used in this cycle ({playbook.house}-tagged uploads)
         </div>
         {houseDecks.length === 0 ? (

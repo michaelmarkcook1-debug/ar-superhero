@@ -105,7 +105,7 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
             position links to its source.
           </p>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {withStance > 0 ? `${withStance} sourced position${withStance === 1 ? "" : "s"}` : "By analyst firm"}
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
             <Pane key={firm} className="p-5" glow={rows.some((r: CoverageRow) => Boolean(r.stance_summary)) ? "gold" : "none"}>
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div className="text-[14.5px] font-semibold text-[#e7e3d8]">{firm}</div>
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/50">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
                   {rows.length} analyst{rows.length === 1 ? "" : "s"}
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
                               if (age === null || age < STALE_AFTER_MONTHS) return null;
                               return (
                                 <span
-                                  className="rounded-full border border-[#d5b46b]/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]"
+                                  className="rounded-full border border-[#d5b46b]/40 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]"
                                   title="Older than two years — historic coverage, not a current read"
                                 >
                                   dated · {Math.round(age / 12)}y old
@@ -190,7 +190,7 @@ export default function AnalystCoverageSection({ vendorId }: { vendorId: string 
                               );
                             })()}
                             {when && (
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">{when}</span>
+                              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">{when}</span>
                             )}
                             {r.source_url && (
                               <a

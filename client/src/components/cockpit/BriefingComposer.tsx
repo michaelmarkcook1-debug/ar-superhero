@@ -106,7 +106,7 @@ export default function BriefingComposer() {
     <section className="mb-14" data-testid="briefing-composer">
       <div className="mb-7 flex items-baseline justify-between">
         <Eyebrow className="text-white/65">Briefing composer</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           Prior decks + AG signals + your variables
         </div>
       </div>
@@ -121,12 +121,12 @@ export default function BriefingComposer() {
               data-testid="button-upload-deck"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-3.5 py-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#63d7de] transition hover:bg-[#00a7b7]/[0.14] disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#00a7b7]/35 bg-[#00a7b7]/[0.08] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-[#63d7de] transition hover:bg-[#00a7b7]/[0.14] disabled:opacity-40"
             >
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileUp className="h-3 w-3" />}
               Upload .pptx
             </button>
-            <input
+            <input aria-label="Upload a prior briefing deck"
               ref={fileRef}
               type="file"
               accept=".pptx"
@@ -159,7 +159,7 @@ export default function BriefingComposer() {
                     key={d.id}
                     className="flex items-center gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3 py-2.5"
                   >
-                    <input
+                    <input aria-label="Reuse this deck"
                       type="checkbox"
                       checked={checked}
                       data-testid={`check-deck-${d.id}`}
@@ -173,14 +173,14 @@ export default function BriefingComposer() {
                         <div className="truncate text-[12.5px] font-medium text-white/85">{d.filename}</div>
                         {d.isDemo && (
                           <span
-                            className="shrink-0 rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]"
+                            className="shrink-0 rounded-full border border-[#d5b46b]/30 px-1.5 py-0.5 text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]"
                             data-testid={`badge-demo-${d.id}`}
                           >
                             demo
                           </span>
                         )}
                       </div>
-                      <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-white/55">
+                      <div className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                         {HOUSE_PLAYBOOKS.find((p) => p.id === d.house)?.house ?? d.house} · {d.slideCount} slides ·{" "}
                         {new Date(d.uploadedAt).toLocaleDateString("en-GB")}
                       </div>
@@ -237,7 +237,7 @@ export default function BriefingComposer() {
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Field label="Assessment topic *">
-              <input
+              <input aria-label="e.g. Application modernisation services"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g. Application modernisation services"
@@ -246,7 +246,7 @@ export default function BriefingComposer() {
               />
             </Field>
             <Field label="Region">
-              <input
+              <input aria-label="e.g. Europe / North America / Global"
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
                 placeholder="e.g. Europe / North America / Global"
@@ -281,7 +281,7 @@ export default function BriefingComposer() {
           {/* Executives */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+              <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
                 Presenting executives
               </span>
               <button
@@ -289,7 +289,7 @@ export default function BriefingComposer() {
                 data-testid="button-add-exec"
                 onClick={() => setExecutives((ex) => [...ex, { name: "", title: "" }])}
                 disabled={executives.length >= 8}
-                className="inline-flex items-center gap-1 text-[10.5px] font-medium uppercase tracking-[0.14em] text-[#63d7de] transition hover:text-white/85 disabled:opacity-40"
+                className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[#63d7de] transition hover:text-white/85 disabled:opacity-40"
               >
                 <Plus className="h-3 w-3" /> Add
               </button>
@@ -297,7 +297,7 @@ export default function BriefingComposer() {
             <div className="space-y-2">
               {executives.map((ex, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <input
+                  <input aria-label="Name"
                     value={ex.name}
                     onChange={(e) =>
                       setExecutives((list) => list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))
@@ -306,7 +306,7 @@ export default function BriefingComposer() {
                     data-testid={`input-exec-name-${i}`}
                     className={inputCls}
                   />
-                  <input
+                  <input aria-label="Title"
                     value={ex.title}
                     onChange={(e) =>
                       setExecutives((list) => list.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))
@@ -370,7 +370,7 @@ const inputCls =
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+      <span className="mb-1.5 block text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
         {label}
       </span>
       {children}

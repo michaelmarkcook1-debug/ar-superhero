@@ -184,7 +184,7 @@ export default function Direct() {
         </p>
         <div className="mt-7 inline-flex flex-wrap items-center gap-3 rounded-2xl border border-[#a88945]/25 bg-[#a88945]/[0.06] px-4 py-3">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#d5b46b]">
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]">
               Briefing on
             </div>
             <div className="mt-0.5 text-[13px] text-white/55">
@@ -194,8 +194,9 @@ export default function Direct() {
           <select
             value={vendorId}
             onChange={(event) => setFocalVendorId(event.target.value)}
+            aria-label="Company to brief on"
             data-testid="select-persona-deck-vendor"
-            className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
+            className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
           >
             {VENDOR_OPTIONS.map((vendor) => (
               <option key={vendor.id} value={vendor.id}>
@@ -220,14 +221,14 @@ export default function Direct() {
                 type="button"
                 onClick={() => setSelectedId(lens.id)}
                 data-testid={`lens-${lens.id}`}
-                className={`group relative flex shrink-0 flex-col items-start gap-1 rounded-2xl border px-5 py-4 text-left transition-all duration-300 ${
+                className={`group relative flex shrink-0 flex-col items-start gap-1 rounded-2xl border px-5 py-4 text-left transition duration-300 ${
                   active
                     ? "border-[#a88945]/40 bg-gradient-to-b from-[#a88945]/[0.10] to-[#a88945]/[0.02] shadow-[0_0_40px_-16px_rgba(168,137,69,0.5)]"
                     : "border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.16] hover:border-[#3d8f6d]/30 hover:bg-[#1a5540]/[0.22]"
                 }`}
               >
                 <div
-                  className={`font-mono text-[10px] uppercase tracking-[0.22em] ${
+                  className={`font-mono text-[11px] uppercase tracking-[0.22em] ${
                     active ? "text-[#d5b46b]" : "text-white/55"
                   }`}
                 >
@@ -240,7 +241,7 @@ export default function Direct() {
                 >
                   {lens.label}
                 </div>
-                <div className="text-[10.5px] uppercase tracking-[0.14em] text-white/60">
+                <div className="text-[11px] uppercase tracking-[0.14em] text-white/60">
                   {lens.stakeholder.split("·")[0].trim()}
                 </div>
               </button>
@@ -252,7 +253,7 @@ export default function Direct() {
       {/* Lens detail */}
       <section className="mb-14 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Pane glow="gold" className="p-8 lg:p-10">
-          <div className="mb-2 flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.22em] text-[#d5b46b]">
+          <div className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[#d5b46b]">
             Lens · {selected.label}
           </div>
           <div className="mb-1 text-[11px] font-medium uppercase tracking-[0.22em] text-white/65">
@@ -312,7 +313,7 @@ export default function Direct() {
           <ol className="space-y-3">
             {selected.briefing.bullets.map((b, i) => (
               <li key={i} className="flex gap-4">
-                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#a88945]/30 bg-[#a88945]/[0.08] font-mono text-[10.5px] text-[#d5b46b]">
+                <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#a88945]/30 bg-[#a88945]/[0.08] font-mono text-[11px] text-[#d5b46b]">
                   {i + 1}
                 </span>
                 <span className="text-[13.5px] leading-relaxed text-white/75">{b}</span>
@@ -339,7 +340,7 @@ export default function Direct() {
 
           {contextOpen && (
             <div className="mt-3 rounded-xl border border-[#3d8f6d]/[0.20] bg-[#0c1a15] p-4" data-testid="further-context">
-              <div className="mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
+              <div className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
                 Further context — what should this briefing serve?
               </div>
               <div className="space-y-1.5">
@@ -378,7 +379,7 @@ export default function Direct() {
                       <span className="block text-[12.5px] font-medium text-white/85">{s.label}</span>
                       <span className="mt-0.5 block text-[11px] leading-snug text-white/60">{s.when}</span>
                       {scenarioId === s.id && (
-                        <span className="mt-1 block text-[10px] leading-snug text-[#63d7de]/80">
+                        <span className="mt-1 block text-[11px] leading-snug text-[#63d7de]/80">
                           Draws on: {s.intel.join(" · ")}
                         </span>
                       )}
@@ -389,7 +390,7 @@ export default function Direct() {
 
               {scenarioId !== "standard" && scenariosForPersona(selected.id).find((s) => s.id === scenarioId)?.houseScoped && (
                 <div className="mt-3">
-                  <div className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-white/60">
+                  <div className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-white/60">
                     Analyst house context
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -456,7 +457,7 @@ export default function Direct() {
             {downloading === "__all__" ? "Generating combined pack…" : "Download combined persona pack"}
             <FileDown className="h-3.5 w-3.5" />
           </button>
-          <div className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+          <div className="mt-3 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
             AnalystGenius persona pack · PPT · Source-traced · NDA controls applied
           </div>
         </Pane>
@@ -523,7 +524,7 @@ export default function Direct() {
               Every leader, one click away.
             </div>
           </div>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/55">
+          <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55">
             {LENSES.length} lenses
           </div>
         </div>
@@ -543,7 +544,7 @@ export default function Direct() {
                 }`}
               >
                 <div className="flex-1">
-                  <div className="text-[10.5px] uppercase tracking-[0.18em] text-white/60">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-white/60">
                     {l.stakeholder}
                   </div>
                   <div className="mt-1 text-[16px] font-semibold tracking-tight text-[#e7e3d8]">

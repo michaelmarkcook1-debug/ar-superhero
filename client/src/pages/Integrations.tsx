@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 // Integrations admin — wired to the real backend.
 // Toggles, mode switches, test, run-sync all call /api/integrations/...
 // Connector statuses (Mock mode / Needs auth / Connected / Off / Error) come
-// from the backend so the UI never claims a live connection that isn't real.
+// from the backend so the UI never claims a live connection that isn’t real.
 // ============================================================================
 
 type Capabilities = {
@@ -284,7 +284,7 @@ export default function Integrations() {
                           >
                             Test
                           </button>
-                          <button
+                          <button type="button"
                             role="switch"
                             aria-checked={i.enabled}
                             onClick={() => patchMutation.mutate({ id: i.id, patch: { enabled: !i.enabled } })}
@@ -314,7 +314,7 @@ export default function Integrations() {
                             if (m.value === "read_only") return cap.read_only;
                             return true;
                           }).map((m) => (
-                            <button
+                            <button type="button"
                               key={m.value}
                               onClick={() => patchMutation.mutate({ id: i.id, patch: { mode: m.value } })}
                               data-testid={`mode-${i.id}-${m.value}`}

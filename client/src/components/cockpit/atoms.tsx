@@ -65,7 +65,7 @@ export function Eyebrow({
   return (
     <div
       className={cn(
-        "text-[10.5px] font-medium uppercase tracking-[0.22em]",
+        "text-[11px] font-medium uppercase tracking-[0.22em]",
         tones[tone],
         className
       )}
@@ -138,7 +138,7 @@ export function StatusChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em]",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em]",
         tones[status],
         className
       )}
@@ -209,14 +209,14 @@ export function SourceTag({
   tag?: "demo" | "external signal" | "internal";
 }) {
   return (
-    <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-white/55">
+    <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-white/55">
       <span className="font-mono">{source}</span>
       {tag && (
         <>
           <span className="text-white/15">·</span>
           <span
             className={cn(
-              "rounded-full border px-1.5 py-0.5 text-[9.5px] tracking-[0.18em]",
+              "rounded-full border px-1.5 py-0.5 text-[11px] tracking-[0.18em]",
               tag === "demo" && "border-[#d5b46b]/30 text-[#d5b46b]",
               tag === "external signal" && "border-[#63d7de]/30 text-[#63d7de]",
               tag === "internal" && "border-[#3d8f6d]/26 text-white/60"
@@ -244,7 +244,7 @@ export function NumberMark({
       <div className="font-mono text-[32px] font-medium leading-none tracking-tight text-[#f0dca8] tabular-nums md:text-[36px]">
         {value}
       </div>
-      <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/65">
+      <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/65">
         {label}
       </div>
       {sub && <div className="text-[11.5px] leading-snug text-white/60">{sub}</div>}
@@ -324,7 +324,7 @@ export function SubNav<T extends string>({
             {it.icon && <span className={on ? "text-[#d5b46b]" : "text-white/60"}>{it.icon}</span>}
             {it.label}
             {it.hint && (
-              <span className={cn("font-mono text-[9.5px] uppercase tracking-[0.16em]", on ? "text-[#d5b46b]/70" : "text-white/50")}>
+              <span className={cn("font-mono text-[11px] uppercase tracking-[0.16em]", on ? "text-[#d5b46b]/70" : "text-white/50")}>
                 {it.hint}
               </span>
             )}

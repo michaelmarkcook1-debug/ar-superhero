@@ -40,7 +40,7 @@ export default function Learning() {
           const count = data.learning.filter((l) => l.state === s).length;
           return (
             <Card key={s} className="p-3">
-              <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">{s}</div>
+              <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{s}</div>
               <div className="mt-1.5 text-[22px] font-semibold tabular text-foreground leading-none">
                 {count}
               </div>

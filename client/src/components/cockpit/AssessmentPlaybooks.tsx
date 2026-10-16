@@ -24,8 +24,8 @@ import {
 // Per-house assessment playbooks from the owner-supplied best-practice
 // document: house rail → flagship model card (axes + leadership definition +
 // framework) → four-stage engagement guidance (RFI, client calls, briefing
-// deck, exec briefing) with do's / don'ts and directional influence ranks →
-// cross-house operating framework. The document's evidence boundary is
+// deck, exec briefing) with do’s / don’ts and directional influence ranks →
+// cross-house operating framework. The document’s evidence boundary is
 // rendered alongside — ranks are directional judgements, not published
 // weights.
 // ============================================================================
@@ -48,12 +48,12 @@ export default function AssessmentPlaybooks() {
     <section className="mb-14" data-testid="assessment-playbooks">
       <div className="mb-6 flex items-baseline justify-between">
         <Eyebrow className="text-white/65">Assessment leadership playbooks</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           Seven houses · Four engagement moments
         </div>
       </div>
 
-      {/* The hard truth — the document's executive frame */}
+      {/* The hard truth — the document’s executive frame */}
       <Pane glow="gold" className="mb-5 p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 max-w-3xl">
@@ -67,7 +67,7 @@ export default function AssessmentPlaybooks() {
             type="button"
             data-testid="button-evidence-boundary"
             onClick={() => setShowBoundary((v) => !v)}
-            className="shrink-0 rounded-full border border-[#3d8f6d]/26 px-3 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-white/65 transition hover:text-white/75"
+            className="shrink-0 rounded-full border border-[#3d8f6d]/26 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-white/65 transition hover:text-white/75"
           >
             {showBoundary ? "Hide" : "Evidence boundary"}
           </button>
@@ -102,8 +102,8 @@ export default function AssessmentPlaybooks() {
             <span
               className={
                 p.id === houseId
-                  ? "font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#d5b46b]/80"
-                  : "font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/50"
+                  ? "font-mono text-[11px] uppercase tracking-[0.14em] text-[#d5b46b]/80"
+                  : "font-mono text-[11px] uppercase tracking-[0.14em] text-white/50"
               }
             >
               {p.assessment.name}
@@ -124,7 +124,7 @@ export default function AssessmentPlaybooks() {
           <div className="mb-5 flex items-center justify-between gap-3">
             <Eyebrow tone="teal">Engagement moments · {playbook.house}</Eyebrow>
             <span
-              className="truncate font-mono text-[9.5px] uppercase tracking-[0.16em] text-[#63d7de]"
+              className="truncate font-mono text-[11px] uppercase tracking-[0.16em] text-[#63d7de]"
               title={playbook.contentSource ?? undefined}
             >
               {playbook.status === "populated" ? "Owner playbook ingested" : "Awaiting playbook document"}
@@ -151,8 +151,8 @@ export default function AssessmentPlaybooks() {
                     <span
                       className={
                         s.id === stageId
-                          ? "font-mono text-[9.5px] uppercase tracking-[0.18em] text-[#63d7de]"
-                          : "font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/50"
+                          ? "font-mono text-[11px] uppercase tracking-[0.18em] text-[#63d7de]"
+                          : "font-mono text-[11px] uppercase tracking-[0.18em] text-white/50"
                       }
                     >
                       {String(i + 1).padStart(2, "0")}
@@ -161,8 +161,8 @@ export default function AssessmentPlaybooks() {
                       <span
                         className={
                           g.rank === 1
-                            ? "rounded-sm border border-[#a88945]/45 bg-[#a88945]/[0.12] px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-[#f0dca8]"
-                            : "rounded-sm border border-[#3d8f6d]/24 px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.12em] text-white/60"
+                            ? "rounded-sm border border-[#a88945]/45 bg-[#a88945]/[0.12] px-1.5 py-px font-mono text-[11px] uppercase tracking-[0.12em] text-[#f0dca8]"
+                            : "rounded-sm border border-[#3d8f6d]/24 px-1.5 py-px font-mono text-[11px] uppercase tracking-[0.12em] text-white/60"
                         }
                         title="Directional influence rank within this house (1 = greatest practical influence). Not a published weight."
                       >
@@ -195,7 +195,7 @@ export default function AssessmentPlaybooks() {
 
           {learning && learning.lines.length > 0 && (
             <div className="mt-5 rounded-xl border border-[#63d7de]/25 bg-[#00a7b7]/[0.05] p-4" data-testid="house-learnings">
-              <div className="mb-2 flex items-center gap-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#63d7de]">
+              <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#63d7de]">
                 <Sparkle className="h-3 w-3" />
                 Learned from your results · {learning.cycles} cycle{learning.cycles === 1 ? "" : "s"}
               </div>
@@ -206,8 +206,8 @@ export default function AssessmentPlaybooks() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-2.5 text-[10.5px] leading-relaxed text-white/55">
-                Observations from your logged results vs your linked submissions — they augment the playbook, they don't override it.
+              <p className="mt-2.5 text-[11px] leading-relaxed text-white/55">
+                Observations from your logged results vs your linked submissions — they augment the playbook, they don’t override it.
               </p>
             </div>
           )}
@@ -234,7 +234,7 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
       <div className="mt-5 flex items-stretch gap-3">
         <div className="flex items-center">
           <span
-            className="text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60"
+            className="text-[11px] font-medium uppercase tracking-[0.16em] text-white/60"
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
             {yAxis}
@@ -244,31 +244,31 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
           <div className="relative h-32 rounded-lg border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.16]">
             <div className="absolute inset-x-0 top-1/2 h-px bg-[#1a5540]/[0.34]" />
             <div className="absolute inset-y-0 left-1/2 w-px bg-[#1a5540]/[0.34]" />
-            <div className="absolute right-2 top-2 rounded-md border border-[#a88945]/40 bg-[#a88945]/[0.12] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[#f0dca8]">
+            <div className="absolute right-2 top-2 rounded-md border border-[#a88945]/40 bg-[#a88945]/[0.12] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.16em] text-[#f0dca8]">
               Leadership
             </div>
           </div>
-          <div className="mt-2 text-center text-[9.5px] font-medium uppercase tracking-[0.16em] text-white/60">
+          <div className="mt-2 text-center text-[11px] font-medium uppercase tracking-[0.16em] text-white/60">
             {xAxis}
           </div>
         </div>
       </div>
 
       <HairLine className="my-5" />
-      <div className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+      <div className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
         What leadership means here
       </div>
       <p className="text-[13px] leading-relaxed text-white/70">{playbook.assessment.leadership}</p>
 
       <div className="mt-5">
-        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+        <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
           Leadership lens & theme
         </div>
         {playbook.leadershipFramework.length ? (
           <ol className="space-y-2">
             {playbook.leadershipFramework.map((step, i) => (
               <li key={i} className="flex gap-3 rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-2.5">
-                <span className="font-mono text-[10px] tracking-[0.22em] text-[#d5b46b]">
+                <span className="font-mono text-[11px] tracking-[0.22em] text-[#d5b46b]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="text-[12.5px] leading-relaxed text-white/80">{step}</span>
@@ -281,7 +281,7 @@ function ModelCard({ playbook }: { playbook: HousePlaybook }) {
       </div>
 
       <div className="mt-5">
-        <div className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
+        <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#d5b46b]">
           What moves rankings here
         </div>
         <div className="rounded-lg border border-[#a88945]/25 bg-[#a88945]/[0.05] px-3.5 py-3">
@@ -307,7 +307,7 @@ function CrossHouseFramework() {
       <ol className="mb-5 space-y-1.5">
         {UNIVERSAL_SHIFT_DRIVERS.map((d, i) => (
           <li key={i} className="flex gap-2.5 text-[12.5px] leading-relaxed text-white/75">
-            <span className="shrink-0 font-mono text-[9.5px] tracking-[0.2em] text-[#d5b46b]">
+            <span className="shrink-0 font-mono text-[11px] tracking-[0.2em] text-[#d5b46b]">
               {String(i + 1).padStart(2, "0")}
             </span>
             {d}
@@ -332,7 +332,7 @@ function CrossHouseFramework() {
         {CROSS_HOUSE_FRAMEWORK.map((item, i) => (
           <li key={i} className="rounded-lg border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] px-3.5 py-3">
             <div className="flex gap-3">
-              <span className="font-mono text-[10px] tracking-[0.22em] text-[#63d7de]">
+              <span className="font-mono text-[11px] tracking-[0.22em] text-[#63d7de]">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div className="min-w-0">
@@ -355,7 +355,7 @@ function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; g
   const blocks: { key: keyof Pick<StageGuidance, "framework" | "dos" | "donts" | "bestPractices">; label: string; tone: string }[] = [
     { key: "framework", label: "Framework", tone: "text-white/60" },
     { key: "dos", label: "Do", tone: "text-[#d5b46b]" },
-    { key: "donts", label: "Don't", tone: "text-white/60" },
+    { key: "donts", label: "Don’t", tone: "text-white/60" },
     { key: "bestPractices", label: "Best practice", tone: "text-[#63d7de]" },
   ];
   const anyContent = blocks.some((b) => guidance[b.key].length > 0);
@@ -370,13 +370,13 @@ function StageGuidancePanel({ playbook, guidance }: { playbook: HousePlaybook; g
         (b) =>
           guidance[b.key].length > 0 && (
             <div key={b.key} className="rounded-xl border border-[#3d8f6d]/[0.14] bg-[#1a5540]/[0.16] p-4">
-              <div className={`mb-2.5 text-[10.5px] font-medium uppercase tracking-[0.18em] ${b.tone}`}>
+              <div className={`mb-2.5 text-[11px] font-medium uppercase tracking-[0.18em] ${b.tone}`}>
                 {b.label}
               </div>
               <ul className="space-y-2">
                 {guidance[b.key].map((item, i) => (
                   <li key={i} className="flex gap-2.5 text-[12.5px] leading-relaxed text-white/75">
-                    <span className="shrink-0 font-mono text-[9.5px] tracking-[0.2em] text-white/50">
+                    <span className="shrink-0 font-mono text-[11px] tracking-[0.2em] text-white/50">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {item}

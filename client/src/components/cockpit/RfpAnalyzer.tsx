@@ -89,7 +89,7 @@ export default function RfpAnalyzer() {
     <section className="mb-14" data-testid="rfp-analyzer">
       <div className="mb-7 flex items-baseline justify-between">
         <Eyebrow className="text-white/65">RFP / RFI analysis</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           Live AG data + approved proof library
         </div>
       </div>
@@ -101,9 +101,9 @@ export default function RfpAnalyzer() {
             Upload draft response
           </Eyebrow>
           <p className="mb-5 text-[13px] leading-relaxed text-white/50">
-            Upload a draft RFP/RFI response (.docx or .txt). It's reviewed against live market
+            Upload a draft RFP/RFI response (.docx or .txt). It’s reviewed against live market
             intelligence and your approved, externally-safe proof points only — restricted
-            evidence is never suggested for external use, and nothing is invented that isn't in
+            evidence is never suggested for external use, and nothing is invented that isn’t in
             the document or in real data.
           </p>
           <button
@@ -116,7 +116,7 @@ export default function RfpAnalyzer() {
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />}
             {uploading ? "Analyzing…" : "Upload & analyze"}
           </button>
-          <input
+          <input aria-label="Upload an RFP or RFI document"
             ref={fileRef}
             type="file"
             accept=".docx,.txt"
@@ -135,7 +135,7 @@ export default function RfpAnalyzer() {
           )}
 
           <HairLine className="my-5" />
-          <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+          <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
             What it draws on
           </div>
           <ul className="mt-2.5 space-y-1.5 text-[12px] leading-relaxed text-white/50">
@@ -167,16 +167,16 @@ export default function RfpAnalyzer() {
               <div className="mb-4 flex flex-wrap items-center gap-2">
                 <Eyebrow tone="gold">Analysis · {filename}</Eyebrow>
                 {result.usedLiveData ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#a5d8ab]/30 bg-[#a5d8ab]/[0.08] px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[#a5d8ab]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#a5d8ab]/30 bg-[#a5d8ab]/[0.08] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#a5d8ab]">
                     <CheckCircle2 className="h-2.5 w-2.5" /> Live market data used
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#d5b46b]/30 bg-[#d5b46b]/[0.08] px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#d5b46b]/30 bg-[#d5b46b]/[0.08] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
                     <AlertTriangle className="h-2.5 w-2.5" /> No live data ({result.liveDataReason})
                   </span>
                 )}
                 {result.truncated && (
-                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.14em] text-white/60">
+                  <span className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] uppercase tracking-[0.14em] text-white/60">
                     document truncated for length
                   </span>
                 )}
@@ -186,7 +186,7 @@ export default function RfpAnalyzer() {
 
               {result.strengthsFound.length > 0 && (
                 <>
-                  <div className="mt-5 mb-2 text-[10.5px] font-medium uppercase tracking-[0.18em] text-[#a5d8ab]">
+                  <div className="mt-5 mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-[#a5d8ab]">
                     Already working
                   </div>
                   <ul className="space-y-1.5">
@@ -202,7 +202,7 @@ export default function RfpAnalyzer() {
 
               <HairLine className="my-5" />
 
-              <div className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.18em] text-white/60">
+              <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-white/60">
                 Suggested improvements ({result.suggestions.length})
               </div>
               <ul className="space-y-3">
@@ -213,7 +213,7 @@ export default function RfpAnalyzer() {
                     data-testid={`rfp-suggestion-${i}`}
                   >
                     <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                      <span className={cn("rounded-full border px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em]", CATEGORY_TONE[s.category])}>
+                      <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em]", CATEGORY_TONE[s.category])}>
                         {CATEGORY_LABEL[s.category]}
                       </span>
                       <span className="text-[13.5px] font-semibold leading-snug text-[#e7e3d8]">{s.title}</span>
@@ -223,7 +223,7 @@ export default function RfpAnalyzer() {
                       <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-[#d5b46b]" />
                       <span><span className="text-white/60">Suggested — </span>{s.suggestedAction}</span>
                     </div>
-                    <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">
+                    <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">
                       {s.groundedIn ? `Grounded in: ${s.groundedIn}` : "General note — not tied to a specific data point"}
                     </div>
                   </li>

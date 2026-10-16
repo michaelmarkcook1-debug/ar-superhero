@@ -40,8 +40,8 @@ export default function HowItWorks() {
         </h1>
         <p className="mt-5 max-w-2xl text-[15.5px] leading-relaxed text-white/55 md:text-[16.5px]">
           How material is meant to move through Succeed, Direct and Enable, from upload to output. This is the intended
-          design. Today the upload panels on each mode simulate the flow; each stage below becomes live as its real
-          implementation lands, and this page will say which.
+          design. Today the Direct and Enable upload panels simulate the flow; Succeed already reads real records. Each
+          stage below becomes live as its real implementation lands, and this page will say which.
         </p>
         <div className="mt-6 flex flex-wrap gap-4 text-[11px] font-medium uppercase tracking-[0.16em]">
           {[
@@ -61,7 +61,7 @@ export default function HowItWorks() {
           accent="gold"
           eyebrow="Mode I · Succeed decision model"
           title="From upload to readiness."
-          description="Eight stages turn raw material into criteria, gaps, prompts, and learning signals. Outputs feed this customer's readiness directly. Cross-client learning runs only through validated AnalystGenius researcher review."
+          description="Eight stages turn raw material into criteria, gaps, prompts, and learning signals. Outputs feed this customer’s readiness directly. Cross-client learning runs only through validated AnalystGenius researcher review."
           stages={SUCCEED_DECISION_STAGES}
           impacts={SUCCEED_MODEL_IMPACTS}
           finalNote="AnalystGenius learning uses validated patterns only. Third-party analyst text, scoring rationale, or methodology IP is never republished across clients."

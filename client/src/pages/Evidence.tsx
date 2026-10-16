@@ -59,8 +59,9 @@ export default function Evidence() {
                 </div>
                 <div className="lg:col-span-2"><ReadinessBar band={e.readiness} /></div>
                 <div className="lg:col-span-1 flex items-center gap-1.5 justify-end">
-                  <button
+                  <button type="button"
                     onClick={() => data.setEvidenceState(e.id, "Approved")}
+                    aria-label="Approve evidence"
                     disabled={status === "Approved"}
                     className={cn(
                       "inline-flex items-center gap-1 rounded-md border px-2 h-7 text-[11.5px] hover-elevate disabled:opacity-50",
@@ -69,8 +70,9 @@ export default function Evidence() {
                   >
                     <Check className="h-3 w-3" />
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => data.setEvidenceState(e.id, "Rejected")}
+                    aria-label="Reject evidence"
                     disabled={status === "Rejected"}
                     className="inline-flex items-center gap-1 rounded-md border border-border bg-secondary px-2 h-7 text-[11.5px] hover-elevate disabled:opacity-50"
                   >

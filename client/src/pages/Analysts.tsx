@@ -89,7 +89,7 @@ export default function Analysts() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button
+          <button type="button"
             onClick={() => syncFromCoverage.mutate()}
             disabled={syncFromCoverage.isPending}
             data-testid="button-sync-roster"
@@ -99,7 +99,7 @@ export default function Analysts() {
             {syncFromCoverage.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
             Sync from coverage
           </button>
-          <button
+          <button type="button"
             onClick={() => setAddOpen((v) => !v)}
             data-testid="button-toggle-add-analyst"
             className="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/10 px-3 h-9 text-[12.5px] font-medium text-primary hover-elevate"
@@ -124,21 +124,21 @@ export default function Analysts() {
       {addOpen && (
         <Card className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-            <input
+            <input aria-label="Name"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Name"
               data-testid="input-analyst-name"
               className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px] placeholder:text-muted-foreground/70"
             />
-            <input
+            <input aria-label="Firm — e.g. Gartner"
               value={form.firm}
               onChange={(e) => setForm((f) => ({ ...f, firm: e.target.value }))}
               placeholder="Firm — e.g. Gartner"
               data-testid="input-analyst-firm"
               className="rounded-md border border-input bg-card/60 px-2.5 py-1.5 text-[13px] placeholder:text-muted-foreground/70"
             />
-            <select
+            <select aria-label="Firm tier"
               value={form.firm_tier}
               onChange={(e) => setForm((f) => ({ ...f, firm_tier: e.target.value }))}
               data-testid="select-analyst-tier"
@@ -148,7 +148,7 @@ export default function Analysts() {
               <option value="Tier 2">Tier 2</option>
               <option value="Tier 3">Tier 3</option>
             </select>
-            <input
+            <input aria-label="Role (optional)"
               value={form.role}
               onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
               placeholder="Role (optional)"
@@ -157,7 +157,7 @@ export default function Analysts() {
             />
           </div>
           <div className="mt-3 flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={() => createAnalyst.mutate()}
               disabled={!form.name.trim() || !form.firm.trim() || createAnalyst.isPending}
               data-testid="button-submit-analyst"
@@ -176,7 +176,7 @@ export default function Analysts() {
       {isError && (
         <Card className="border-destructive/30 bg-destructive/5">
           <p className="text-[13px] text-destructive">
-            Couldn't load analysts: {(error as Error)?.message ?? "unknown error"}
+            Couldn’t load analysts: {(error as Error)?.message ?? "unknown error"}
           </p>
         </Card>
       )}
@@ -234,7 +234,7 @@ export default function Analysts() {
                           <div>
                             <div className="font-medium text-foreground">
                               {a.name}{" "}
-                              {a.rating_overridden && <span className="text-[10px] text-accent">· overridden</span>}
+                              {a.rating_overridden && <span className="text-[11px] text-accent">· overridden</span>}
                             </div>
                             <div className="text-[11.5px] text-muted-foreground">{a.role ?? "—"}</div>
                           </div>
@@ -285,7 +285,7 @@ function FilterChip({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={cn(
         "rounded-md border px-2.5 py-1 text-[11.5px] hover-elevate",

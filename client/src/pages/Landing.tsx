@@ -10,7 +10,7 @@ export default function Landing() {
   const { isDark: dark, toggleTheme } = useAppTheme();
 
   return (
-    <main className={`relative min-h-screen overflow-hidden transition-colors duration-500 ${dark ? "bg-[#060f0c] text-white" : "bg-[#fdf6eb] text-[#123d2c]"}`}>
+    <main className={`relative min-h-dvh overflow-hidden transition-colors duration-500 ${dark ? "bg-[#060f0c] text-white" : "bg-[#fdf6eb] text-[#123d2c]"}`}>
       <div className={`absolute inset-0 transition-colors duration-500 ${dark ? "bg-[#060f0c]" : "bg-[#fdf6eb]"}`} />
       {/* Möbius hero. Its cream ground is the same value as the light canvas,
           so light mode carries it full-strength and seamless. Dark mode fades
@@ -55,7 +55,7 @@ export default function Landing() {
             <span className={`block text-[15px] font-semibold tracking-tight ${dark ? "text-white" : "text-[#123d2c]"}`}>
               AR Super<span className="text-[#a88945]">Hero</span>
             </span>
-            <span className={`mt-0.5 block text-[8.5px] font-medium uppercase tracking-[0.2em] ${dark ? "text-white/65" : "text-[#123d2c]/45"}`}>
+            <span className={`mt-0.5 block text-[11px] font-medium uppercase tracking-[0.2em] ${dark ? "text-white/65" : "text-[#123d2c]/45"}`}>
               by AnalystGenius
             </span>
           </span>
@@ -75,7 +75,7 @@ export default function Landing() {
         </button>
       </header>
 
-      <section className="relative z-10 flex min-h-[calc(100vh-76px)] items-center justify-center px-5 pb-10">
+      <section className="relative z-10 flex min-h-[calc(100dvh-76px)] items-center justify-center px-5 pb-10">
         <div className="relative w-full max-w-6xl">
           <div className="relative mx-auto flex min-h-[610px] max-w-4xl flex-col items-center justify-center text-center max-sm:min-h-[560px]">
             <div className={`mb-5 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-medium uppercase tracking-[0.18em] shadow-sm backdrop-blur-md ${
@@ -84,7 +84,7 @@ export default function Landing() {
                 : "border-[#a88945]/25 bg-white/62 text-[#5e4b21]"
             }`}>
               <span className="h-1.5 w-1.5 rounded-full bg-[#00a7b7]" />
-              AR INTELLIGENCE LAYER
+              AR intelligence layer
             </div>
 
             <h1 className={`flex max-w-3xl flex-wrap items-baseline gap-x-[0.28em] text-[54px] font-semibold leading-[0.96] tracking-normal md:text-[84px] lg:text-[104px] ${
@@ -155,21 +155,21 @@ export default function Landing() {
           <div className="relative mx-auto -mt-8 grid max-w-4xl grid-cols-1 gap-3 md:grid-cols-3">
             <LandingStat
               icon={<Gauge className="h-4 w-4" />}
-              label="Readiness models"
-              value="6"
-              detail="MQ, Wave, MarketScape, PEAK, Horizons, NEAT"
+              label="Analyst houses"
+              value="7"
+              detail="Gartner, Forrester, IDC, HFS, NelsonHall, ISG, Everest"
             />
             <LandingStat
               icon={<ShieldCheck className="h-4 w-4" />}
-              label="Evidence governance"
-              value="5"
-              detail="Internal, NDA, no-NDA, RFI, marketing controls"
+              label="Every figure sourced"
+              value="1"
+              detail="One rule: cited record, live read, or a stated gap"
             />
             <LandingStat
               icon={<FileText className="h-4 w-4" />}
               label="Leader lenses"
-              value="5"
-              detail="Strategy, Executive, Product, Marketing, Commercial"
+              value="7"
+              detail="Executive, Strategy, Product, Marketing, Commercial, Delivery, Regional"
             />
           </div>
         </div>

@@ -10,7 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 // SuperHero assembles the goal, the sources with their provenance, and the
 // capabilities a playbook may name; the person takes the prompt into Claude
 // with the WorkEngine skill. Nothing is sent anywhere from here: the prompt is
-// copied and the request envelope downloaded, so the person's own WorkEngine
+// copied and the request envelope downloaded, so the person’s own WorkEngine
 // sign-in carries the work. Every figure shown is real and traces to a source.
 // ============================================================================
 
@@ -143,7 +143,7 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
                       ) : (
                         <span className="truncate font-mono text-[11px] text-[#63d7de]">{s.source_ref}</span>
                       )}
-                      <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                         {s.role} · {s.permitted_use} · {s.currency_state} · {s.read_state}
                       </span>
                     </div>
@@ -202,12 +202,12 @@ export default function WorkSeedDialog({ request, onClose }: { request: SeedRequ
                   </button>
                 </div>
               </div>
-              <textarea
+              <textarea aria-label="WorkEngine hand-off prompt"
                 readOnly
                 value={seed.handoff_prompt}
                 data-testid="work-seed-prompt"
                 rows={10}
-                className="w-full resize-y rounded-lg border border-[#3d8f6d]/[0.2] bg-[#081410] p-3 font-mono text-[11.5px] leading-relaxed text-white/80 outline-none focus:border-[#d5b46b]/50"
+                className="w-full resize-y rounded-lg border border-[#3d8f6d]/[0.2] bg-[#081410] p-3 font-mono text-[11.5px] leading-relaxed text-white/80 outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] focus:border-[#d5b46b]/50"
               />
               <p className="mt-1.5 text-[11px] leading-relaxed text-white/50">
                 Nothing is sent from here. Your own WorkEngine sign-in carries the work; the goal and sources arrive exactly as

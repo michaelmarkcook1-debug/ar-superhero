@@ -124,7 +124,7 @@ export default function BriefingTriggersPanel({
             </span>
             <Eyebrow tone={tone}>{label}</Eyebrow>
           </div>
-          <span className="font-mono text-[10px] tracking-[0.22em] text-white/50">{items.length}</span>
+          <span className="font-mono text-[11px] tracking-[0.22em] text-white/50">{items.length}</span>
         </div>
 
         {isLoading && <p className="text-[12.5px] text-white/55">Deriving triggers…</p>}
@@ -135,10 +135,10 @@ export default function BriefingTriggersPanel({
             {shown.map((t) => (
               <li key={t.id} data-testid={`trigger-${t.kind}`} className={`border-l-2 pl-4 ${t.priority === "now" ? "border-[#d5b46b]/70" : "border-[#3d8f6d]/[0.28]"}`}>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-[#3d8f6d]/24 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white/55">
+                  <span className="rounded-full border border-[#3d8f6d]/24 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                     {KIND_LABEL[t.kind]}
                   </span>
-                  {t.evidenceDate && <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">{formatDate(t.evidenceDate)}</span>}
+                  {t.evidenceDate && <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">{formatDate(t.evidenceDate)}</span>}
                 </div>
                 <div className="mt-1 text-[13.5px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">{t.title}</div>
                 <p className="mt-1 text-[12.5px] leading-relaxed text-white/60">{t.detail}</p>
@@ -161,7 +161,7 @@ export default function BriefingTriggersPanel({
                       type="button"
                       onClick={() => setSeedRequest(t.action!.type === "seed" ? t.action!.request : null)}
                       data-testid={`trigger-seed-${t.id.replace(/[^a-z0-9]+/gi, "-")}`}
-                      className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                      className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
                     >
                       {t.action.label}
                     </button>
@@ -172,14 +172,14 @@ export default function BriefingTriggersPanel({
                         href={t.action.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                        className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
                       >
                         {t.action.label}
                       </a>
                     ) : (
                       <Link
                         href={t.action.href}
-                        className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
+                        className="rounded-full border border-[#3d8f6d]/30 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60 transition hover:border-[#d5b46b]/50 hover:text-[#f0dca8]"
                       >
                         {t.action.label}
                       </Link>
@@ -207,7 +207,7 @@ export default function BriefingTriggersPanel({
     <section className="mb-14" data-testid="briefing-triggers">
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
         <Eyebrow className="text-white/65">{eyebrow} · {vendorLabel}</Eyebrow>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {data ? `${now.length} act now · ${ahead.length} prepare ahead` : "Act now · Prepare ahead"}
         </div>
       </div>

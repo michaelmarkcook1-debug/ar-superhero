@@ -22,7 +22,7 @@ export default function PlatformReputation() {
     <div className="mx-auto max-w-[1100px] px-5 py-10 lg:px-8 lg:py-12">
       <PlatformHeader
         title="Reputation Tracker"
-        description="Sentiment across analyst, media, social, customer, and employee lenses over time — with an AI-generated read of what's driving the trend and the questions to put to the provider."
+        description="Sentiment across analyst, media, social, customer, and employee lenses over time — with an AI-generated read of what’s driving the trend and the questions to put to the provider."
       />
 
       <div className="mb-6">
@@ -90,7 +90,7 @@ export default function PlatformReputation() {
                   {sec.themes?.length ? (
                     <div className="mt-2 flex flex-wrap gap-1">
                       {sec.themes.map((t, i) => (
-                        <span key={i} className="rounded-full bg-muted/50 px-2 py-0.5 text-[10.5px] text-muted-foreground">
+                        <span key={i} className="rounded-full bg-muted/50 px-2 py-0.5 text-[11px] text-muted-foreground">
                           {t.label}
                         </span>
                       ))}

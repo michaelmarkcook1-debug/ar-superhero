@@ -155,8 +155,10 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-feature-settings: 'ss01', 'ss02', 'cv11', 'tnum' 0;
+    font-feature-settings: 'ss01', 'ss02', 'cv11', 'kern' 1, 'liga' 1, 'tnum' 0;
     letter-spacing: -0.005em;
+    line-height: 1.45;
+    text-rendering: optimizeLegibility;
   }
 
   .tabular {
@@ -185,10 +187,79 @@
   }
 }
 
+@layer base {
+  /* Dark UI: native scrollbars, selects and form controls follow the theme. */
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* One visible focus ring for every interactive element, keyboard only. */
+  :focus-visible {
+    outline: 2px solid rgba(213, 180, 107, 0.85);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  summary {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Touch targets: nothing clickable shorter than 24px. Inline prose links
+     are unaffected (min-height does nothing on inline boxes). */
+  button,
+  a.inline-flex,
+  [role="button"] {
+    min-height: 1.5rem;
+  }
+
+  /* Headings balance; body text avoids widows. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    hyphens: none;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numbers line up wherever they are compared. */
+  .font-mono,
+  table,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Native selects on dark surfaces (Windows paints them white otherwise). */
+  select {
+    background-color: #090d14;
+    color: #f4eed8;
+  }
+
+  /* Motion: everything that moves stops when the user asks it to. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
 @layer utilities {
   /* Eyebrow / overline label */
   .eyebrow {
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     font-weight: 500;

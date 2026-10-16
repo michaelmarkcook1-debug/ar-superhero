@@ -101,7 +101,7 @@ export function StanceChip({
     >
       {stance}
       {confidence !== undefined && (
-        <span className="text-[10px] font-normal opacity-70 tabular">
+        <span className="text-[11px] font-normal opacity-70 tabular">
           · {(confidence * 100).toFixed(0)}%
         </span>
       )}
@@ -164,7 +164,7 @@ export function ConfidenceMeter({ value }: { value: number }) {
           style={{ width: `${Math.round(value * 100)}%` }}
         />
       </div>
-      <span className="text-[10.5px] text-muted-foreground tabular">
+      <span className="text-[11px] text-muted-foreground tabular">
         {(value * 100).toFixed(0)}%
       </span>
     </div>
@@ -244,7 +244,7 @@ export function KeyValue({
 }) {
   return (
     <div>
-      <div className="text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground mb-1">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-1">
         {label}
       </div>
       <div className={cn("text-sm text-foreground", mono && "font-mono tabular")}>

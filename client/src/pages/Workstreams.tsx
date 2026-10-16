@@ -4,7 +4,7 @@ import { Card, Chip, Eyebrow, ReadinessBar, AnalystAvatar, RatingPill } from "@/
 
 // NOTE: assigned-analyst lookup here is still the fictional seed roster — the
 // real (Postgres-backed) analyst records have no workstream link yet, so this
-// join can't be migrated without new schema. Tracked as follow-up.
+// join can’t be migrated without new schema. Tracked as follow-up.
 export default function Workstreams() {
   const data = useAppData();
   return (

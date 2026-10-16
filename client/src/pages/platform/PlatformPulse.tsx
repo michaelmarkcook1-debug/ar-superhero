@@ -78,11 +78,11 @@ export default function PlatformPulse() {
                 {SECTOR_LABELS[s] ?? s} {n}
               </button>
             ))}
-            <input
+            <input aria-label="Search providers"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search providers…"
-              className="ml-auto h-8 w-[200px] rounded-lg border border-border bg-card/70 px-3 text-[12.5px] outline-none placeholder:text-muted-foreground/70 focus:border-primary/40"
+              className="ml-auto h-8 w-[200px] rounded-lg border border-border bg-card/70 px-3 text-[12.5px] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] placeholder:text-muted-foreground/70 focus:border-primary/40"
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function PlatformPulse() {
                     </div>
                   </div>
                   {p.level && (
-                    <span className="shrink-0 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                    <span className="shrink-0 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">
                       {p.level}
                     </span>
                   )}

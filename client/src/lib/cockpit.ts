@@ -11,7 +11,7 @@ import type { ReadinessBand } from "./seed";
 
 // ---------------------------------------------------------------------------
 // Vendor selector — shared by Succeed and Direct, since both let AR pick
-// which company a generated deck defends/briefs for. Ids match the server's
+// which company a generated deck defends/briefs for. Ids match the server’s
 // vendor -> AnalystGenius-ticker registry (server/services/vendors.ts).
 // ---------------------------------------------------------------------------
 
@@ -200,7 +200,7 @@ export const LENSES: Lens[] = [
     oneLine:
       "Internal marketing guidance only. Storylines that resonate in current analyst inquiries should be reflected in internal sales-enablement and analyst briefing materials — not in external campaigns.",
     knows: [
-      "App Modernisation inquiries trending up 22% QoQ in Northstar's category.",
+      "App Modernisation inquiries trending up 22% QoQ in Northstar’s category.",
       "BFSI AI co-pilot collateral is too sales-led for analyst use.",
       "NDA-only quotes cannot be externalised.",
     ],
@@ -229,7 +229,7 @@ export const LENSES: Lens[] = [
     oneLine:
       "Analyst influence enablement for internal sales leaders. Focus is on shaping how analyst positioning is used inside the sales motion, not on deal-room intelligence or competitor deal dynamics.",
     knows: [
-      "BFSI sales leaders need a 2-pager on Northstar's analyst visibility (Gartner, Everest, IDC).",
+      "BFSI sales leaders need a 2-pager on Northstar’s analyst visibility (Gartner, Everest, IDC).",
       "North America Banking pursuit team has 2 named pursuits anchored on analyst positioning.",
       "NDA-only analyst quotes cannot be used in commercial conversations.",
     ],
@@ -435,7 +435,7 @@ export const NARRATIVES: Narrative[] = [
     title: "Composable application modernisation",
     resonance: "Rising",
     detail:
-      "Analyst category weight is climbing. Northstar's two refactor cases land; the playbook narrative is missing.",
+      "Analyst category weight is climbing. Northstar’s two refactor cases land; the playbook narrative is missing.",
     internalOnly: true,
   },
   {
@@ -510,7 +510,7 @@ export const IMPACT_STATS = [
 // Analyst moment material uploads + Succeed decision model
 // ============================================================================
 //
-// Uploaded third-party analyst material is used for the customer's own
+// Uploaded third-party analyst material is used for the customer’s own
 // readiness (Succeed) and for AnalystGenius model learning only where
 // permitted/validated. We never imply AnalystGenius republishes other firms'
 // IP. Cross-client learning is gated on AnalystGenius researcher validation
@@ -612,7 +612,7 @@ export const SUCCEED_DECISION_STAGES: DecisionStage<SucceedMaterialType>[] = [
     label: "Outcome learning signal",
     short: "What this cycle taught us.",
     feeds: ["outcome", "writeup"],
-    output: "Patterns added to AR's own learning log.",
+    output: "Patterns added to AR’s own learning log.",
     tone: "muted",
   },
   {
@@ -645,7 +645,7 @@ export const SUCCEED_MODEL_IMPACTS: ModelImpact[] = [
     id: "mi2",
     trigger: "Everest PEAK BFSI outcome write-up captured.",
     observed:
-      "Outcome write-up created 2 learning signals pending AG validation. Validated signals can inform other clients without reusing the analyst's IP.",
+      "Outcome write-up created 2 learning signals pending AG validation. Validated signals can inform other clients without reusing the analyst’s IP.",
     scope: "AG cross-client (pending)",
   },
   {
@@ -791,7 +791,7 @@ export const DIRECT_UPLOADS: DirectUpload[] = [
     lensId: "commercial",
     state: "Needs review",
     summary:
-      "Pursuit plan references claims that need cross-checking against AR's restricted list.",
+      "Pursuit plan references claims that need cross-checking against AR’s restricted list.",
     signals: [
       "2 pursuit claims flagged for restricted-list review",
       "Sales-safe substitutions suggested",
@@ -1073,7 +1073,7 @@ export const ENABLE_DECISION_STAGES: DecisionStage<EnableMaterialType>[] = [
   {
     id: "e4",
     label: "Presence gap mapping",
-    short: "Where the story isn't landing.",
+    short: "Where the story isn’t landing.",
     feeds: ["thought-leadership", "messaging-draft", "website-copy"],
     output: "Gap list with internal owner suggestions.",
     tone: "teal",
@@ -1430,7 +1430,7 @@ export const ENABLE_PRESENCE_DELIVERABLES: DeliverableTemplate[] = [
     id: "pres-gap-report",
     name: "Market Presence Gap Report",
     summary:
-      "Where the story isn't landing, with AR's view of why and what would close each gap. Briefing-grade.",
+      "Where the story isn’t landing, with AR’s view of why and what would close each gap. Briefing-grade.",
     formats: ["DOCX", "PDF"],
     primaryFormat: "PDF",
     templateState: "AG curated · v2",
@@ -1452,7 +1452,7 @@ export const ENABLE_PRESENCE_DELIVERABLES: DeliverableTemplate[] = [
     id: "pres-narrative-map",
     name: "Analyst-Resonant Narrative Map",
     summary:
-      "Map of the narratives analysts are currently weighing, with Northstar's proof coverage per narrative.",
+      "Map of the narratives analysts are currently weighing, with Northstar’s proof coverage per narrative.",
     formats: ["PPTX", "PDF"],
     primaryFormat: "PPTX",
     templateState: "AG curated",

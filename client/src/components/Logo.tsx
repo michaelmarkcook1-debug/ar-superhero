@@ -38,7 +38,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
         <div className="text-[15px] font-semibold tracking-tight text-foreground">
           AR SuperHero
         </div>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
+        <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
           by AnalystGenius
         </div>
       </div>

@@ -132,7 +132,7 @@ export function UploadPanel<T extends string>({
             {subtitle}
           </p>
         </div>
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/65 md:inline-flex">
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/65 md:inline-flex">
           <ShieldCheck className="h-3 w-3" />
           Source-traced
         </div>
@@ -223,7 +223,7 @@ export function UploadPanel<T extends string>({
                 : undefined
             }
           >
-            <input
+            <input aria-label="Choose a file to upload"
               ref={fileInputRef}
               type="file"
               className="hidden"
@@ -274,7 +274,7 @@ export function UploadPanel<T extends string>({
               <div className="flex w-full flex-col items-center gap-3">
                 <Loader2 className="h-6 w-6 animate-spin" style={{ color: accentLight }} />
                 <div className="w-full max-w-sm">
-                  <div className="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.18em] text-white/55">
+                  <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
                     <span className="truncate pr-3 text-white/75">
                       {currentFilename}
                     </span>
@@ -284,7 +284,7 @@ export function UploadPanel<T extends string>({
                   </div>
                   <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#1a5540]/[0.34]">
                     <div
-                      className="h-full transition-all"
+                      className="h-full transition"
                       style={{
                         width: `${phase === "uploading" ? progress : 100}%`,
                         background: accentHex,
@@ -325,7 +325,7 @@ export function UploadPanel<T extends string>({
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/50" />
             <span>{permissionNote}</span>
           </div>
-          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/50">
+          <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/50">
             {UPLOAD_BACKEND_NOTE}
           </div>
         </div>
@@ -374,7 +374,7 @@ export function UploadedItemsList({
 }) {
   return (
     <Pane className="overflow-hidden p-0" data-testid="uploaded-items-list">
-      <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/60">
+      <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/60">
         <div className="col-span-5">File · type</div>
         <div className="col-span-3">Captured signals</div>
         <div className="col-span-2">Uploaded</div>
@@ -402,12 +402,12 @@ export function UploadedItemsList({
                       {it.filename}
                     </span>
                     {isNew && (
-                      <span className="rounded-full border border-[#d5b46b]/40 bg-[#d5b46b]/[0.08] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[#d5b46b]">
+                      <span className="rounded-full border border-[#d5b46b]/40 bg-[#d5b46b]/[0.08] px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]">
                         New
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] uppercase tracking-[0.16em] text-white/60">
                     <span>{it.typeLabel}</span>
                     <span className="text-white/15">·</span>
                     <span>{it.size}</span>
@@ -435,14 +435,14 @@ export function UploadedItemsList({
               </div>
               <div className="col-span-2 text-[12px] text-white/55">
                 <div>{it.uploadedBy}</div>
-                <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-white/55">
+                <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                   {it.uploadedAt}
                 </div>
               </div>
               <div className="col-span-2 flex justify-end">
                 <span
                   className={cn(
-                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[10.5px] font-medium uppercase tracking-[0.14em]",
+                    "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.14em]",
                     STATE_TONES[it.state] || "border-white/[0.12] bg-[#1a5540]/[0.18] text-white/55"
                   )}
                 >
@@ -517,14 +517,14 @@ export function DecisionModel<F extends string>({
               <div className="flex items-center justify-between">
                 <span
                   className={cn(
-                    "inline-flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[10px] tracking-[0.14em]",
+                    "inline-flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[11px] tracking-[0.14em]",
                     toneRing,
                     toneText
                   )}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span className={cn("font-mono text-[10px] uppercase tracking-[0.18em]", toneText)}>
+                <span className={cn("font-mono text-[11px] uppercase tracking-[0.18em]", toneText)}>
                   Stage
                 </span>
               </div>
@@ -535,14 +535,14 @@ export function DecisionModel<F extends string>({
 
               <HairLine className="my-4" />
 
-              <div className="mb-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/55">
+              <div className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
                 Fed by
               </div>
               <div className="flex flex-wrap gap-1">
                 {s.feeds.slice(0, 4).map((f) => (
                   <span
                     key={String(f)}
-                    className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/55"
+                    className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55"
                   >
                     {String(f)}
                   </span>
@@ -550,7 +550,7 @@ export function DecisionModel<F extends string>({
               </div>
 
               <div className="mt-3 text-[11.5px] leading-snug text-white/65">
-                <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/55">
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
                   Output
                 </span>
                 <div className="mt-1">{s.output}</div>
@@ -585,20 +585,20 @@ export function DecisionModel<F extends string>({
             >
               <div className="col-span-1">
                 <span
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[10px]"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full border font-mono text-[11px]"
                   style={{ borderColor: `${accentLight}55`, color: accentLight }}
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
               <div className="col-span-4">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
                   Trigger
                 </div>
                 <div className="mt-1 text-[13px] text-white/80">{m.trigger}</div>
               </div>
               <div className="col-span-5">
-                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/55">
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
                   Observed
                 </div>
                 <div className="mt-1 text-[13px] leading-relaxed text-[#e7e3d8]">
@@ -607,7 +607,7 @@ export function DecisionModel<F extends string>({
               </div>
               <div className="col-span-2 flex justify-end">
                 <span
-                  className="rounded-full border px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.16em]"
+                  className="rounded-full border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.16em]"
                   style={{
                     borderColor: `${accentLight}33`,
                     color: accentLight,

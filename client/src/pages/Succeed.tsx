@@ -15,7 +15,7 @@ import { Pane, Eyebrow, SectionTitle, HairLine, Glyph, NumberMark } from "@/comp
 // Succeed — win the analyst evaluations that matter.
 //
 // Everything on this page is a record SuperHero holds or a rule it states:
-// the vendor's cited placement history (and how long since each evaluation
+// the vendor’s cited placement history (and how long since each evaluation
 // last placed them), the evaluation triggers derived from that history and
 // from named coverage, the asks the AR team has written for each leader, the
 // assessment results the team has logged, the house playbooks, and the
@@ -83,14 +83,15 @@ export default function Succeed() {
         </p>
         <div className="mt-7 inline-flex flex-wrap items-center gap-3 rounded-2xl border border-[#a88945]/25 bg-[#a88945]/[0.06] px-4 py-3">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#d5b46b]">Preparing</div>
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]">Preparing</div>
             <div className="mt-0.5 text-[13px] text-white/55">Shared with Mission Control and Direct. Defence packs use this company.</div>
           </div>
           <select
             value={selectedVendorId}
             onChange={(event) => setFocalVendorId(event.target.value)}
+            aria-label="Company to prepare for"
             data-testid="select-briefing-deck-vendor"
-            className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
+            className="min-w-[220px] rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] font-medium text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] transition hover:border-[#d5b46b]/45 focus:border-[#d5b46b]"
           >
             {VENDOR_OPTIONS.map((vendor) => (
               <option key={vendor.id} value={vendor.id}>
@@ -168,7 +169,7 @@ export default function Succeed() {
                 <li key={a.id} className="flex flex-wrap items-start justify-between gap-x-6 gap-y-1.5 py-3" data-testid={`succeed-ask-${a.id}`}>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full border border-[#3d8f6d]/24 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white/55">
+                      <span className="rounded-full border border-[#3d8f6d]/24 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-white/55">
                         {PERSONA_LABEL[a.persona_id] ?? a.persona_id}
                       </span>
                       <span className="text-[13.5px] font-semibold text-[#e7e3d8]">{a.title}</span>

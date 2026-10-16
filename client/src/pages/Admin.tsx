@@ -32,39 +32,39 @@ const PLATFORM_LINKS = [
 const ADMIN_LINKS = [
   {
     href: "/admin/command-centre",
-    label: "Command Centre (legacy)",
+    label: "Command Centre (legacy demo)",
     icon: Activity,
-    detail: "Original operational command view. Retained for AR teams during transition.",
+    detail: "The original operational view, on fictional Northstar demo data. Kept for reference only.",
   },
   {
     href: "/admin/workstreams",
     label: "Workstreams",
     icon: ClipboardList,
-    detail: "Per-workstream task and status tracking — moved behind Succeed in the main UX.",
+    detail: "Per-workstream task and status tracking on demo data. Not wired to the cockpit.",
   },
   {
     href: "/admin/analysts",
     label: "Analyst landscape",
     icon: Users,
-    detail: "Internal analyst register. Visible inside Succeed only where tied to active moments.",
+    detail: "The analyst roster: named analysts, firms, ratings you set, and the sync from cited coverage.",
   },
   {
     href: "/admin/evidence",
     label: "Evidence library",
     icon: Library,
-    detail: "Underlying evidence store powering proof items shown in Succeed and Enable.",
+    detail: "Evidence store on demo data. Enable’s proof items do not read from it yet.",
   },
   {
     href: "/admin/leader-lens",
-    label: "Leader Lens (legacy)",
+    label: "Leader Lens (legacy demo)",
     icon: ClipboardList,
-    detail: "Original leadership briefing view — superseded by Direct.",
+    detail: "The original leadership view on demo data. Superseded by Direct.",
   },
   {
     href: "/admin/learning",
     label: "Learning queue",
     icon: GraduationCap,
-    detail: "Pattern review backlog. Feeds the Outcome learning section in Succeed.",
+    detail: "Pattern review backlog on demo data. Logged results now live under Succeed.",
   },
   {
     href: "/admin/integrations",
@@ -158,7 +158,7 @@ export default function Admin() {
               icon={<Database className="h-4 w-4" />}
               label="Data sources"
               value="Live"
-              detail="AnalystGenius API (provider snapshot, narrative–reality gap, reputation trends), Postgres on Supabase, and the cited placement and coverage records loaded from research. Every figure shown carries its source."
+              detail="AnalystGenius API (provider snapshot, narrative–reality gap, reputation trends), a Postgres store, and the cited placement and coverage records loaded from research. Every figure shown carries its source."
             />
             <ConfigBlock
               icon={<Settings className="h-4 w-4" />}
@@ -170,7 +170,7 @@ export default function Admin() {
               icon={<Users className="h-4 w-4" />}
               label="Decision models"
               value="Three"
-              detail="How material is meant to flow through Succeed, Direct and Enable, on one page. The upload panels simulate this flow today."
+              detail="How material is meant to flow through Succeed, Direct and Enable, on one page. The Direct and Enable upload panels simulate this flow today; Succeed reads real records."
             />
           </div>
           <div className="mt-6">

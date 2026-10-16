@@ -57,23 +57,23 @@ export function useAsks(vendorId: string, personaId?: string) {
 export function DueBadge({ due, status }: { due: string | null; status: AskStatus }) {
   const days = daysUntil(due);
   if (status !== "open" || days === null) {
-    return <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">{formatDue(due)}</span>;
+    return <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">{formatDue(due)}</span>;
   }
   if (days < 0) {
     return (
-      <span className="rounded-full border border-[#a88945]/50 bg-[#a88945]/[0.12] px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
+      <span className="rounded-full border border-[#a88945]/50 bg-[#a88945]/[0.12] px-1.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#e5c989]">
         overdue · {formatDue(due)}
       </span>
     );
   }
   if (days <= 7) {
     return (
-      <span className="rounded-full border border-[#a88945]/35 px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#d5b46b]">
+      <span className="rounded-full border border-[#a88945]/35 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.14em] text-[#d5b46b]">
         {days === 0 ? "due today" : `due in ${days}d`}
       </span>
     );
   }
-  return <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">due {formatDue(due)}</span>;
+  return <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/50">due {formatDue(due)}</span>;
 }
 
 export default function AsksPanel({
@@ -139,7 +139,7 @@ export default function AsksPanel({
             What AR needs from {stakeholder} on {vendorLabel}, with an owner and a date. Written by you; nothing here is suggested.
           </p>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
+        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/50">
           {open.length} open{overdue > 0 ? ` · ${overdue} overdue` : ""}
           {closed.length > 0 ? ` · ${closed.length} closed` : ""}
         </div>
@@ -193,26 +193,27 @@ export default function AsksPanel({
           data-testid="ask-form"
         >
           <input
+            aria-label="What you need from this leader"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={`What do you need from ${stakeholder.split("·")[0].trim()}?`}
             data-testid="ask-title"
-            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none placeholder:text-white/40 focus:border-[#d5b46b]"
+            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] placeholder:text-white/40 focus:border-[#d5b46b]"
           />
-          <input
+          <input aria-label="Owner (name)"
             value={owner}
             onChange={(e) => setOwner(e.target.value)}
             placeholder="Owner (name)"
             data-testid="ask-owner"
-            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none placeholder:text-white/40 focus:border-[#d5b46b]"
+            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] placeholder:text-white/40 focus:border-[#d5b46b]"
           />
-          <input
+          <input aria-label="Due date"
             type="date"
             value={due}
             min={todayIso()}
             onChange={(e) => setDue(e.target.value)}
             data-testid="ask-due"
-            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none focus:border-[#d5b46b]"
+            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] focus:border-[#d5b46b]"
           />
           <button
             type="submit"
@@ -222,12 +223,12 @@ export default function AsksPanel({
           >
             <Plus className="h-3.5 w-3.5" /> Add ask
           </button>
-          <input
+          <input aria-label="Note (optional)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Note (optional)"
             data-testid="ask-note"
-            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none placeholder:text-white/40 focus:border-[#d5b46b] md:col-span-4"
+            className="rounded-full border border-white/[0.12] bg-[#090d14] px-4 py-2 text-[13px] text-[#f4eed8] outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] placeholder:text-white/40 focus:border-[#d5b46b] md:col-span-4"
           />
         </form>
         {create.isError && <p className="mt-2 text-[12px] text-[#e89797]">{(create.error as Error).message}</p>}
@@ -246,7 +247,7 @@ export default function AsksPanel({
                 {closed.map((a) => (
                   <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-white/55">
                     <span>
-                      <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-white/45">{STATUS_LABEL[a.status]}</span> · {a.title}
+                      <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/45">{STATUS_LABEL[a.status]}</span> · {a.title}
                       {a.owner ? ` · ${a.owner}` : ""}
                     </span>
                     <AskAction label="Reopen" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setStatus.mutate({ id: a.id, status: "open" })} muted />

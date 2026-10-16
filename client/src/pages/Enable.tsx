@@ -270,7 +270,7 @@ function SellContent() {
                 </div>
               </div>
               <div className="col-span-3 flex items-center">
-                <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/65">
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/65">
                   {p.reuse}
                 </span>
               </div>
@@ -296,7 +296,7 @@ function SellContent() {
                 <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0 text-[#e89797]" />
                 <div>
                   <div className="text-[13.5px] font-medium leading-snug text-[#f4eed8]">
-                    "{c.claim}"
+                    “{c.claim}”
                   </div>
                   <p className="mt-2 text-[12.5px] leading-relaxed text-white/50">
                     {c.reason}
@@ -338,7 +338,7 @@ function SellContent() {
                 {b.guidance}
               </p>
               <HairLine className="my-5" />
-              <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
+              <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/60">
                 Approved snippets
               </div>
               <ul className="space-y-1.5">
@@ -377,7 +377,7 @@ function PresenceContent() {
               <div className="mb-3 flex items-center justify-between">
                 <Eyebrow tone="gold">{n.title}</Eyebrow>
                 <span
-                  className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] ${
+                  className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] ${
                     n.resonance === "Rising"
                       ? "text-[#a5d8ab]"
                       : n.resonance === "Steady"
@@ -393,7 +393,7 @@ function PresenceContent() {
               </div>
               <p className="text-[13.5px] leading-relaxed text-white/65">{n.detail}</p>
               {n.internalOnly && (
-                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/65">
+                <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-white/65">
                   <Shield className="h-2.5 w-2.5" />
                   Internal guidance only
                 </div>
@@ -407,8 +407,8 @@ function PresenceContent() {
       <section className="mb-12">
         <SectionTitle
           eyebrow="Market presence gaps"
-          title="Where the story isn't landing yet."
-          description="AR's view of the gaps that hold Northstar back from being heard in this category."
+          title="Where the story isn’t landing yet."
+          description="AR’s view of the gaps that hold the firm back from being heard in this category. Demo guidance until Enable reads real records."
         />
         <Pane className="overflow-hidden p-0">
           {PRESENCE_GAPS.map((g, i) => (
@@ -419,7 +419,7 @@ function PresenceContent() {
               }`}
               data-testid={`presence-gap-${g.id}`}
             >
-              <div className="col-span-3 font-mono text-[10.5px] uppercase tracking-[0.18em] text-[#d5b46b]">
+              <div className="col-span-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]">
                 {g.area}
               </div>
               <div className="col-span-4 text-[13.5px] text-white/85">{g.gap}</div>
@@ -453,7 +453,7 @@ function PresenceContent() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {OPPORTUNITIES.map((o) => (
             <Pane key={o.id} className="p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-white/55">
+              <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-white/55">
                 {o.format}
               </div>
               <div className="mt-2 text-[15px] font-semibold leading-snug tracking-tight text-[#e7e3d8]">
@@ -464,10 +464,10 @@ function PresenceContent() {
               </p>
               <HairLine className="my-5" />
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/60">
                   {o.owner}
                 </span>
-                <span className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-white/65">
+                <span className="rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/65">
                   Internal · Briefing-grade
                 </span>
               </div>
@@ -484,7 +484,7 @@ const OPPORTUNITIES = [
     id: "o1",
     format: "AR briefing series",
     headline: "Composable architecture in BFSI",
-    body: "Pair Northstar's two refactor outcomes with a playbook narrative. Tightens the App Modernisation moment.",
+    body: "Pair Northstar’s two refactor outcomes with a playbook narrative. Tightens the App Modernisation moment.",
     owner: "Strategy + AR",
   },
   {

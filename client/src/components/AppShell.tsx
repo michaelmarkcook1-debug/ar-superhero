@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [search, setSearch] = useState("");
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-dvh flex bg-background text-foreground">
       {/* Sidebar */}
       <aside className="hidden lg:flex w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
         <div className="px-5 pt-5 pb-4 border-b border-sidebar-border">
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="px-3 py-2 border-b border-sidebar-border">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground px-2 mt-2 mb-1">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground px-2 mt-2 mb-1">
             User organisation
           </div>
           <div className="flex items-center gap-2 px-2 py-1.5 rounded-md">
@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 overflow-y-auto py-3">
           {NAV.map((group) => (
             <div key={group.group} className="mb-4 px-3">
-              <div className="px-2 mb-1.5 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="px-2 mb-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                 {group.group}
               </div>
               <ul className="space-y-0.5">
@@ -120,7 +120,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         />
                         <span className="truncate flex-1">{item.label}</span>
                         {item.badge && (
-                          <span className="text-[10px] font-medium tabular text-muted-foreground bg-muted/60 rounded px-1.5 py-0.5">
+                          <span className="text-[11px] font-medium tabular text-muted-foreground bg-muted/60 rounded px-1.5 py-0.5">
                             {item.badge}
                           </span>
                         )}
@@ -160,13 +160,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2 lg:gap-3">
               <div className="relative hidden md:block">
                 <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <input aria-label="Search analysts, evidence, workstreams"
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search analysts, evidence, workstreams…"
                   data-testid="input-search"
-                  className="h-8 w-[280px] lg:w-[340px] rounded-md border border-border bg-card/70 pl-8 pr-2.5 text-[12.5px] placeholder:text-muted-foreground/70 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40"
+                  className="h-8 w-[280px] lg:w-[340px] rounded-md border border-border bg-card/70 pl-8 pr-2.5 text-[12.5px] placeholder:text-muted-foreground/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d5b46b]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#081410] focus:ring-1 focus:ring-primary/40 focus:border-primary/40"
                 />
               </div>
               <span className="hidden lg:inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -220,7 +220,7 @@ function TabGroup({
 }) {
   return (
     <div className="flex min-w-max items-center gap-1.5">
-      <span className="mr-1 hidden text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground xl:inline">
+      <span className="mr-1 hidden text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground xl:inline">
         {label}
       </span>
       {tabs.map((tab) => {
@@ -247,7 +247,7 @@ function TabGroup({
             {tab.badge && (
               <span
                 className={cn(
-                  "ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] tabular",
+                  "ml-0.5 rounded-full px-1.5 py-0.5 text-[11px] tabular",
                   active ? "bg-primary/18 text-primary" : "bg-muted text-muted-foreground"
                 )}
               >
