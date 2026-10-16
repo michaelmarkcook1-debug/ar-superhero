@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { ArrowUpRight, CalendarClock, ExternalLink } from "lucide-react";
 import { Pane, Eyebrow, HairLine } from "@/components/cockpit/atoms";
 import { VENDOR_OPTIONS } from "@/lib/cockpit";
+import { apiRequest } from "@/lib/queryClient";
+import { storedCompetitorTickers } from "@/lib/agBrief";
 
 // ============================================================================
 // Evaluation anniversaries — how long since each evaluation last placed the
@@ -74,6 +77,39 @@ export default function EvaluationAnniversariesPanel({
   const effectiveVendor = vendorId || VENDOR_OPTIONS[0].id;
   const vendorLabel = VENDOR_OPTIONS.find((v) => v.id === effectiveVendor)?.label ?? effectiveVendor;
   const { data, isLoading, isError } = useEvaluationCalendar(effectiveVendor);
+  const [packKey, setPackKey] = useState<string | null>(null);
+  const [packError, setPackError] = useState<string | null>(null);
+
+  // The defence pack for one evaluation series: the AnalystGenius read, the
+  // cited record in that evaluation, the house's rules, who covers you there,
+  // and the evidence to supply. Generated server-side, downloaded here.
+  async function downloadDefencePack(s: Series) {
+    setPackKey(s.key);
+    setPackError(null);
+    try {
+      const response = await apiRequest("POST", "/api/briefing-decks/generate", {
+        firm: s.firm,
+        reportName: s.report,
+        vendorId: effectiveVendor,
+        competitorTickers: storedCompetitorTickers(),
+      });
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") ?? "";
+      const match = disposition.match(/filename="?([^";]+)"?/);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = match?.[1] ?? `${effectiveVendor}-defence-pack.pptx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setPackError(e instanceof Error ? e.message : "Deck generation failed");
+    } finally {
+      setPackKey(null);
+    }
+  }
 
   const all = data?.series ?? [];
   const actionable = all.filter((s) => s.band !== "recent");
@@ -137,12 +173,29 @@ export default function EvaluationAnniversariesPanel({
                   </div>
                   {!compact && <p className="mt-1 text-[11.5px] leading-relaxed text-white/50">{s.note}</p>}
                 </div>
-                <div className="shrink-0 text-right font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
-                  {Math.round(s.monthsSinceLast)} mo ago
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <div className="text-right font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
+                    {Math.round(s.monthsSinceLast)} mo ago
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => downloadDefencePack(s)}
+                    disabled={packKey !== null}
+                    data-testid={`eval-defence-pack-${s.key.replace(/[^a-z0-9]+/g, "-")}`}
+                    className="rounded-full border border-[#a88945]/35 bg-[#a88945]/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#f0dca8] transition hover:border-[#d5b46b]/55 hover:bg-[#a88945]/[0.14] disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {packKey === s.key ? "Generating" : "Defence pack · PPT"}
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
+        )}
+
+        {packError && (
+          <p className="mt-3 text-[12px] text-[#e89797]" data-testid="eval-defence-pack-error">
+            {packError}
+          </p>
         )}
 
         {hidden > 0 && (

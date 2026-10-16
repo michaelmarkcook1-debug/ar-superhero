@@ -4,998 +4,492 @@ import {
   deckToBuffer,
   addCover,
   addClosing,
-  addCeoBioSlide,
   addBodySlide,
-  addTable,
-  addMetricCard,
   addBulletList,
+  addSectionDivider,
   addSectionLabel,
-  evidenceLabel,
-  PALETTE,
+  addStats,
+  addTable,
+  AG,
+  CONTENT_BOTTOM,
+  FONT_BODY,
+  fitH,
+  todayLabel,
   type Brand,
 } from "./boardPack";
-import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
+import { addAgIntelligenceSlides, readProvenance } from "./agIntelligenceSlide";
 import { derivePersonaView, type PersonaView } from "./personaLens";
 import { buildPersonaBriefing, type PersonaBriefing } from "./personaBriefing";
 import { vendorById } from "./vendors";
+import { vendorAnalystView, type VendorAnalyst } from "./rosterSync";
+import { publicRankingsStore } from "./publicRankingsStore";
+import { askStore, type Ask } from "./askStore";
+import type { PublicAnalystRanking } from "@shared/schema";
 
 // ============================================================================
-// Direct tab — persona analyst-influence briefing packs.
+// Direct tab — the persona's own quarterly briefing, in the house style.
 //
-// These are AnalystGenius-driven persona briefing packs that translate AG
-// (demo) data into what each internal AR stakeholder needs to know and do.
-// They are NOT generic stakeholder templates: every "what they need to know"
-// line is sourced from the AG persona model below, and missing AG fields are
-// surfaced as structured "input needed" rows rather than invented content.
-//
-// Data here is a server-side, demo-safe copy of the Direct persona model,
-// authored for the demo customer Capgemini. No outcome/likelihood prediction.
+// A persona deck is the artefact that stakeholder reads in their own meeting:
+// where the firm stands against its named peer set, what moved this quarter,
+// the competitor field, threats and opportunities, talent, and the published
+// record — scoped to the questions that role actually asks. It is not an AR
+// work-plan, and it carries no seeded content: every figure is an
+// AnalystGenius field, a cited placement, a named analyst's sourced position,
+// or an ask the AR team wrote. Where a source is unavailable the slide says
+// so; nothing is filled in its place.
 // ============================================================================
 
-export type PersonaId =
-  | "executive"
-  | "strategy"
-  | "product"
-  | "marketing"
-  | "commercial"
-  | "delivery"
-  | "regional";
+export type PersonaId = "executive" | "strategy" | "product" | "marketing" | "commercial" | "delivery" | "regional";
 
-type ProofRow = {
-  asset: string;
-  why: string;
-  state: "Safe" | "Restricted" | "Unsupported" | "Input needed";
-  owner: string;
+const PERSONA_META: Record<PersonaId, { label: string; stakeholder: string; audience: string; question: string }> = {
+  executive: { label: "Executive", stakeholder: "CEO · COO · CSO", audience: "Executive leadership", question: "Where does the firm stand against its peers, and what moved this quarter?" },
+  strategy: { label: "Strategy", stakeholder: "Chief Strategy Officer · Strategy Office", audience: "Strategy leadership", question: "Where do the market story and the delivered reality diverge?" },
+  product: { label: "Product", stakeholder: "Product / Service Line Leaders", audience: "Product and service-line leadership", question: "Where does capability standing lead or lag the peer set?" },
+  marketing: { label: "Marketing", stakeholder: "Marketing / Communications", audience: "Marketing and communications", question: "How is the firm's story landing, by channel, against its peers?" },
+  commercial: { label: "Commercial", stakeholder: "Sales / Pursuit Leaders", audience: "Sales and pursuit leadership", question: "How is the peer field rated where you sell, and what can be cited?" },
+  delivery: { label: "Delivery", stakeholder: "Delivery / Operations Leaders", audience: "Delivery and operations leadership", question: "How do workforce and client sentiment compare across the peer set?" },
+  regional: { label: "Regional", stakeholder: "Regional / Country Leaders", audience: "Regional leadership", question: "Where does the firm stand on the measures reported globally?" },
 };
-
-type RiskRow = { risk: string; mitigation: string; owner: string };
-
-type Persona = {
-  id: PersonaId;
-  label: string;
-  stakeholder: string;
-  whyMatters: string;
-  objective: string;
-  evidenceConfidence: string; // qualitative, no outcome prediction
-  evidenceGrade: "E1" | "E2" | "E3";
-  posture: string;
-  knows: string[]; // AG-derived implications
-  doNext: { action: string; owner: string; timing: string }[];
-  proof: ProofRow[];
-  guardrails: { approved: string[]; avoid: string[] };
-  enablement: string[]; // sales / internal enablement angle
-  risks: RiskRow[];
-  openInputs: string[]; // structured AG fields needing user evidence
-};
-
-// Demo customer for the prototype.
-const DEMO_CUSTOMER = "Capgemini";
-
-const PERSONAS: Persona[] = [
-  {
-    id: "executive",
-    label: "Executive",
-    stakeholder: "CEO · COO · CSO",
-    whyMatters:
-      "Executive sponsorship sets the analyst-visible priorities and unblocks the decisions only leadership can make this cycle.",
-    objective:
-      "Secure two go/no-go decisions and one investment approval so AR can lock the next four weeks of analyst engagement.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Decision-seeking — bring two decisions and one approval, not a status read-out.",
-    knows: [
-      "Portfolio status: six active analyst moments, one submitted, none declined.",
-      "Concentration risk: two reference clients underpin three active moments.",
-      "Investment ask: one AnalystGenius readiness session this sprint.",
-    ],
-    doNext: [
-      { action: "Confirm whether the cross-ecosystem assessment is in or deferred this cycle.", owner: "CSO", timing: "This week" },
-      { action: "Approve redirecting one reference client to the at-risk submission.", owner: "COO", timing: "This week" },
-      { action: "Sponsor the cross-business analyst narrative workshop.", owner: "CEO", timing: "Next sprint" },
-    ],
-    proof: [
-      { asset: "Named cross-industry references (disclosure-ready)", why: "Underpins three active moments; reduces concentration risk.", state: "Restricted", owner: "AR + Commercial" },
-      { asset: "Executive POV on category direction", why: "Anchors the analyst-visible strategy.", state: "Input needed", owner: "Strategy Office" },
-      { asset: "Investment sign-off for readiness session", why: "Unblocks the weakest assessment view.", state: "Input needed", owner: "Executive" },
-    ],
-    guardrails: {
-      approved: ["Portfolio-level readiness and concentration risk (internal).", "Investment ask framed as readiness, not outcome."],
-      avoid: ["Any predicted rating or rank.", "Naming NDA-only references in non-NDA settings."],
-    },
-    enablement: [
-      "A confident executive narrative gives sales leadership air-cover to lead with analyst-grade positioning.",
-      "Clear leadership decisions let AR move from reactive to proactive analyst engagement.",
-    ],
-    risks: [
-      { risk: "Evaluation criterion on AI-assisted delivery is underexposed.", mitigation: "Approve a focused proof motion before the next briefing.", owner: "Product + AR" },
-      { risk: "Two references carry three moments (concentration).", mitigation: "Diversify references; sequence reuse deliberately.", owner: "Commercial + AR" },
-    ],
-    openInputs: [
-      "Executive point of view on the FY priority categories.",
-      "Confirmed budget line for the AnalystGenius readiness session.",
-      "Decision on the cross-ecosystem assessment disposition.",
-    ],
-  },
-  {
-    id: "strategy",
-    label: "Strategy",
-    stakeholder: "Chief Strategy Officer · Strategy Office",
-    whyMatters:
-      "Strategy owns the narratives analysts evaluate against; misalignment here cascades into every submission.",
-    objective: "Lock the analyst-visible strategy and anchor narratives for the next four weeks.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Alignment-seeking — confirm anchor narratives so submissions can lock language.",
-    knows: [
-      "Sequencing the anchor assessment first supports three downstream RFIs.",
-      "The AI-operations point of view must be re-stated before two overlapping submission windows.",
-      "The cross-ecosystem assessment exposes a cross-business-unit gap.",
-    ],
-    doNext: [
-      { action: "Confirm the anchor narratives so analyst submissions can lock language.", owner: "CSO", timing: "This week" },
-      { action: "Sponsor a one-pager on the cross-business operating model.", owner: "Strategy Office", timing: "2 weeks" },
-    ],
-    proof: [
-      { asset: "Confirmed anchor narratives", why: "Lets all submissions use consistent language.", state: "Input needed", owner: "Strategy Office" },
-      { asset: "Cross-business operating model one-pager", why: "Required for cross-ecosystem readiness; reusable across moments.", state: "Input needed", owner: "Strategy + AR" },
-    ],
-    guardrails: {
-      approved: ["Internal narrative direction and sequencing.", "Category-weight observations from AG signals."],
-      avoid: ["Stating analyst rankings as decided.", "Externalising internal-only narratives."],
-    },
-    enablement: [
-      "A locked analyst-visible strategy gives every other persona a consistent story to reuse.",
-      "Anchor narratives shorten AR turnaround on new RFIs.",
-    ],
-    risks: [
-      { risk: "FY strategy and analyst-visible strategy diverge on AI operations.", mitigation: "Re-state the AI-operations POV before overlapping windows.", owner: "Strategy + AR" },
-    ],
-    openInputs: [
-      "Signed-off list of FY anchor narratives.",
-      "Cross-business-unit operating model evidence.",
-    ],
-  },
-  {
-    id: "product",
-    label: "Product",
-    stakeholder: "Product / Service Line Leaders",
-    whyMatters:
-      "Product owns the capability evidence analysts probe hardest; gaps here are the most common reason submissions stall.",
-    objective: "Get a service-line decision on three capability/evidence gaps. No roadmap recommendation is made here.",
-    evidenceConfidence: "Low",
-    evidenceGrade: "E2",
-    posture: "Decision-seeking — capability gaps need a service-line owner and a date.",
-    knows: [
-      "AI-assisted developer co-pilot proof exists as pilots only.",
-      "Multi-tier partner delivery has minimal documented client outcomes.",
-      "Platform-engineering outcome metrics still need confirmation.",
-    ],
-    doNext: [
-      { action: "Approve the AI co-pilot disclosure motion for two references.", owner: "Service Line Lead", timing: "This week" },
-      { action: "Document the partner-led delivery model as a stand-alone capability.", owner: "Product", timing: "2 weeks" },
-      { action: "Schedule a readiness session with AnalystGenius on the cross-ecosystem view.", owner: "Product + AR", timing: "Next sprint" },
-    ],
-    proof: [
-      { asset: "Two named AI co-pilot client outcomes", why: "Closes the most-probed evaluation criterion.", state: "Unsupported", owner: "Product + Commercial" },
-      { asset: "Partner-led delivery model write-up", why: "Converts an internal capability into analyst-usable proof.", state: "Restricted", owner: "Product" },
-      { asset: "Platform-engineering outcome metrics", why: "Confirms a trending-well pilot story.", state: "Input needed", owner: "Service Line Lead" },
-    ],
-    guardrails: {
-      approved: ["Pilot-stage framing of AI co-pilot work.", "Capability descriptions without unproven outcome claims."],
-      avoid: ["Claiming production-grade AI tooling before disclosure clears.", "Multi-tier ecosystem leadership claims without proof."],
-    },
-    enablement: [
-      "Cleared capability proof becomes reusable across sales pursuits and analyst briefings.",
-      "A documented delivery model gives Commercial a concrete differentiator.",
-    ],
-    risks: [
-      { risk: "AI-assisted dev tooling criterion is currently unsupported.", mitigation: "Run the disclosure motion; keep briefing-only until cleared.", owner: "Product + AR" },
-    ],
-    openInputs: [
-      "Disclosure-ready AI co-pilot outcomes (two named).",
-      "Permission to document the partner-led delivery model.",
-      "Confirmed platform-engineering KPIs.",
-    ],
-  },
-  {
-    id: "marketing",
-    label: "Marketing",
-    stakeholder: "Marketing / Communications",
-    whyMatters:
-      "Marketing controls how analyst-grade language is reused internally; mishandled, NDA-only material leaks into campaigns.",
-    objective: "Refresh two internal assets so analyst narratives are used correctly — internal guidance only, not external campaigns.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Guidance — internal sales-enablement and briefing materials only.",
-    knows: [
-      "Application-modernisation inquiries are trending up in the demo customer's category.",
-      "The AI co-pilot collateral is too sales-led for analyst use.",
-      "NDA-only quotes cannot be externalised.",
-    ],
-    doNext: [
-      { action: "Sharpen the internal application-modernisation narrative one-pager.", owner: "Marketing", timing: "This week" },
-      { action: "Reposition the AI co-pilot deck for analyst audiences (not buyers).", owner: "Marketing + AR", timing: "2 weeks" },
-    ],
-    proof: [
-      { asset: "Application-modernisation internal one-pager", why: "Open narrative window; keeps internal messaging consistent.", state: "Input needed", owner: "Marketing" },
-      { asset: "Analyst-version AI co-pilot deck", why: "Removes buyer-led framing analysts discount.", state: "Restricted", owner: "Marketing + AR" },
-    ],
-    guardrails: {
-      approved: ["Internal narrative guidance for AR briefings.", "Category-trend framing from AG signals."],
-      avoid: ["Externalising NDA-only quotes.", "Publishing analyst positioning as external campaign copy."],
-    },
-    enablement: [
-      "Analyst-aligned internal messaging keeps sales, AR and comms telling one story.",
-      "A tighter narrative library speeds up briefing prep across personas.",
-    ],
-    risks: [
-      { risk: "NDA-only quotes leaking into campaign drafts.", mitigation: "Run a quote-use policy refresher for marketing managers.", owner: "Marketing" },
-    ],
-    openInputs: [
-      "Approved internal application-modernisation narrative.",
-      "Analyst-audience version of the AI co-pilot deck.",
-    ],
-  },
-  {
-    id: "commercial",
-    label: "Commercial",
-    stakeholder: "Sales / Pursuit Leaders",
-    whyMatters:
-      "Commercial decides how analyst positioning shows up in the sales motion; this is where AR intelligence converts to pipeline credibility.",
-    objective: "Enable two active pursuits with analyst-grade, reuse-safe proof. Focus is the sales motion, not deal-room intelligence.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Enablement — equip pursuits with reuse-safe proof and clear do-not-use lines.",
-    knows: [
-      "Banking sales leaders need a short brief on current analyst visibility.",
-      "Two named pursuits are anchored on analyst positioning.",
-      "NDA-only analyst quotes cannot be used in commercial conversations.",
-    ],
-    doNext: [
-      { action: "Approve the analyst-visibility two-pager and route to sales leadership.", owner: "Commercial", timing: "This week" },
-      { action: "Confirm three proof items as sales-safe for the banking pursuit.", owner: "Commercial + AR", timing: "This week" },
-    ],
-    proof: [
-      { asset: "Analyst-visibility two-pager", why: "Gives sellers a credible, reuse-safe positioning aid.", state: "Restricted", owner: "AR" },
-      { asset: "Three sales-safe proof items", why: "Anchors the named pursuit in defensible evidence.", state: "Input needed", owner: "Commercial + AR" },
-    ],
-    guardrails: {
-      approved: ["Safe, marketing-approved client outcomes.", "Public analyst-visibility framing."],
-      avoid: ["Reusing NDA-only quotes in deal collateral.", "Unsupported production claims in pursuit decks."],
-    },
-    enablement: [
-      "Analyst-grade enablement raises win-theme credibility in regulated-industry pursuits.",
-      "Clear reuse rules let sellers move fast without compliance risk.",
-    ],
-    risks: [
-      { risk: "Pursuit teams reusing NDA-only quotes in collateral.", mitigation: "Mark reuse state on every proof item; brief the pursuit team.", owner: "Commercial + AR" },
-    ],
-    openInputs: [
-      "Confirmed list of sales-safe proof items.",
-      "Pursuit-team briefing date.",
-    ],
-  },
-  {
-    id: "delivery",
-    label: "Delivery",
-    stakeholder: "Delivery / Operations Leaders",
-    whyMatters:
-      "Delivery-side proof — operating model, partner integration, AI-assisted ops — is the strongest analyst lever this cycle.",
-    objective: "Formalise two operational assets for analyst use and sponsor one delivery-led briefing.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Packaging — turn strong-but-informal delivery proof into analyst-ready assets.",
-    knows: [
-      "AI-assisted operations evidence is weighing heavier this assessment cycle.",
-      "Two delivery outcomes are documented and analyst-cleared.",
-      "The partner-led delivery model is documented but not yet packaged.",
-    ],
-    doNext: [
-      { action: "Package the partner-led delivery model for analyst briefings.", owner: "Delivery", timing: "2 weeks" },
-      { action: "Sponsor one delivery-led analyst briefing before submission.", owner: "Delivery + AR", timing: "Next sprint" },
-    ],
-    proof: [
-      { asset: "Two cleared delivery outcomes", why: "Strongest current analyst-ready proof.", state: "Safe", owner: "Delivery" },
-      { asset: "Packaged partner-led delivery model", why: "Converts internal proof into a briefing asset.", state: "Restricted", owner: "Delivery + AR" },
-    ],
-    guardrails: {
-      approved: ["Analyst-cleared delivery outcomes.", "Operating-model narrative with documented evidence."],
-      avoid: ["Over-claiming ecosystem breadth beyond documented partners.", "Using uncleared delivery metrics."],
-    },
-    enablement: [
-      "Packaged delivery proof differentiates pursuits on execution credibility.",
-      "A delivery-led briefing diversifies the reference base AR can draw on.",
-    ],
-    risks: [
-      { risk: "Concentration on two reference clients.", mitigation: "Confirm a reference-diversification plan.", owner: "Delivery + Commercial" },
-    ],
-    openInputs: [
-      "Packaged partner-led delivery model artefact.",
-      "Confirmed delivery-led briefing slot.",
-    ],
-  },
-  {
-    id: "regional",
-    label: "Regional",
-    stakeholder: "Regional / Country Leaders",
-    whyMatters:
-      "Regional leaders own reference availability and coverage balance; the analyst load is unevenly distributed this cycle.",
-    objective: "Make two coverage decisions: reference rotation and where to invest analyst coverage this half.",
-    evidenceConfidence: "Medium",
-    evidenceGrade: "E2",
-    posture: "Decision-seeking — rotate references and decide coverage investment.",
-    knows: [
-      "EMEA and North America carry the heaviest analyst-visible load this cycle.",
-      "North America has two pursuits anchored on analyst positioning.",
-      "APAC analyst coverage is light against rising APAC pipeline.",
-    ],
-    doNext: [
-      { action: "Confirm EMEA reference availability windows.", owner: "EMEA Lead", timing: "This week" },
-      { action: "Decide whether to invest in APAC analyst coverage this half.", owner: "APAC Lead", timing: "This month" },
-    ],
-    proof: [
-      { asset: "EMEA reference rotation plan", why: "Reduces reuse strain across three moments.", state: "Input needed", owner: "EMEA Lead" },
-      { asset: "APAC coverage decision", why: "Aligns analyst coverage with pipeline.", state: "Input needed", owner: "APAC Lead" },
-    ],
-    guardrails: {
-      approved: ["Region-level coverage and reference observations.", "Pipeline-vs-coverage framing."],
-      avoid: ["Committing references without availability confirmation.", "Predicting regional rankings."],
-    },
-    enablement: [
-      "Balanced coverage means pursuits in every region can cite analyst positioning.",
-      "Reference rotation protects the most-used clients from briefing fatigue.",
-    ],
-    risks: [
-      { risk: "EMEA reference reuse across three moments.", mitigation: "Activate the rotation plan; stagger reference use.", owner: "EMEA Lead + AR" },
-    ],
-    openInputs: [
-      "EMEA reference availability windows.",
-      "APAC analyst coverage investment decision.",
-    ],
-  },
-];
-
-function resolveBrand(vendorId: string | undefined, deckLabel: string): Brand {
-  const v = vendorById(vendorId);
-  return { vendorName: v.name, vendorMark: v.mark, vendorAccent: v.accent, deckLabel };
-}
-
-function todayLabel(): string {
-  return new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-}
 
 function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function toneForState(state: ProofRow["state"]): "good" | "warn" | "bad" | "default" {
-  if (state === "Safe") return "good";
-  if (state === "Restricted") return "warn";
-  if (state === "Unsupported") return "bad";
-  return "warn"; // Input needed
+export function listDirectPersonaIds(): PersonaId[] {
+  return Object.keys(PERSONA_META) as PersonaId[];
 }
 
 export function getDirectPersonaDeckFilename(personaIds: PersonaId[], vendorId = "capgemini"): string {
   const v = vendorById(vendorId);
-  const personaPart = personaIds.length === 1 ? slugify(personaById(personaIds[0]).label) : "multi-persona";
+  const personaPart = personaIds.length === 1 ? slugify(PERSONA_META[personaIds[0]].label) : "multi-persona";
   return `${slugify(v.name)}--${personaPart}--quarterly-briefing.pptx`;
 }
 
-function personaById(id: PersonaId): Persona {
-  return PERSONAS.find((p) => p.id === id) ?? PERSONAS[0];
+function formatDate(d: string | null | undefined, precision?: string | null): string {
+  if (!d) return "—";
+  if (precision === "year" || /^\d{4}$/.test(d)) return d.slice(0, 4);
+  if (precision === "month" || /^\d{4}-\d{2}$/.test(d)) {
+    const [y, m] = d.split("-").map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  }
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function listDirectPersonaIds(): PersonaId[] {
-  return PERSONAS.map((p) => p.id);
+function formatDue(due: string | null): string {
+  if (!due) return "no date";
+  const [y, m, d] = due.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 // ---------------------------------------------------------------------------
 // Deck assembly
 // ---------------------------------------------------------------------------
 
-export async function createDirectPersonaDeck(
-  personaIds: PersonaId[],
-  vendorId = "capgemini",
-  competitorTickers?: string[]
-): Promise<Buffer> {
-  const ids = personaIds.length ? personaIds : ["executive" as PersonaId];
-  const personas = ids.map(personaById);
-  const multi = personas.length > 1;
-  // The deck is the STAKEHOLDER's briefing, not an AR work-plan, so it is
-  // titled and framed for the person reading it in their own meeting.
-  const deckLabel = multi ? "Quarterly Briefing" : `${personas[0].label} — Quarterly Briefing`;
-  const brand = resolveBrand(vendorId, deckLabel);
-  const agTicker = vendorById(vendorId).agTicker;
+export async function createDirectPersonaDeck(personaIds: PersonaId[], vendorId = "capgemini", competitorTickers?: string[]): Promise<Buffer> {
+  const ids = (personaIds.length ? personaIds : ["executive"]).filter((id): id is PersonaId => id in PERSONA_META);
+  const vendor = vendorById(vendorId);
+  const vendorName = vendor.name;
+  const multi = ids.length > 1;
+  const first = PERSONA_META[ids[0]];
+  const deckLabel = multi ? "Quarterly briefing" : `${first.label} quarterly briefing`;
+  const brand: Brand = { vendorName, vendorMark: vendor.mark, vendorAccent: vendor.accent, deckLabel };
 
-  const pptx = newDeck({
-    title: `${brand.vendorName} ${deckLabel}`,
-    subject: `AnalystGenius AR SuperHero persona briefing pack for ${brand.vendorName}`,
-  });
+  // Third-party records, read once and shared by every persona section. Each
+  // is optional: a failed read is reported on the slide, never filled in.
+  const [view, rankings, asks] = await Promise.all([
+    vendorAnalystView(vendorId).catch(() => null),
+    publicRankingsStore.listRankings(vendorId).catch(() => null),
+    askStore.list(vendorId).catch(() => null),
+  ]);
 
+  const pptx = newDeck({ title: `${vendorName} ${deckLabel}`, subject: `AnalystGenius quarterly briefing for ${vendorName}` });
   let n = 0;
   const idx = () => String(++n).padStart(2, "0");
 
+  // The read is pulled first so the cover can carry the real figures.
+  // addAgIntelligenceSlides adds its own slides, so the cover is added before
+  // it only in order; pptxgenjs keeps insertion order, hence the two-step.
+  const agenda = [
+    "The AnalystGenius read",
+    ...ids.map((id) => `${PERSONA_META[id].label} — where you stand`),
+    "Who is writing about you",
+    "The published record",
+    "Sources",
+    "Next steps",
+  ].slice(0, 6);
+
+  const coverNotesParts: string[] = [`Generated by AnalystGenius AR SuperHero on ${todayLabel()} for ${vendorName}.`, `Personas: ${ids.map((id) => PERSONA_META[id].label).join(", ")}.`, `Peer set: ${(competitorTickers ?? []).join(", ") || "AnalystGenius default"}.`];
+
+  // Cover placeholder values are filled after the read; pptxgenjs cannot
+  // reorder slides, so the cover is added first with the figures the read
+  // returns on a pre-fetch. getArBrief is cached, so this costs no second
+  // upstream call.
+  const { getArBrief } = await import("./agIntelligence");
+  let pre = await getArBrief({ competitors: competitorTickers, focalTicker: vendor.agTicker });
+  if (pre.degraded) pre = await getArBrief({ competitors: competitorTickers, focalTicker: vendor.agTicker, force: true });
+  const f = pre.live && !pre.degraded ? pre.focal : undefined;
+
   addCover(pptx, brand, {
-    kicker: "COMPETITIVE POSITION · THIS QUARTER",
-    bigTitle: multi
-      ? `${brand.vendorName} — Quarterly Briefing`
-      : `${brand.vendorName} — ${personas[0].label} Quarterly Briefing`,
-    subTitle: multi
-      ? `Prepared for · ${personas.map((p) => p.label).join(" · ")}`
-      : `Prepared for ${personas[0].stakeholder}`,
-    generatedLabel: `Generated ${todayLabel()}`,
-    contextRight: `Peer set: ${(competitorTickers ?? []).join(" · ") || "AG default"}`,
-    footNote:
-      "Your position against the named peer set, from live AnalystGenius signals. Every figure is a verbatim AG field; metrics AG does not carry are stated as unavailable rather than estimated. No outcome or ranking prediction.",
+    kicker: `Prepared for ${vendorName} · ${todayLabel()}`,
+    titleA: multi ? "Where you stand," : `${first.label} briefing:`,
+    titleB: multi ? "this quarter." : "where you stand.",
+    subTitle: multi ? "Standing against the named peer set, what moved this quarter, and the competitor field — one section per leader." : `${first.question}`,
+    contextLines: [multi ? `For ${ids.map((id) => PERSONA_META[id].audience.toLowerCase()).join(", ")}.` : `For ${first.audience.toLowerCase()}.`, "For circulation within the leadership team."],
+    stats: f
+      ? [
+          { value: f.assessmentScore == null ? "—" : String(f.assessmentScore), label: "Assessment" },
+          { value: f.aiReadinessScore == null ? "—" : String(f.aiReadinessScore), label: "AI readiness" },
+          { value: f.gapScore == null ? "—" : String(f.gapScore), label: "Narrative gap" },
+        ]
+      : [],
+    preparedFor: { name: multi ? "Leadership team" : first.audience, role: vendorName },
+    agenda,
+    notes: coverNotesParts.join(" "),
   });
 
-  // Combined contents slide for multi-persona packs.
-  if (multi) {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: "Persona pack contents",
-      note: "One section per stakeholder persona. Each section follows the same evidence-graded structure.",
-    });
-    addTable(slide, {
-      x: 0.6,
-      y: contentTop,
-      w: 12.13,
-      colW: [3.2, 3.4, 5.53],
-      headers: ["PERSONA", "STAKEHOLDER", "AR OBJECTIVE"],
-      rows: personas.map((p) => ({ cells: [p.label, p.stakeholder, p.objective] })),
-      fontSize: 10.5,
-    });
+  const brief = await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers, vendor.agTicker, agenda[0]);
+
+  for (const id of ids) {
+    const meta = PERSONA_META[id];
+    const section = `${meta.label} — where you stand`;
+    const briefing = await buildPersonaBriefing(brief, id);
+    const pv = derivePersonaView(brief, id);
+
+    if (multi) {
+      addSectionDivider(pptx, brand, {
+        index: idx(),
+        section,
+        title: `${meta.label}: ${meta.stakeholder}`,
+        note: briefing?.lens,
+        question: { label: "The central question", text: meta.question },
+      });
+    }
+    if (briefing) addPersonaBriefingSlides(pptx, brand, meta.label, briefing, brief, idx, section);
+    if (pv) addPersonaReadSlides(pptx, brand, meta.label, pv, brief, idx, section);
+    if (!briefing && !pv) {
+      const { slide, contentTop } = addBodySlide(pptx, brand, { index: idx(), section, title: `${meta.label} — the AnalystGenius read was unavailable`, note: "This section needs the live read; nothing is estimated in its place." });
+      addBulletList(slide, ["Regenerate once the connection is restored."], { x: 0.75, y: contentTop, w: 11.83, h: 1 });
+    }
+    const personaAsks = (asks ?? []).filter((a) => a.persona_id === id && a.status === "open");
+    if (personaAsks.length) addAsksSlide(pptx, brand, meta.label, personaAsks, idx, section);
   }
 
-  const brief = await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers, agTicker);
+  addCoverageSlide(pptx, brand, vendorName, view, idx, "Who is writing about you");
+  addPlacementsSlide(pptx, brand, vendorName, rankings, idx, "The published record");
+  addSourcesSlide(pptx, brand, brief, view, rankings, asks, idx, "Sources");
 
-  for (const persona of personas) {
-    // The persona's OWN briefing leads: where they stand against the named
-    // peer set this quarter. The AR-facing working sections follow it.
-    const briefing = await buildPersonaBriefing(brief, persona.id);
-    if (briefing) addPersonaBriefingSlides(pptx, brand, persona, briefing, idx);
-    const view = derivePersonaView(brief, persona.id);
-    if (view) addPersonaAgSlides(pptx, brand, persona, view, idx);
-    // AR-facing working notes (asks, proof states, guardrails) follow the
-    // stakeholder's own briefing and are labelled as an appendix, so the deck
-    // never opens by telling the reader what AR needs from them.
-    addAppendixDivider(pptx, brand, persona, idx);
-    addPersonaSection(pptx, brand, persona, idx);
-  }
-
-  addProvenanceSlide(pptx, brand, idx, personas);
-  addSupportSlide(pptx, brand, idx);
+  const openAsks = (asks ?? []).filter((a) => ids.includes(a.persona_id as PersonaId) && a.status === "open").slice(0, 3);
+  const steps = openAsks.length
+    ? openAsks.map((a) => ({ title: a.title.length > 60 ? `${a.title.slice(0, 57)}…` : a.title, body: `${a.owner ? `Owner ${a.owner}` : "No owner named"} · due ${formatDue(a.due_date)}`, owner: `${PERSONA_META[a.persona_id as PersonaId]?.label ?? a.persona_id} ask, recorded by AR` }))
+    : [];
+  if (steps.length < 3) steps.push({ title: "Regenerate before the meeting", body: "The AnalystGenius read is a point-in-time value and drifts between sessions.", owner: "AnalystGenius follow-up" });
+  if (steps.length < 3) steps.push({ title: "Record the asks that come out of the room", body: "What AR needs from each leader becomes trackable the moment it is written down.", owner: `${vendorName} leadership` });
+  if (steps.length < 3) steps.push({ title: "Log the first analyst interaction", body: "No interaction is on record yet; the roster fills as briefings are logged.", owner: "AR team" });
 
   addClosing(pptx, brand, {
-    heading: "AnalystGenius is with you at the point of need.",
-    body:
-      "This briefing shows where you stand against your named peer set this quarter, what moved, and what the competitor field looks like — from live AnalystGenius signals. Where a metric is not shown, AG does not carry it; those gaps are stated on the slide rather than estimated.",
-    disclaimer:
-      "Generated by AnalystGenius AR SuperHero. Evidence-graded and confidence-labelled; demo, modelled and open-input sections are clearly marked. This is internal enablement material, not analyst research, a prediction, or a substitute for AnalystGenius expert review. © 2026 AnalystGenius.",
+    titleA: "The next step",
+    titleB: `with ${vendorName}.`,
+    body: "Where you stand against your named peer set this quarter, what moved, and what the competitor field looks like. Where a metric is not shown, AnalystGenius does not carry it; the gap is stated, not estimated.",
+    nextSteps: steps.slice(0, 3),
+    disclaimer: "Generated by AnalystGenius AR SuperHero. Live signals at generation time; cited placements and named-analyst coverage each carry a source; no outcome or ranking prediction. Internal briefing material, not analyst research. © 2026 AnalystGenius.",
   });
-
-  addCeoBioSlide(pptx);
 
   return deckToBuffer(pptx);
 }
 
-// Divider marking where the stakeholder-facing briefing ends and the AR
-// working notes begin.
-function addAppendixDivider(pptx: pptxgen, brand: Brand, p: Persona, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: `Appendix — AR working notes (${p.label})`,
-    note: "The sections above are your briefing. What follows is the AR team's working view: the evidence it holds, what it still needs, and the message guardrails for this cycle.",
-  });
-  addBulletList(
-    slide,
-    [
-      "Evidence and proof states AR is working with for this persona.",
-      "Open inputs AR needs from your team to complete the analyst record.",
-      "Message guardrails — what is approved for external use and what is not.",
-    ],
-    { x: 0.6, y: contentTop + 0.2, w: 12.13, h: 1.6, fontSize: 11.5 }
-  );
-}
+// ---------------------------------------------------------------------------
+// The persona's own briefing — standing, movement, threats, talent, revenue.
+// ---------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------
-// The persona's own briefing — competitive standing against the named peer
-// set, quarter movement, competitor intel matrix and market movements.
-//
-// This is the artefact the stakeholder reads in their own meeting, not a list
-// of things AR needs from them. Every figure is a verbatim AG field, and
-// metrics AG does not carry are stated as absent rather than left implied.
-// ---------------------------------------------------------------------------
-function addPersonaBriefingSlides(
-  pptx: pptxgen,
-  brand: Brand,
-  p: Persona,
-  b: PersonaBriefing,
-  idx: () => string
-) {
-  // Slide A — standing vs the peer set.
+function addPersonaBriefingSlides(pptx: pptxgen, brand: Brand, label: string, b: PersonaBriefing, brief: { generatedAt: string; stale?: boolean }, idx: () => string, section: string) {
+  const prov = readProvenance(brief as any);
+
+  // A — standing against the peer set.
   {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — where you stand against your peer set`,
-      note: b.lens,
+      section,
+      title: `${label} — where you stand against your peer set`,
+      note: b.headline,
+      caveat: b.dataGaps[0] ?? prov,
+      notes: `Sources: AnalystGenius providers/snapshot (assessment, AI readiness, revenue growth) and narrative-reality-gap (recognition). ${prov} ${b.dataGaps.join(" ")}`,
     });
-
-    slide.addText(b.headline, {
-      x: 0.6,
-      y: contentTop,
-      w: 12.13,
-      h: 0.6,
-      fontSize: 14.5,
-      bold: true,
-      color: PALETTE.ink,
-      valign: "top",
-    });
-
+    addSectionLabel(slide, b.lens, { x: 0.75, y: contentTop, w: 11.83, color: AG.muted });
     addTable(slide, {
-      x: 0.6,
-      y: contentTop + 0.72,
-      w: 12.13,
-      colW: [3.53, 2.15, 2.15, 2.15, 2.15],
+      x: 0.75,
+      y: contentTop + 0.3,
+      w: 11.83,
+      colW: [3.43, 2.1, 2.1, 2.1, 2.1],
       headers: b.scorecardHeaders,
-      rows: b.peerRows.map((r) => ({
-        cells: [r.name, r.assessment, r.aiReadiness, r.revenueGrowth, r.recognition],
-        tone: r.isFocal ? ("good" as const) : ("default" as const),
-      })),
+      rows: b.peerRows.map((r) => ({ cells: [r.name, r.assessment, r.aiReadiness, r.revenueGrowth, r.recognition], tone: r.isFocal ? ("good" as const) : ("default" as const) })),
       fontSize: 10.5,
     });
+    const gapsTop = contentTop + 0.3 + 0.38 + b.peerRows.length * 0.34 + 0.3;
+    if (b.dataGaps.length > 1 && gapsTop < CONTENT_BOTTOM - 0.7) {
+      addSectionLabel(slide, "What this comparison does not include", { x: 0.75, y: gapsTop, w: 11.83 });
+      addBulletList(slide, b.dataGaps.slice(1), { x: 0.75, y: gapsTop + 0.3, w: 11.83, h: CONTENT_BOTTOM - gapsTop - 0.35, fontSize: 9.5 });
+    }
+  }
 
-    const gapsTop = contentTop + 0.72 + 0.42 + b.peerRows.length * 0.32 + 0.25;
-    if (b.dataGaps.length && gapsTop < 6.4) {
-      addSectionLabel(slide, "What this comparison does not include", { x: 0.6, y: gapsTop, w: 12.13 });
-      addBulletList(slide, b.dataGaps, {
-        x: 0.6,
-        y: gapsTop + 0.3,
-        w: 12.13,
-        h: 1.1,
+  // B — movement this quarter + competitor matrix + market movements.
+  {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      section,
+      title: `${label} — this quarter's movement and the competitor field`,
+      note: b.reputationSpan ? `Reputation movement ${b.reputationSpan}, from AnalystGenius's reputation tracker.` : "Competitor field from AnalystGenius's provider catalogue.",
+      caveat: prov,
+      notes: `Sources: AnalystGenius reputation-tracker/trends (lens movement), providers/snapshot (competitor scores), AR SuperHero's own 14-day captures (market movements). ${prov}`,
+    });
+    let y = contentTop;
+    if (b.reputation.length) {
+      addSectionLabel(slide, "Reputation movement this quarter", { x: 0.75, y, w: 5.8 });
+      addTable(slide, {
+        x: 0.75,
+        y: y + 0.3,
+        w: 5.8,
+        colW: [2.7, 1.7, 1.4],
+        headers: ["Lens", "Movement", "Δ"],
+        rows: b.reputation.slice(0, 7).map((r) => ({ cells: [r.lens, r.movement, `${r.delta > 0 ? "+" : ""}${r.delta}`], tone: r.delta <= -5 ? ("warn" as const) : r.delta > 0 ? ("good" as const) : ("default" as const) })),
         fontSize: 9.5,
       });
     }
-  }
-
-  // Slide B — reputation movement this quarter + competitor intel matrix.
-  {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: `${p.label} — this quarter's movement and the competitor field`,
-      note: b.reputationSpan
-        ? `Reputation movement ${b.reputationSpan}, verbatim from AG's reputation tracker.`
-        : "Competitor field from AG's provider catalogue.",
-    });
-
-    let y = contentTop;
-    if (b.reputation.length) {
-      addSectionLabel(slide, "Reputation movement this quarter", { x: 0.6, y, w: 5.9 });
-      addTable(slide, {
-        x: 0.6,
-        y: y + 0.32,
-        w: 5.9,
-        colW: [2.7, 1.7, 1.5],
-        headers: ["LENS", "MOVEMENT", "Δ"],
-        rows: b.reputation.map((r) => ({
-          cells: [r.lens, r.movement, `${r.delta > 0 ? "+" : ""}${r.delta}`],
-          tone: r.delta <= -5 ? ("warn" as const) : r.delta > 0 ? ("good" as const) : ("default" as const),
-        })),
-        fontSize: 10,
-      });
-    }
-
     if (b.competitorIntel.length) {
-      addSectionLabel(slide, "Competitor intelligence matrix", { x: 6.75, y, w: 5.98 });
-      addTable(slide, {
-        x: 6.75,
-        y: y + 0.32,
-        w: 5.98,
-        colW: [1.5, 2.24, 2.24],
-        headers: ["FIRM", "STANDING VS YOU", "WHAT TO WATCH"],
-        rows: b.competitorIntel.map((c) => ({ cells: [c.name, c.standing, c.watchItem] })),
-        fontSize: 9,
-      });
+      addSectionLabel(slide, "Competitor intelligence", { x: 6.8, y, w: 5.78 });
+      addTable(slide, { x: 6.8, y: y + 0.3, w: 5.78, colW: [1.5, 2.14, 2.14], headers: ["Firm", "Standing vs you", "What to watch"], rows: b.competitorIntel.slice(0, 5).map((c) => ({ cells: [c.name, c.standing, c.watchItem] })), fontSize: 8.5 });
     }
-
-    y = contentTop + 2.9;
-    if (b.marketMovements.length && y < 6.2) {
-      addSectionLabel(slide, "Market movements against your peer group", { x: 0.6, y, w: 12.13 });
-      addBulletList(
-        slide,
-        b.marketMovements.slice(0, 4).map((m) => `${m.title} — ${m.detail}`),
-        { x: 0.6, y: y + 0.3, w: 12.13, h: 1.5, fontSize: 10 }
-      );
+    y = contentTop + 2.75;
+    if (b.marketMovements.length && y < CONTENT_BOTTOM - 0.8) {
+      addSectionLabel(slide, "Market movements against your peer group", { x: 0.75, y, w: 11.83 });
+      addBulletList(slide, b.marketMovements.slice(0, 4).map((m) => `${m.title} — ${m.detail}`), { x: 0.75, y: y + 0.3, w: 11.83, h: CONTENT_BOTTOM - y - 0.35, fontSize: 9.5 });
     }
   }
 
-  // Slide C — emerging threats and opportunities from the AG pulse.
+  // C — threats and opportunities.
   if (b.threats.length || b.opportunities.length) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — emerging threats and opportunities`,
-      note: "From the live AG pulse. Each line names the AG signal it derives from.",
+      section,
+      title: `${label} — emerging threats and opportunities`,
+      note: "From the AnalystGenius pulse. Each line names the signal it derives from.",
+      caveat: prov,
+      notes: `Sources: ${[...b.threats, ...b.opportunities].map((t) => t.source).filter((v, i, a) => a.indexOf(v) === i).join("; ")}`,
     });
-
     if (b.threats.length) {
-      addSectionLabel(slide, "Emerging threats", { x: 0.6, y: contentTop, w: 5.9 });
-      addTable(slide, {
-        x: 0.6,
-        y: contentTop + 0.32,
-        w: 5.9,
-        colW: [2.2, 3.7],
-        headers: ["SIGNAL", "WHAT IT MEANS"],
-        rows: b.threats.slice(0, 5).map((t) => ({ cells: [t.title, t.detail], tone: "warn" as const })),
-        fontSize: 9,
-      });
+      addSectionLabel(slide, "Emerging threats", { x: 0.75, y: contentTop, w: 5.8 });
+      addTable(slide, { x: 0.75, y: contentTop + 0.3, w: 5.8, colW: [2.1, 3.7], headers: ["Signal", "What it means"], rows: b.threats.slice(0, 5).map((t) => ({ cells: [t.title, t.detail], tone: "warn" as const })), fontSize: 9 });
     }
-
     if (b.opportunities.length) {
-      addSectionLabel(slide, "Emerging opportunities", { x: 6.75, y: contentTop, w: 5.98 });
-      addTable(slide, {
-        x: 6.75,
-        y: contentTop + 0.32,
-        w: 5.98,
-        colW: [2.24, 3.74],
-        headers: ["SIGNAL", "WHAT IT MEANS"],
-        rows: b.opportunities.slice(0, 5).map((o) => ({ cells: [o.title, o.detail], tone: "good" as const })),
-        fontSize: 9,
-      });
+      addSectionLabel(slide, "Emerging opportunities", { x: 6.8, y: contentTop, w: 5.78 });
+      addTable(slide, { x: 6.8, y: contentTop + 0.3, w: 5.78, colW: [2.1, 3.68], headers: ["Signal", "What it means"], rows: b.opportunities.slice(0, 5).map((o) => ({ cells: [o.title, o.detail], tone: "good" as const })), fontSize: 9 });
     }
   }
 
-  // Slide D — talent competitiveness across the peer set.
+  // D — talent competitiveness.
   if (b.talent.length) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — talent competitiveness across your peer set`,
+      section,
+      title: `${label} — talent competitiveness across your peer set`,
       note: "Where talent is moving across the named set. Attrition windows differ per firm and are shown.",
+      caveat: b.dataGaps.find((g) => g.startsWith("Talent")) ?? "AnalystGenius reports no company-to-company movement; this is direction across the set, not named destinations.",
+      notes: "Sources: AnalystGenius talent/intelligence, reported fields only (headcount, headcount YoY, attrition with its window, net flow, AI skill density). Self-labelled estimates in that payload are not used.",
     });
-
     addTable(slide, {
-      x: 0.6,
+      x: 0.75,
       y: contentTop,
-      w: 12.13,
-      colW: [2.9, 1.6, 1.5, 1.3, 3.13, 1.7],
-      headers: ["FIRM", "HEADCOUNT", "YOY", "ATTRITION", "ATTRITION WINDOW", "NET FLOW"],
-      rows: b.talent.map((t) => ({
-        cells: [t.name, t.headcount, t.headcountYoY, t.attrition, t.attritionWindow, t.netFlow],
-        tone: t.isFocal ? ("good" as const) : ("default" as const),
-      })),
+      w: 11.83,
+      colW: [2.8, 1.6, 1.4, 1.3, 3.0, 1.73],
+      headers: ["Firm", "Headcount", "YoY", "Attrition", "Attrition window", "Net flow"],
+      rows: b.talent.map((t) => ({ cells: [t.name, t.headcount, t.headcountYoY, t.attrition, t.attritionWindow, t.netFlow], tone: t.isFocal ? ("good" as const) : ("default" as const) })),
       fontSize: 9.5,
     });
-
-    const anaTop = contentTop + 0.42 + b.talent.length * 0.32 + 0.3;
-    if (b.talentAnalysis.length && anaTop < 6.3) {
-      addSectionLabel(slide, "What this means", { x: 0.6, y: anaTop, w: 12.13 });
-      addBulletList(slide, b.talentAnalysis, {
-        x: 0.6,
-        y: anaTop + 0.3,
-        w: 12.13,
-        h: 1.6,
-        fontSize: 10,
-      });
+    const anaTop = contentTop + 0.38 + b.talent.length * 0.32 + 0.3;
+    if (b.talentAnalysis.length && anaTop < CONTENT_BOTTOM - 0.7) {
+      addSectionLabel(slide, "What this means", { x: 0.75, y: anaTop, w: 11.83 });
+      addBulletList(slide, b.talentAnalysis, { x: 0.75, y: anaTop + 0.3, w: 11.83, h: CONTENT_BOTTOM - anaTop - 0.35, fontSize: 10 });
     }
   }
 
-  // Slide E — financial trajectory, only when AG actually carries the series.
+  // E — revenue trajectory, only when AnalystGenius carries the series.
   if (b.quarterlyRevenue.length >= 2) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — quarterly revenue trajectory`,
-      note: "Verbatim AG quarterly revenue series. Share price is not included — see the note below.",
+      section,
+      title: `${label} — quarterly revenue trajectory`,
+      note: "AnalystGenius's quarterly revenue series, as reported.",
+      caveat: prov,
+      notes: "Source: AnalystGenius providers/snapshot quarterlyRevenue.",
     });
     const pts = b.quarterlyRevenue.slice(-8);
-    addTable(slide, {
-      x: 0.6,
-      y: contentTop,
-      w: 12.13,
-      colW: [6.06, 6.07],
-      headers: ["QUARTER ENDING", "REVENUE (USD M)"],
-      rows: pts.map((q) => ({ cells: [q.quarter, q.revenueUsdM.toLocaleString()] })),
-      fontSize: 10.5,
-    });
-    const first = pts[0];
-    const last = pts[pts.length - 1];
-    const change = first.revenueUsdM ? ((last.revenueUsdM - first.revenueUsdM) / first.revenueUsdM) * 100 : null;
+    addTable(slide, { x: 0.75, y: contentTop, w: 11.83, colW: [5.9, 5.93], headers: ["Quarter ending", "Revenue (USD m)"], rows: pts.map((q) => ({ cells: [q.quarter, q.revenueUsdM.toLocaleString()] })), fontSize: 10.5 });
+    const firstQ = pts[0];
+    const lastQ = pts[pts.length - 1];
+    const change = firstQ.revenueUsdM ? ((lastQ.revenueUsdM - firstQ.revenueUsdM) / firstQ.revenueUsdM) * 100 : null;
     if (change !== null) {
-      slide.addText(
-        `Across the reported series: ${first.quarter} ${first.revenueUsdM.toLocaleString()}M → ${last.quarter} ${last.revenueUsdM.toLocaleString()}M (${change > 0 ? "+" : ""}${change.toFixed(1)}%).`,
-        { x: 0.6, y: contentTop + 0.42 + pts.length * 0.32 + 0.2, w: 12.13, h: 0.4, fontSize: 11, color: PALETTE.ink }
-      );
+      const y = contentTop + 0.38 + pts.length * 0.32 + 0.2;
+      slide.addText(`Across the reported series: ${firstQ.quarter} ${firstQ.revenueUsdM.toLocaleString()}M → ${lastQ.quarter} ${lastQ.revenueUsdM.toLocaleString()}M (${change > 0 ? "+" : ""}${change.toFixed(1)}%).`, { x: 0.75, y, w: 11.83, h: fitH(y, 0.4), fontFace: FONT_BODY, fontSize: 11, color: AG.ink, margin: 0, fit: "shrink" });
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Per-persona live AG slides — the role-scoped market read and advice.
-// Every value is a verbatim AG field; every advice line names its signal.
+// Role-scoped read and advice.
 // ---------------------------------------------------------------------------
-function addPersonaAgSlides(
-  pptx: pptxgen,
-  brand: Brand,
-  p: Persona,
-  view: PersonaView,
-  idx: () => string
-) {
-  // Slide 1 — the role's market read.
+
+function addPersonaReadSlides(pptx: pptxgen, brand: Brand, label: string, view: PersonaView, brief: { generatedAt: string; stale?: boolean }, idx: () => string, section: string) {
+  const prov = readProvenance(brief as any);
   {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — your AG market read`,
-      note: `Live AnalystGenius signals scoped to ${view.roleTitle}. Values are verbatim API fields.`,
+      section,
+      title: `${label} — your market read`,
+      note: `The AnalystGenius signals that land on your desk, scoped to ${view.roleTitle}.`,
+      caveat: `${prov} Values are shown as returned.`,
+      notes: `Sources: AnalystGenius providers/snapshot, narrative-reality-gap, reputation-tracker/trends. ${prov}`,
     });
-
-    const cardW = 3.95;
-    view.metrics.slice(0, 3).forEach((m, i) => {
-      addMetricCard(slide, {
-        x: 0.6 + i * (cardW + 0.12),
-        y: contentTop + 0.1,
-        w: cardW,
-        label: m.label,
-        value: m.value,
-        caption: m.caption,
-      });
-    });
-
-    const colTop = contentTop + 1.55;
-
-    // Reputation lenses this role owns.
+    addStats(slide, view.metrics.slice(0, 3).map((m) => ({ value: m.value, label: m.label, caption: m.caption })), { x: 0.75, y: contentTop + 0.05, w: 11.83 });
+    const colTop = contentTop + 1.45;
     if (view.lenses.length) {
-      addSectionLabel(slide, "Reputation lenses you own", { x: 0.6, y: colTop, w: 5.9 });
-      addTable(slide, {
-        x: 0.6,
-        y: colTop + 0.32,
-        w: 5.9,
-        colW: [2.7, 1.7, 1.5],
-        headers: ["Lens", "Movement", "Δ"],
-        rows: view.lenses.map((l) => ({
-          cells: [l.name, `${l.prev} → ${l.last}`, `${l.delta > 0 ? "+" : ""}${l.delta}`],
-          tone: l.delta <= -5 ? ("warn" as const) : ("default" as const),
-        })),
-        fontSize: 10,
-      });
+      addSectionLabel(slide, "Reputation lenses you own", { x: 0.75, y: colTop, w: 5.8 });
+      addTable(slide, { x: 0.75, y: colTop + 0.3, w: 5.8, colW: [2.7, 1.7, 1.4], headers: ["Lens", "Movement", "Δ"], rows: view.lenses.map((l) => ({ cells: [l.name, `${l.prev} → ${l.last}`, `${l.delta > 0 ? "+" : ""}${l.delta}`], tone: l.delta <= -5 ? ("warn" as const) : ("default" as const) })), fontSize: 10 });
     }
-
-    const rightX = view.lenses.length ? 6.9 : 0.6;
-    const rightW = view.lenses.length ? 5.8 : 12.1;
-    const signals = [
-      ...view.emergencies.map((e) => `Exposure — ${e.title}: ${e.detail}`),
-      ...view.highlights.map((h) => `Lead with — ${h.title}: ${h.detail}`),
-    ];
+    const rightX = view.lenses.length ? 6.8 : 0.75;
+    const rightW = view.lenses.length ? 5.78 : 11.83;
+    const signals = [...view.emergencies.map((e) => `Exposure — ${e.title}: ${e.detail}`), ...view.highlights.map((h) => `Lead with — ${h.title}: ${h.detail}`)];
     if (signals.length) {
       addSectionLabel(slide, "Signals on your desk", { x: rightX, y: colTop, w: rightW });
-      addBulletList(slide, signals.slice(0, 5), {
-        x: rightX,
-        y: colTop + 0.32,
-        w: rightW,
-        h: 3.9,
-        fontSize: 9.5,
-      });
+      addBulletList(slide, signals.slice(0, 5), { x: rightX, y: colTop + 0.3, w: rightW, h: CONTENT_BOTTOM - colTop - 0.35, fontSize: 9.5 });
     }
   }
-
-  // Slide 2 — role advice + the questions this role should personally own.
   if (view.advice.length || view.questions.length) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: `${p.label} — AG advice for your role`,
-      note: "Derived readings of live AG signals — each line names the signal it comes from. No outcome prediction.",
+      section,
+      title: `${label} — what this means for your role`,
+      note: "Readings of the signals above. Each line names the signal it comes from.",
+      caveat: "Derived readings, not predictions. No outcome or ranking is forecast.",
     });
-
     if (view.advice.length) {
-      addSectionLabel(slide, "What the signals mean for you", { x: 0.6, y: contentTop + 0.1, w: 12.1 });
+      addSectionLabel(slide, "What the signals mean for you", { x: 0.75, y: contentTop, w: 11.83 });
       slide.addText(
         view.advice.flatMap((a) => [
-          { text: a.line, options: { bullet: { code: "2022", indent: 14 }, breakLine: true, fontSize: 11, color: PALETTE.ink } },
-          { text: `     ${a.source}`, options: { breakLine: true, fontSize: 8, color: PALETTE.slate, italic: true } },
+          { text: a.line, options: { bullet: { code: "25A0", indent: 14 }, breakLine: true, fontSize: 11, color: AG.ink } },
+          { text: `     ${a.source}`, options: { breakLine: true, fontSize: 8, color: AG.muted, italic: true } },
         ]),
-        {
-          x: 0.6,
-          y: contentTop + 0.45,
-          w: 12.1,
-          h: 3.6,
-          lineSpacingMultiple: 1.08,
-          paraSpaceAfter: 4,
-          valign: "top",
-          margin: 0,
-          fit: "shrink",
-        }
+        { x: 0.75, y: contentTop + 0.3, w: 11.83, h: fitH(contentTop + 0.3, view.questions.length ? 2.6 : 3.9), fontFace: FONT_BODY, lineSpacingMultiple: 1.08, paraSpaceAfter: 4, valign: "top", margin: 0, fit: "shrink" }
       );
     }
-
     if (view.questions.length) {
-      const qTop = contentTop + (view.advice.length ? 4.25 : 0.1);
-      addSectionLabel(slide, "Questions you should personally be ready for", { x: 0.6, y: qTop, w: 12.1 });
-      addBulletList(slide, view.questions, { x: 0.6, y: qTop + 0.32, w: 12.1, h: 1.4, fontSize: 10.5 });
+      const qTop = contentTop + (view.advice.length ? 3.05 : 0);
+      addSectionLabel(slide, "Questions you should personally be ready for", { x: 0.75, y: qTop, w: 11.83 });
+      addBulletList(slide, view.questions, { x: 0.75, y: qTop + 0.3, w: 11.83, h: 1.1, fontSize: 10.5 });
     }
   }
 }
 
-function addPersonaSection(pptx: pptxgen, brand: Brand, p: Persona, idx: () => string) {
-  // 1. Briefing summary.
-  {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: `${p.label} — briefing summary`,
-      note: "AG-data briefing summary. Why this stakeholder matters, the AR objective, and the evidence posture.",
-    });
-    addMetricCard(slide, { x: 0.6, y: contentTop, w: 3.0, label: "Evidence confidence", value: p.evidenceConfidence, caption: evidenceLabel(p.evidenceGrade, p.evidenceConfidence) });
-    addMetricCard(slide, { x: 3.75, y: contentTop, w: 3.0, label: "Stakeholder", value: p.label, caption: p.stakeholder });
-    addMetricCard(slide, { x: 6.9, y: contentTop, w: 5.83, label: "Action posture", value: " ", caption: " " });
-    slide.addText(p.posture, {
-      x: 7.08,
-      y: contentTop + 0.4,
-      w: 5.5,
-      h: 0.7,
-      fontFace: "Arial",
-      fontSize: 11.5,
-      color: PALETTE.ink,
-      margin: 0,
-      valign: "top",
-      fit: "shrink",
-    });
-    addSectionLabel(slide, "Why this stakeholder matters", { x: 0.6, y: contentTop + 1.45, w: 12 });
-    slide.addText(p.whyMatters, {
-      x: 0.6,
-      y: contentTop + 1.74,
-      w: 12.13,
-      h: 0.7,
-      fontFace: "Arial",
-      fontSize: 12.5,
-      color: PALETTE.ink,
-      margin: 0,
-      valign: "top",
-      fit: "shrink",
-    });
-    addSectionLabel(slide, "Current AR objective", { x: 0.6, y: contentTop + 2.6, w: 12 });
-    slide.addText(p.objective, {
-      x: 0.6,
-      y: contentTop + 2.89,
-      w: 12.13,
-      h: 0.7,
-      fontFace: "Arial",
-      fontSize: 12.5,
-      color: PALETTE.ink,
-      margin: 0,
-      valign: "top",
-      fit: "shrink",
-    });
-  }
+// ---------------------------------------------------------------------------
+// Real records the AR team holds: asks, named coverage, placements, sources.
+// ---------------------------------------------------------------------------
 
-  // 2. What this persona needs to know + what to do next.
-  {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: `${p.label} — what to know and do`,
-      note: "Left: what AG data says this persona needs to know. Right: role-specific next actions, owners and timing.",
-    });
-    addSectionLabel(slide, "What AG data says you need to know", { x: 0.6, y: contentTop, w: 6, color: PALETTE.gold });
-    addBulletList(slide, p.knows, { x: 0.6, y: contentTop + 0.32, w: 5.9, h: 4.6, fontSize: 12 });
-
-    addSectionLabel(slide, "What to do next", { x: 6.8, y: contentTop, w: 6, color: PALETTE.gold });
-    addTable(slide, {
-      x: 6.8,
-      y: contentTop + 0.32,
-      w: 5.93,
-      colW: [3.43, 1.4, 1.1],
-      headers: ["ACTION", "OWNER", "TIMING"],
-      rows: p.doNext.map((d) => ({ cells: [d.action, d.owner, d.timing] })),
-      fontSize: 9.5,
-      headerFontSize: 9,
-    });
-  }
-
-  // 3. Proof needed + guardrails.
-  {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: `${p.label} — proof needed and message guardrails`,
-      note: "Proof/evidence required from this persona, and the analyst-facing message guardrails (NDA vs no-NDA).",
-    });
-    addSectionLabel(slide, "Proof / evidence needed from this persona", { x: 0.6, y: contentTop, w: 12 });
-    addTable(slide, {
-      x: 0.6,
-      y: contentTop + 0.3,
-      w: 12.13,
-      colW: [3.8, 4.6, 1.93, 1.8],
-      headers: ["ASSET / EVIDENCE", "WHY IT MATTERS", "STATE", "OWNER"],
-      rows: p.proof.map((r) => ({ cells: [r.asset, r.why, r.state, r.owner], tone: toneForState(r.state) })),
-      fontSize: 9.5,
-      headerFontSize: 9,
-    });
-    const guardY = contentTop + 0.3 + 0.42 * (p.proof.length + 1) + 0.35;
-    addSectionLabel(slide, "Approved (incl. under NDA)", { x: 0.6, y: guardY, w: 6, color: PALETTE.good });
-    addBulletList(slide, p.guardrails.approved, { x: 0.6, y: guardY + 0.28, w: 5.9, h: 1.4, fontSize: 10.5 });
-    addSectionLabel(slide, "Claims to avoid", { x: 6.8, y: guardY, w: 6, color: PALETTE.bad });
-    addBulletList(slide, p.guardrails.avoid, { x: 6.8, y: guardY + 0.28, w: 5.93, h: 1.4, fontSize: 10.5 });
-  }
-
-  // 4. Enablement + risks + open inputs.
-  {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: `${p.label} — enablement, risks and open inputs`,
-      note: "How AG/AR intelligence helps internally, the risks and mitigations, and the AG inputs still needed.",
-    });
-    addSectionLabel(slide, "Sales / internal enablement angle", { x: 0.6, y: contentTop, w: 12, color: PALETTE.gold });
-    addBulletList(slide, p.enablement, { x: 0.6, y: contentTop + 0.3, w: 12.13, h: 1.0, fontSize: 11.5 });
-
-    const riskY = contentTop + 1.4;
-    addSectionLabel(slide, "Risks and mitigations", { x: 0.6, y: riskY, w: 12 });
-    addTable(slide, {
-      x: 0.6,
-      y: riskY + 0.3,
-      w: 12.13,
-      colW: [4.4, 5.93, 1.8],
-      headers: ["RISK", "MITIGATION", "OWNER"],
-      rows: p.risks.map((r) => ({ cells: [r.risk, r.mitigation, r.owner], tone: "warn" as const })),
-      fontSize: 9.5,
-      headerFontSize: 9,
-    });
-    const openY = riskY + 0.3 + 0.42 * (p.risks.length + 1) + 0.5;
-    addSectionLabel(slide, "Open AG inputs needed", { x: 0.6, y: openY, w: 12, color: PALETTE.warn });
-    addBulletList(slide, p.openInputs, { x: 0.6, y: openY + 0.28, w: 12.13, h: 1.2, fontSize: 11 });
-  }
-}
-
-function addProvenanceSlide(pptx: pptxgen, brand: Brand, idx: () => string, personas: Persona[]) {
+function addAsksSlide(pptx: pptxgen, brand: Brand, label: string, asks: Ask[], idx: () => string, section: string) {
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
-    title: "Data basis and provenance",
-    note: "Every section is labelled by source. Estimated, demo and open-input content is marked — nothing here is audited fact.",
+    section,
+    title: `${label} — what AR needs from you`,
+    note: `${asks.length} open ask${asks.length === 1 ? "" : "s"} recorded by the AR team for this role.`,
+    caveat: "Written by the AR team in AR SuperHero; nothing here is suggested or inferred.",
+    notes: "Source: AR SuperHero asks, recorded by the AR team.",
   });
   addTable(slide, {
-    x: 0.6,
+    x: 0.75,
     y: contentTop,
-    w: 12.13,
-    colW: [4.6, 7.53],
-    headers: ["SECTION", "BASIS"],
-    rows: [
-      { cells: ["Persona model, what-to-know, objectives", "AG DEMO DATA — derived from the AnalystGenius Direct persona model for the demo customer."], tone: "default" },
-      { cells: ["Next actions, owners, timing", "AG DEMO DATA + TEMPLATE — illustrative owners/timing; confirm with named leaders before use."], tone: "default" },
-      { cells: ["Proof / evidence states", "AG DEMO DATA — Safe / Restricted / Unsupported reflect demo reuse states; revalidate per client."], tone: "default" },
-      { cells: ["Risks and mitigations", "MODELLED / TEMPLATE — directional risk framing, not a probability or outcome prediction."], tone: "warn" },
-      { cells: ["Open inputs", "MISSING INPUTS — fields requiring user uploads or AnalystGenius evidence before client-ready use."], tone: "warn" },
-      { cells: ["External market signals", "EXTERNAL DEMO SIGNALS — illustrative, to be verified against live AnalystGenius intelligence."], tone: "default" },
-    ],
+    w: 11.83,
+    colW: [6.0, 2.4, 1.6, 1.83],
+    headers: ["Ask", "Owner", "Due", "Status"],
+    rows: asks.slice(0, 8).map((a) => ({ cells: [a.title + (a.note ? `\n${a.note}` : ""), a.owner ?? "No owner named", formatDue(a.due_date), a.status] })),
     fontSize: 10,
-    headerFontSize: 9.5,
   });
 }
 
-function addSupportSlide(pptx: pptxgen, brand: Brand, idx: () => string) {
+function addCoverageSlide(pptx: pptxgen, brand: Brand, vendorName: string, view: Awaited<ReturnType<typeof vendorAnalystView>> | null, idx: () => string, section: string) {
+  if (!view) {
+    addBodySlide(pptx, brand, { index: idx(), section, title: "Who is writing about you", note: "Named-analyst coverage could not be read when this deck was generated.", caveat: "Absent, not empty: regenerate the deck to include the named analysts." });
+    return;
+  }
+  const positioned: VendorAnalyst[] = view.analysts.filter((a) => a.positions > 0);
+  const silent = view.analysts.filter((a) => a.positions === 0);
+  if (!positioned.length && !silent.length) return;
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
-    title: "AnalystGenius expert support",
-    note: "Point-of-need support — bring AG analysts in where evidence is thin or stakes are high.",
+    section,
+    title: "Who is writing about you",
+    note: `${view.summary.named} named analysts cover ${vendorName}; ${view.summary.withPosition} have a published, sourced position${view.summary.stale ? `, ${view.summary.stale} of them more than two years old` : ""}.`,
+    caveat: view.summary.withInteraction === 0 ? "No interaction with any of these analysts is logged yet, so the relationship is unknown rather than neutral." : `${view.summary.withInteraction} have a logged interaction.`,
+    notes: `Source: named-analyst coverage held by AR SuperHero; every position carries a source URL. ${positioned.slice(0, 8).map((a) => `${a.name} — ${a.latest_source_url ?? ""}`).join("; ")}`,
   });
+  if (positioned.length) {
+    addTable(slide, {
+      x: 0.75,
+      y: contentTop,
+      w: 11.83,
+      colW: [2.9, 2.3, 1.6, 1.6, 3.43],
+      headers: ["Analyst", "Firm", "Positions", "Latest", "Relationship"],
+      rows: positioned.slice(0, 8).map((a) => ({
+        cells: [a.name + (a.role ? `\n${a.role}` : ""), a.firm, String(a.positions), `${formatDate(a.latest_published, a.latest_precision)}${a.stale ? " · dated" : ""}`, a.last_interaction_at ? `Last contact ${new Date(a.last_interaction_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : "No interaction logged"],
+      })),
+      fontSize: 9,
+    });
+  }
+  const y = contentTop + 0.38 + Math.min(positioned.length, 8) * 0.44 + 0.25;
+  if (silent.length && y < CONTENT_BOTTOM - 0.6) {
+    addSectionLabel(slide, `Also covering this market, no published position on ${vendorName} found`, { x: 0.75, y, w: 11.83 });
+    slide.addText(silent.slice(0, 12).map((a) => `${a.name} (${a.firm})`).join("  ·  "), { x: 0.75, y: y + 0.28, w: 11.83, h: fitH(y + 0.28, 0.6), fontFace: FONT_BODY, fontSize: 9.5, color: AG.body, margin: 0, fit: "shrink", valign: "top" });
+  }
+}
 
-  addSectionLabel(slide, "When to bring AnalystGenius in", { x: 0.6, y: contentTop, w: 12 });
+function addPlacementsSlide(pptx: pptxgen, brand: Brand, vendorName: string, rankings: PublicAnalystRanking[] | null, idx: () => string, section: string) {
+  if (!rankings) {
+    addBodySlide(pptx, brand, { index: idx(), section, title: "The published record", note: "The placement record could not be read when this deck was generated.", caveat: "Absent, not empty: regenerate the deck to include the cited placements." });
+    return;
+  }
+  if (!rankings.length) return;
+  const rows = [...rankings].sort((a, b) => b.published_date.localeCompare(a.published_date));
+  const confirmed = rows.filter((r) => r.source_type === "analyst_firm_page").length;
+  const firms = new Set(rows.map((r) => r.analyst_firm)).size;
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    section,
+    title: "The published record",
+    note: `${rows.length} cited placements for ${vendorName} across ${firms} analyst firms. The most recent are listed.`,
+    caveat: `${confirmed} of ${rows.length} are confirmed on the analyst firm's own page; the rest are vendor-reported. Every row carries a source.`,
+    notes: `Source: cited public placements held by AR SuperHero. ${rows.slice(0, 10).map((r) => `${r.report_name} — ${r.source_url}`).join("; ")}`,
+  });
   addTable(slide, {
-    x: 0.6,
-    y: contentTop + 0.3,
-    w: 12.13,
-    colW: [4.6, 6.13, 1.4],
-    headers: ["TRIGGER", "HOW AG HELPS", "OUTPUT"],
-    rows: [
-      { cells: ["High-severity open inputs remain", "Run a readiness session to close the gaps in this pack.", "Readiness session"] },
-      { cells: ["Restricted / Unsupported proof states", "Validate reuse states before client-facing use.", "Cleared proof"] },
-      { cells: ["Analyst briefing imminent", "Pressure-test each persona's analyst-facing narrative.", "Briefing dry-run"] },
-      { cells: ["Modelled risk framing only", "Convert directional risks into evidence-backed positioning.", "Evidence pack"] },
-    ],
-    fontSize: 10,
-    headerFontSize: 9.5,
+    x: 0.75,
+    y: contentTop,
+    w: 11.83,
+    colW: [1.9, 5.3, 2.4, 2.23],
+    headers: ["Analyst firm", "Report", "Placement", "Published"],
+    rows: rows.slice(0, 9).map((r) => ({ cells: [r.analyst_firm, r.report_name, r.placement, formatDate(r.published_date, r.date_precision)] })),
+    fontSize: 9,
   });
+}
 
-  const angleY = contentTop + 0.3 + 0.42 * 5 + 0.5;
-  addSectionLabel(slide, "Why this makes AR a superhero internally", { x: 0.6, y: angleY, w: 12, color: PALETTE.gold });
-  addBulletList(
-    slide,
-    [
-      "AR walks into every leadership conversation with evidence-graded, persona-ready actions.",
-      "Open inputs become a shared work-list with AnalystGenius, not an AR-only burden.",
-    ],
-    { x: 0.6, y: angleY + 0.3, w: 12.13, h: 1.2, fontSize: 11.5 }
-  );
+function addSourcesSlide(pptx: pptxgen, brand: Brand, brief: { live: boolean; generatedAt: string; stale?: boolean; degraded?: boolean }, view: Awaited<ReturnType<typeof vendorAnalystView>> | null, rankings: PublicAnalystRanking[] | null, asks: Ask[] | null, idx: () => string, section: string) {
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    section,
+    title: "Sources",
+    note: "Every section names where its figures come from. Nothing in this deck is estimated or seeded.",
+    caveat: "AnalystGenius values are point-in-time and drift between reads; placements and coverage are cited public records; asks are written by the AR team.",
+  });
+  const rows: { cells: string[]; tone?: "default" | "good" | "warn" | "bad" }[] = [
+    { cells: ["AnalystGenius read", brief.live && !brief.degraded ? readProvenance(brief as any) : "Unavailable at generation time; nothing shown in its place.", "providers/snapshot · narrative-reality-gap · reputation-tracker/trends · talent/intelligence (reported fields)"], tone: brief.live && !brief.degraded ? "default" : "warn" },
+    { cells: ["Named-analyst coverage", view ? `${view.summary.named} analysts, ${view.summary.withPosition} with a sourced position` : "Could not be read", "AR SuperHero coverage records; every position carries a source URL"], tone: view ? "default" : "warn" },
+    { cells: ["Published placements", rankings ? `${rankings.length} cited placements, ${rankings.filter((r) => r.source_type === "analyst_firm_page").length} confirmed on the analyst firm's own page` : "Could not be read", "AR SuperHero placement records; every row carries a source URL"], tone: rankings ? "default" : "warn" },
+    { cells: ["Asks", asks ? `${asks.filter((a) => a.status === "open").length} open` : "Could not be read", "Written by the AR team in AR SuperHero"], tone: asks ? "default" : "warn" },
+  ];
+  addTable(slide, { x: 0.75, y: contentTop, w: 11.83, colW: [2.6, 4.6, 4.63], headers: ["Section", "What was available", "Source"], rows, fontSize: 10 });
 }

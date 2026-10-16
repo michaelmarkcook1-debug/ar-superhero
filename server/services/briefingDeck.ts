@@ -4,499 +4,361 @@ import {
   deckToBuffer,
   addCover,
   addClosing,
-  addCeoBioSlide,
   addBodySlide,
-  addTable,
-  addMetricCard,
   addBulletList,
+  addCards,
+  addRowList,
   addSectionLabel,
-  evidenceLabel,
-  PALETTE,
+  addTable,
+  AG,
+  CONTENT_BOTTOM,
+  FONT_BODY,
+  fitH,
+  todayLabel,
   type Brand,
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
-import { vendorById, type VendorContext } from "./vendors";
+import { vendorById, vendorByTicker } from "./vendors";
+import { publicRankingsStore } from "./publicRankingsStore";
+import { analystCoverageStore } from "./analystCoverageStore";
+import { vendorEvaluationCalendar } from "./evaluationCalendar";
+import { baseReportName } from "./workSeed";
+import { houseLearnings } from "./resultsLearning";
+import {
+  CONFIDENCE_FACTOR,
+  CROSS_HOUSE_FRAMEWORK,
+  ENGAGEMENT_STAGES,
+  EVIDENCE_BOUNDARY,
+  HARD_TRUTH,
+  UNIVERSAL_SHIFT_DRIVERS,
+  playbookById,
+  type AnalystHouseId,
+  type HousePlaybook,
+} from "@shared/assessmentPlaybooks";
+import type { AnalystCoverage, PublicAnalystRanking } from "@shared/schema";
 
 // ============================================================================
-// Succeed tab — AR analyst assessment "defence pack".
+// Succeed tab — the evaluation defence pack.
 //
-// Board/C-suite style pack that defends a vendor's readiness for a specific
-// analyst assessment. Two live demo assessment views only (Overall IT Services,
-// Overall AI Readiness). Capgemini is the demo vendor. No predicted rating or
-// outcome — this is a readiness and evidence view, with open inputs surfaced
-// rather than invented.
+// Prepares a vendor for the next cycle of a specific analyst evaluation, from
+// what AR SuperHero actually holds:
+//   - the AnalystGenius read (standing, competitive field, narrative gap)
+//   - the vendor's cited placement history in that evaluation
+//   - what the house evaluates and what moves its rankings (house playbook)
+//   - the four engagement moments with the house's own dos and don'ts
+//   - the named analysts who cover the vendor at that house
+//   - what the house has published about the peer set
+//   - the evidence the vendor must supply — stated as open inputs
+// Nothing here is a readiness score, a predicted placement, or a seeded
+// evidence gap. Where the pack has no house (the general form), the
+// cross-house framework carries the guidance and the full record is shown.
 // ============================================================================
 
-type ReadinessBand = "Strong" | "Adequate" | "Weak" | "Missing" | "Unsupported";
-
-type AnalystMoment = {
-  id: string;
-  model: string;
-  topic: string;
-  cycle: string;
-  due: string;
-  status: string;
-  readiness: ReadinessBand;
-  owner: string;
-  exposure: string;
-  topGaps: string[];
-  rfiState: string;
-  briefingState: string;
-  evidenceCoverage: number;
-};
-
-type EvidenceGap = {
-  id: string;
-  momentId: string;
-  title: string;
-  severity: string;
-  status: string;
-  rationale: string;
-};
-
-const MOMENTS: AnalystMoment[] = [
-  {
-    id: "m1",
-    model: "Overall IT Services",
-    topic: "Enterprise IT Services market position",
-    cycle: "Live demo view: H1 2026",
-    due: "12 Jun",
-    status: "On track",
-    readiness: "Adequate",
-    owner: "Mireille Okonkwo",
-    exposure:
-      "Current AG-shaped demo data shows defensible delivery scale and client outcome signals, but the executive story still needs sharper proof of repeatability across regions and service lines.",
-    topGaps: [
-      "Named cross-industry references: three strong examples available, two still approval-limited.",
-      "Repeatable operating model proof: narrative exists but needs stronger quantified evidence.",
-    ],
-    rfiState: "In review",
-    briefingState: "Scheduled",
-    evidenceCoverage: 0.68,
-  },
-  {
-    id: "m2",
-    model: "Overall AI Readiness",
-    topic: "AI services and enterprise AI adoption readiness",
-    cycle: "Live demo view: H1 2026",
-    due: "28 May",
-    status: "At risk",
-    readiness: "Weak",
-    owner: "Dev Patel",
-    exposure:
-      "AI readiness has visible momentum, but AG-shaped demo data shows uneven production proof, governance evidence, and client value metrics across the portfolio.",
-    topGaps: [
-      "Production-grade AI outcomes: pilot evidence is stronger than scaled client proof.",
-      "Responsible AI governance: policy exists, but assessment-ready operating evidence is thin.",
-    ],
-    rfiState: "Draft",
-    briefingState: "Pending",
-    evidenceCoverage: 0.44,
-  },
-];
-
-const EVIDENCE_GAPS: EvidenceGap[] = [
-  {
-    id: "g1",
-    momentId: "m2",
-    title: "Production AI outcomes: scaled proof",
-    severity: "High",
-    status: "unsupported",
-    rationale: "Pilot metrics are available, but named production outcomes and adoption depth are not yet assessment-ready.",
-  },
-  {
-    id: "g2",
-    momentId: "m1",
-    title: "Cross-industry reference permission",
-    severity: "High",
-    status: "restricted",
-    rationale: "Three strong references exist; two remain NDA-limited to analyst briefing use only.",
-  },
-  {
-    id: "g4",
-    momentId: "m1",
-    title: "Repeatable IT services operating model proof",
-    severity: "Medium",
-    status: "restricted",
-    rationale: "Operating model narrative exists, but reusable quantified evidence is not yet cleared for analyst-facing use.",
-  },
-  {
-    id: "g5",
-    momentId: "m2",
-    title: "Responsible AI operating evidence",
-    severity: "Medium",
-    status: "restricted",
-    rationale: "Policy and governance materials exist, but operating evidence needs permissioned examples and controls proof.",
-  },
-];
-
-function getVendor(vendorId?: string): VendorContext {
-  return vendorById(vendorId);
+export interface BriefingDeckInput {
+  /** Legacy caller: a Succeed moment id. Produces the general form. */
+  momentId?: string;
+  /** Evaluation form: the analyst firm and report name of a cited series. */
+  firm?: string;
+  reportName?: string;
+  vendorId?: string;
+  competitorTickers?: string[];
 }
+
+const HOUSE_BY_FIRM: Record<string, AnalystHouseId> = {
+  gartner: "gartner",
+  forrester: "forrester",
+  idc: "idc",
+  "hfs research": "hfs",
+  hfs: "hfs",
+  nelsonhall: "nelsonhall",
+  isg: "isg",
+  "everest group": "everest",
+  everest: "everest",
+};
 
 function slugify(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function todayLabel(): string {
-  return new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+function fmtDate(d: string, precision: string): string {
+  if (precision === "year" || /^\d{4}$/.test(d)) return d.slice(0, 4);
+  if (precision === "month" || /^\d{4}-\d{2}$/.test(d)) {
+    const [y, m] = d.split("-").map(Number);
+    return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  }
+  const dt = new Date(d);
+  return Number.isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function readinessConfidence(band: ReadinessBand): string {
-  if (band === "Strong") return "High";
-  if (band === "Adequate") return "Medium";
-  return "Low";
+function sourceSplit(rows: PublicAnalystRanking[]): string {
+  const confirmed = rows.filter((r) => r.source_type === "analyst_firm_page").length;
+  return `${confirmed} of ${rows.length} confirmed on the analyst firm's own page; the rest are vendor-reported.`;
 }
 
-function severityTone(severity: string, status: string): "good" | "warn" | "bad" {
-  if (status === "unsupported") return "bad";
-  if (severity === "High") return "bad";
-  if (severity === "Medium") return "warn";
-  return "good";
+export function getBriefingDeckFilename(input: BriefingDeckInput | string, vendorIdLegacy = "capgemini"): string {
+  const inp: BriefingDeckInput = typeof input === "string" ? { momentId: input, vendorId: vendorIdLegacy } : input;
+  const vendor = vendorById(inp.vendorId);
+  const scope = inp.firm && inp.reportName ? `${slugify(inp.firm)}--${slugify(baseReportName(inp.reportName))}` : "analyst-record";
+  return `${slugify(vendor.name)}--${scope}--defence-pack.pptx`;
 }
 
-export function getBriefingDeckFilename(momentId: string, vendorId = "capgemini"): string {
-  const moment = MOMENTS.find((m) => m.id === momentId) ?? MOMENTS[0];
-  const vendor = getVendor(vendorId);
-  return `${slugify(vendor.name)}--${slugify(moment.model)}--defence-pack.pptx`;
-}
+export async function createBriefingDeck(input: BriefingDeckInput | string, vendorIdLegacy = "capgemini", competitorsLegacy?: string[]): Promise<Buffer> {
+  const inp: BriefingDeckInput = typeof input === "string" ? { momentId: input, vendorId: vendorIdLegacy, competitorTickers: competitorsLegacy } : input;
+  const vendor = vendorById(inp.vendorId);
+  const vendorName = vendor.name;
+  const series = Boolean(inp.firm && inp.reportName);
+  const firm = inp.firm?.trim() ?? "";
+  const baseName = inp.reportName ? baseReportName(inp.reportName) : "";
+  const houseId = series ? HOUSE_BY_FIRM[firm.toLowerCase()] : undefined;
+  const playbook: HousePlaybook | null = houseId ? playbookById(houseId) : null;
+  const houseName = playbook?.house ?? firm;
 
-export async function createBriefingDeck(
-  momentId: string,
-  vendorId = "capgemini",
-  competitorTickers?: string[]
-): Promise<Buffer> {
-  const moment = MOMENTS.find((m) => m.id === momentId) ?? MOMENTS[0];
-  const vendor = getVendor(vendorId);
-  const gaps = EVIDENCE_GAPS.filter((g) => g.momentId === moment.id);
+  // Records, each optional and reported honestly when absent.
+  const [allRankings, coverage, calendar, learnings] = await Promise.all([
+    publicRankingsStore.listRankings().catch(() => null),
+    analystCoverageStore.list(vendor.id).catch(() => null),
+    vendorEvaluationCalendar(vendor.id).catch(() => null),
+    houseId ? houseLearnings(houseId).catch(() => []) : Promise.resolve([]),
+  ]);
+  const vendorRows = (allRankings ?? []).filter((r) => r.vendor_id === vendor.id);
+  const editions = series ? vendorRows.filter((r) => r.analyst_firm.toLowerCase() === firm.toLowerCase() && baseReportName(r.report_name).toLowerCase() === baseName.toLowerCase()).sort((a, b) => b.published_date.localeCompare(a.published_date)) : [];
+  const peerIds = new Set((inp.competitorTickers ?? []).map((t) => vendorByTicker(t)?.id).filter((v): v is string => Boolean(v) && v !== vendor.id));
+  const peerRows = (allRankings ?? [])
+    .filter((r) => peerIds.has(r.vendor_id) && (!series || r.analyst_firm.toLowerCase() === firm.toLowerCase()))
+    .sort((a, b) => b.published_date.localeCompare(a.published_date));
+  const seriesEntry = calendar?.series.find((s) => s.firm.toLowerCase() === firm.toLowerCase() && s.report.toLowerCase() === baseName.toLowerCase());
 
-  const deckLabel = `${moment.model} — Analyst Assessment Defence Pack`;
-  const brand: Brand = {
-    vendorName: vendor.name,
-    vendorMark: vendor.mark,
-    vendorAccent: vendor.accent,
-    deckLabel,
-  };
-
-  const pptx = newDeck({
-    title: `${vendor.name} ${moment.model} Analyst Assessment Defence Pack`,
-    subject: `AnalystGenius AR SuperHero assessment defence pack for ${vendor.name}`,
-  });
-
+  const deckLabel = series ? `${houseName} defence pack` : "Analyst record defence pack";
+  const brand: Brand = { vendorName, vendorMark: vendor.mark, vendorAccent: vendor.accent, deckLabel };
+  const pptx = newDeck({ title: `${vendorName} — ${deckLabel}`, subject: `AnalystGenius evaluation defence pack for ${vendorName}` });
   let n = 0;
   const idx = () => String(++n).padStart(2, "0");
 
+  const agenda = series
+    ? ["The AnalystGenius read", "Your record in this evaluation", `What ${houseName} evaluates`, "The four engagement moments", `Who covers you at ${houseName}`, "The evidence you must supply"]
+    : ["The AnalystGenius read", "Your published record", "What drives a defensible position", "The four engagement moments", "Who is writing about you", "The evidence you must supply"];
+
   addCover(pptx, brand, {
-    kicker: "AR / C-SUITE ONLY · EVIDENCE-GRADED",
-    bigTitle: `${vendor.name} — Analyst Assessment Defence Pack`,
-    subTitle: `${moment.model} · ${moment.cycle}`,
-    generatedLabel: `Generated ${todayLabel()}`,
-    contextRight: `Assessment owner: ${moment.owner}`,
-    footNote:
-      "AnalystGenius-driven readiness and evidence view. Built from AG demo data; missing fields are shown as open inputs, not inferred. No predicted rating, rank, or outcome.",
+    kicker: `Prepared for ${vendorName} · ${todayLabel()}`,
+    titleA: series ? "Defending the next" : "Defending your",
+    titleB: series ? `${houseName} cycle.` : "analyst record.",
+    subTitle: series ? `${baseName}: what the house evaluates, what it has published about you, and the evidence the next submission needs.` : "Your cited placement record, the named analysts who cover you, and the evidence a defensible position needs.",
+    contextLines: [series && seriesEntry ? `Last logged edition ${fmtDate(seriesEntry.last.date, seriesEntry.last.precision)}, ${Math.round(seriesEntry.monthsSinceLast)} months ago.` : `${vendorRows.length} cited placements on record.`, "For the AR team and the executives who will present."],
+    stats: series
+      ? [
+          { value: String(editions.length), label: editions.length === 1 ? "Edition on record" : "Editions on record" },
+          { value: editions[0]?.placement ?? "—", label: "Last placement" },
+          { value: seriesEntry ? `${Math.round(seriesEntry.monthsSinceLast)} mo` : "—", label: "Since last edition" },
+        ]
+      : [
+          { value: String(vendorRows.length), label: "Cited placements" },
+          { value: String(new Set(vendorRows.map((r) => r.analyst_firm)).size), label: "Analyst firms" },
+          { value: coverage ? String(new Set(coverage.filter((c) => c.vendor_id === vendor.id && c.stance_summary).map((c) => c.analyst_name)).size) : "—", label: "Analysts with a position" },
+        ],
+    preparedFor: { name: "Analyst relations", role: vendorName },
+    agenda,
+    notes: `Generated by AnalystGenius AR SuperHero on ${todayLabel()}. Scope: ${series ? `${houseName} · ${baseName}` : "general analyst record"}. Peer set: ${(inp.competitorTickers ?? []).join(", ") || "none named"}.`,
   });
 
-  await addAgIntelligenceSlides(pptx, brand, idx, competitorTickers, vendor.agTicker);
-  addReadinessSummary(pptx, brand, moment, gaps, idx);
-  addWhyMatters(pptx, brand, moment, idx);
-  addReadinessSnapshot(pptx, brand, moment, idx);
-  addEvidenceGaps(pptx, brand, gaps, idx);
-  addBriefingStrategy(pptx, brand, moment, idx);
-  addRfiPlan(pptx, brand, moment, idx);
-  addRiskRegister(pptx, brand, moment, idx);
-  addProvenance(pptx, brand, idx);
-  addSupport(pptx, brand, idx);
+  // 1–3. The AnalystGenius read.
+  await addAgIntelligenceSlides(pptx, brand, idx, inp.competitorTickers, vendor.agTicker, agenda[0]);
+
+  // 4. Your record.
+  addRecordSlide(pptx, brand, idx, agenda[1], vendorName, series ? editions : vendorRows, allRankings === null, series ? `Your record in ${baseName}` : "Your published record", seriesEntry?.note);
+
+  // 5. What the house evaluates / what drives a defensible position.
+  addWhatMovesSlide(pptx, brand, idx, agenda[2], playbook, learnings[0]);
+
+  // 6. The four engagement moments.
+  addMomentsSlide(pptx, brand, idx, agenda[3], playbook);
+
+  // 7. Who covers you.
+  addCoverageSlide(pptx, brand, idx, agenda[4], vendor.id, vendorName, coverage, series ? houseName : undefined);
+
+  // 8. What the field has published (peers in this scope).
+  if (peerRows.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      section: agenda[1],
+      title: series ? `What ${houseName} has published about your peers` : "What the field has published",
+      note: `${peerRows.length} cited placements for the named peer set${series ? ` at ${houseName}` : ""}. The most recent are listed.`,
+      caveat: sourceSplit(peerRows),
+      notes: `Source: cited public placements held by AR SuperHero. ${peerRows.slice(0, 8).map((r) => `${vendorById(r.vendor_id).name} · ${r.report_name} — ${r.source_url}`).join("; ")}`,
+    });
+    addTable(slide, {
+      x: 0.75,
+      y: contentTop,
+      w: 11.83,
+      colW: [1.7, 1.8, 4.3, 2.0, 2.03],
+      headers: ["Firm", "Analyst firm", "Report", "Placement", "Published"],
+      rows: peerRows.slice(0, 9).map((r) => ({ cells: [vendorById(r.vendor_id).name, r.analyst_firm, r.report_name, r.placement, fmtDate(r.published_date, r.date_precision)] })),
+      fontSize: 8.5,
+    });
+  }
+
+  // 9. The evidence you must supply.
+  addEvidenceSlide(pptx, brand, idx, agenda[5], houseName || null);
 
   addClosing(pptx, brand, {
-    heading: "Defend the readiness, not a predicted score.",
-    body:
-      "This pack equips AR to lead the assessment conversation with evidence. Close the open inputs above with permissioned proof, and bring AnalystGenius in where the evidence is thin.",
-    disclaimer:
-      "Generated by AnalystGenius AR SuperHero. Evidence-graded and confidence-labelled; demo, modelled and open-input sections are clearly marked. This is internal readiness material, not analyst research, a prediction, or a substitute for AnalystGenius expert review. © 2026 AnalystGenius.",
+    titleA: "The next step",
+    titleB: `with ${vendorName}.`,
+    body: series ? `Enter the ${houseName} cycle with the record in hand, the house's rules in view, and every claim traceable to evidence the firm will stand behind.` : "Take the published record and the named coverage into the next cycle, with every claim traceable to evidence the firm will stand behind.",
+    nextSteps: [
+      { title: series ? `Confirm the ${houseName} timetable` : "Confirm the next cycle", body: series ? "The research “as of” date and submission deadline, from the house. AR SuperHero holds no house calendar." : "Which evaluation is next, and its “as of” date, from the house.", owner: "AR team" },
+      { title: "Build the criterion-to-evidence ledger", body: "One row per criterion, with GA state, date and owner. The house framework's first rule.", owner: "AR team with evidence owners" },
+      { title: "Choose references by relevance", body: "Not prestige. Confirm availability before committing a name.", owner: `${vendorName} commercial leadership` },
+    ],
+    disclaimer: "Generated by AnalystGenius AR SuperHero. Cited placements and coverage carry sources; house guidance is a synthesis of published methodology, not published weights; no placement or outcome is predicted. © 2026 AnalystGenius.",
   });
-
-  addCeoBioSlide(pptx);
 
   return deckToBuffer(pptx);
 }
 
-function addReadinessSummary(
-  pptx: pptxgen,
-  brand: Brand,
-  moment: AnalystMoment,
-  gaps: EvidenceGap[],
-  idx: () => string
-) {
+// ---------------------------------------------------------------------------
+
+function addRecordSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, vendorName: string, rows: PublicAnalystRanking[], unavailable: boolean, title: string, anniversaryNote?: string) {
+  if (unavailable) {
+    addBodySlide(pptx, brand, { index: idx(), section, title, note: "The placement record could not be read when this deck was generated.", caveat: "Absent, not empty: regenerate the deck to include the cited placements." });
+    return;
+  }
+  if (!rows.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, { index: idx(), section, title, note: `No cited placement is logged for ${vendorName} in this scope.`, caveat: "Logged means found and cited; it does not mean none exists. Verify against the house before the cycle." });
+    addBulletList(slide, ["A placement is added to the record only with a source URL that carries the claim."], { x: 0.75, y: contentTop, w: 11.83, h: 1 });
+    return;
+  }
+  const sorted = [...rows].sort((a, b) => b.published_date.localeCompare(a.published_date));
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
-    title: "The readiness summary",
-    note: "Readiness and evidence posture for this assessment view. This defends a readiness position, not a predicted result.",
+    section,
+    title,
+    note: anniversaryNote ?? `${sorted.length} cited placement${sorted.length === 1 ? "" : "s"} on record. The most recent are listed.`,
+    caveat: `${sourceSplit(sorted)} Every row carries a source URL.`,
+    notes: `Source: cited public placements held by AR SuperHero. ${sorted.slice(0, 10).map((r) => `${r.report_name} ${r.published_date} — ${r.source_url}`).join("; ")}`,
   });
-  const conf = readinessConfidence(moment.readiness);
-  addMetricCard(slide, { x: 0.6, y: contentTop, w: 2.9, label: "Readiness band", value: moment.readiness, caption: evidenceLabel("E2", conf) });
-  addMetricCard(slide, { x: 3.65, y: contentTop, w: 2.9, label: "Evidence coverage", value: `${Math.round(moment.evidenceCoverage * 100)}%`, caption: "AG demo data" });
-  addMetricCard(slide, { x: 6.7, y: contentTop, w: 2.9, label: "Open evidence gaps", value: String(gaps.length), caption: "See gaps slide" });
-  addMetricCard(slide, { x: 9.75, y: contentTop, w: 2.98, label: "Posture", value: conf === "Low" ? "Build proof" : "Hold & sharpen", caption: `Status: ${moment.status}` });
-
-  addSectionLabel(slide, "Context", { x: 0.6, y: contentTop + 1.45, w: 12 });
   addTable(slide, {
-    x: 0.6,
-    y: contentTop + 1.75,
-    w: 12.13,
-    colW: [3.0, 9.13],
-    headers: ["FIELD", "VALUE"],
-    rows: [
-      { cells: ["Assessment view", `${moment.model} — ${moment.topic}`] },
-      { cells: ["Cycle", moment.cycle] },
-      { cells: ["Owner / due", `${moment.owner} · due ${moment.due}`] },
-      { cells: ["RFI / briefing", `${moment.rfiState} · ${moment.briefingState}`] },
-    ],
-    fontSize: 10.5,
-  });
-}
-
-function addWhyMatters(pptx: pptxgen, brand: Brand, moment: AnalystMoment, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "Why this assessment matters, and why now",
-    note: "Internal impact for AR, sales, leadership, delivery and marketing — and the timing pressure this cycle.",
-  });
-  addSectionLabel(slide, "Why it matters internally", { x: 0.6, y: contentTop, w: 6, color: PALETTE.gold });
-  addBulletList(
-    slide,
-    [
-      "AR: anchors the analyst narrative for the next briefing cycle.",
-      "Sales: positioning feeds active pursuits citing analyst visibility.",
-      "Leadership: concentration and evidence risk need a decision.",
-      "Delivery: operating-model proof is the strongest available lever.",
-      "Marketing: internal narrative must stay aligned and NDA-safe.",
-    ],
-    { x: 0.6, y: contentTop + 0.32, w: 5.9, h: 4.4, fontSize: 11.5 }
-  );
-  addSectionLabel(slide, "Why now", { x: 6.8, y: contentTop, w: 6, color: PALETTE.gold });
-  addBulletList(
-    slide,
-    [
-      `Cycle timing: ${moment.cycle}, due ${moment.due}.`,
-      `RFI is ${moment.rfiState.toLowerCase()} and the briefing is ${moment.briefingState.toLowerCase()}.`,
-      "The evaluation narrative is moving; evidence risk grows the longer gaps stay open.",
-      moment.exposure,
-    ],
-    { x: 6.8, y: contentTop + 0.32, w: 5.93, h: 4.4, fontSize: 11.5 }
-  );
-}
-
-function addReadinessSnapshot(pptx: pptxgen, brand: Brand, moment: AnalystMoment, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "Assessment readiness snapshot",
-    note: "Readiness by criterion, with the current evidence state. No criterion is scored or predicted.",
-  });
-  const rows = [
-    { cells: ["Delivery scale & client outcomes", "Adequate", "AG demo signals present; quantify repeatability."], tone: "warn" as const },
-    { cells: ["Named references", "Restricted", "Strong examples exist; approval-limited for reuse."], tone: "warn" as const },
-    { cells: ["Operating model repeatability", "Weak", "Narrative exists; quantified proof not yet cleared."], tone: "bad" as const },
-    { cells: ["Innovation / roadmap proof", "Input needed", "Requires user evidence before client-ready use."], tone: "warn" as const },
-  ];
-  addTable(slide, {
-    x: 0.6,
+    x: 0.75,
     y: contentTop,
-    w: 12.13,
-    colW: [4.6, 2.5, 5.03],
-    headers: ["CRITERION", "READINESS", "EVIDENCE STATE"],
-    rows,
-    fontSize: 10.5,
-  });
-  slide.addText(
-    "Readiness reflects current AG demo evidence only. Where a criterion is marked 'Input needed', supply permissioned proof rather than asserting a position.",
-    { x: 0.6, y: contentTop + 2.9, w: 12.13, h: 0.5, fontFace: "Arial", fontSize: 10.5, italic: true, color: PALETTE.slate, margin: 0, fit: "shrink" }
-  );
-}
-
-function addEvidenceGaps(pptx: pptxgen, brand: Brand, gaps: EvidenceGap[], idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "Evidence gaps and required actions",
-    note: "Each gap carries a severity, current evidence state, owner and next action. Unsupported items must not be claimed.",
-  });
-  const owners = ["AR + Commercial", "AR", "Delivery + AR", "AR + Compliance"];
-  const actions = [
-    "Run a disclosure motion for two named outcomes.",
-    "Confirm reuse permission; mark NDA-only references.",
-    "Clear quantified operating-model evidence for analyst use.",
-    "Assemble responsible-AI operating evidence pack.",
-  ];
-  const rows = gaps.length
-    ? gaps.map((g, i) => ({
-        cells: [g.title, g.severity, g.status, owners[i % owners.length], actions[i % actions.length]],
-        tone: severityTone(g.severity, g.status),
-      }))
-    : [{ cells: ["No open evidence gaps captured", "—", "—", "—", "Confirm none are hidden outside the platform."], tone: "good" as const }];
-  addTable(slide, {
-    x: 0.6,
-    y: contentTop,
-    w: 12.13,
-    colW: [3.5, 1.2, 1.7, 2.2, 3.53],
-    headers: ["GAP", "SEVERITY", "EVIDENCE STATE", "OWNER", "NEXT ACTION"],
-    rows,
-    fontSize: 9.5,
-    headerFontSize: 9,
+    w: 11.83,
+    colW: [1.9, 5.1, 2.6, 2.23],
+    headers: ["Analyst firm", "Report", "Placement", "Published"],
+    rows: sorted.slice(0, 9).map((r) => ({ cells: [r.analyst_firm, r.report_name, r.placement, fmtDate(r.published_date, r.date_precision)] })),
+    fontSize: 9,
   });
 }
 
-function addBriefingStrategy(pptx: pptxgen, brand: Brand, moment: AnalystMoment, idx: () => string) {
+function addWhatMovesSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, playbook: HousePlaybook | null, learning?: { cycles: number; lines: { line: string }[] }) {
+  if (playbook) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, {
+      index: idx(),
+      section,
+      title: `What ${playbook.house} evaluates, and what moves its rankings`,
+      note: playbook.assessment.leadership,
+      caveat: "A synthesis of published methodology and the owner playbook, not published weights. The study's own criteria, inclusion rules and cut-off dates override it.",
+      notes: `Source: house playbook (${playbook.contentSource ?? "owner-supplied"}). Evidence boundary: ${EVIDENCE_BOUNDARY[0]}`,
+    });
+    addSectionLabel(slide, `${playbook.assessment.name} — published axes`, { x: 0.75, y: contentTop, w: 5.8 });
+    addTable(slide, { x: 0.75, y: contentTop + 0.3, w: 5.8, colW: [1.0, 4.8], headers: ["Axis", "Published label"], rows: [{ cells: ["X", playbook.assessment.axes[0]] }, { cells: ["Y", playbook.assessment.axes[1]] }], fontSize: 10.5 });
+    addSectionLabel(slide, "Leadership framework", { x: 0.75, y: contentTop + 1.45, w: 5.8 });
+    addBulletList(slide, playbook.leadershipFramework.slice(0, 3), { x: 0.75, y: contentTop + 1.75, w: 5.8, h: CONTENT_BOTTOM - contentTop - 1.8, fontSize: 9.5 });
+    addSectionLabel(slide, playbook.movementDriver.headline, { x: 6.8, y: contentTop, w: 5.78 });
+    addBulletList(slide, playbook.movementDriver.drivers.slice(0, 6), { x: 6.8, y: contentTop + 0.3, w: 5.78, h: learning?.lines.length ? 2.2 : CONTENT_BOTTOM - contentTop - 0.35, fontSize: 10 });
+    if (learning?.lines.length) {
+      const lTop = contentTop + 2.7;
+      addSectionLabel(slide, `Learned from your ${playbook.house} results (${learning.cycles} cycle${learning.cycles === 1 ? "" : "s"}), observational`, { x: 6.8, y: lTop, w: 5.78 });
+      addBulletList(slide, learning.lines.slice(0, 3).map((l) => l.line), { x: 6.8, y: lTop + 0.3, w: 5.78, h: CONTENT_BOTTOM - lTop - 0.35, fontSize: 9.5 });
+    }
+    return;
+  }
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
-    title: "Analyst briefing strategy",
-    note: "NDA vs no-NDA split, likely analyst questions, and the proof to bring. No claims beyond cleared evidence.",
+    section,
+    title: HARD_TRUTH.headline,
+    note: HARD_TRUTH.detail,
+    caveat: HARD_TRUTH.formula,
+    notes: `Source: cross-house framework from the owner playbook. ${EVIDENCE_BOUNDARY[1]}`,
   });
-  addSectionLabel(slide, "Approved (incl. under NDA)", { x: 0.6, y: contentTop, w: 6, color: PALETTE.good });
-  addBulletList(
+  addSectionLabel(slide, "What drives the largest shifts in analyst rankings, across houses", { x: 0.75, y: contentTop, w: 11.83 });
+  addCards(slide, UNIVERSAL_SHIFT_DRIVERS.slice(0, 6).map((d) => ({ title: d.replace(/\.$/, ""), body: "" })), { x: 0.75, y: contentTop + 0.3, w: 11.83, cols: 3, h: 0.95 });
+}
+
+function addMomentsSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, playbook: HousePlaybook | null) {
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    section,
+    title: playbook ? `The four engagement moments at ${playbook.house}` : "The four engagement moments",
+    note: playbook ? "Each moment with the house's first rule to follow and first to avoid, in rank order of practical influence where the playbook states one." : "Each moment with the cross-house framework rule that applies.",
+    caveat: playbook ? "Ranks are directional operating judgements, not published weights." : CONFIDENCE_FACTOR.headline + " " + CONFIDENCE_FACTOR.detail.slice(0, 120) + "…",
+  });
+  const cards = ENGAGEMENT_STAGES.map((st, i) => {
+    const guidance = playbook?.stages.find((s) => s.stage === st.id);
+    const framework = CROSS_HOUSE_FRAMEWORK[i];
+    const body = guidance
+      ? [guidance.dos[0] ? `Do: ${guidance.dos[0]}` : null, guidance.donts[0] ? `Avoid: ${guidance.donts[0]}` : null].filter(Boolean).join("\n")
+      : framework
+        ? `${framework.title}. ${framework.points[0] ?? ""}`
+        : st.what;
+    return { tag: guidance?.rank ? `Influence rank ${guidance.rank}` : st.label, title: st.label, body };
+  });
+  addCards(slide, cards, { x: 0.75, y: contentTop, w: 11.83, cols: 2, h: 1.85, numbered: false });
+}
+
+function addCoverageSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, vendorId: string, vendorName: string, coverage: AnalystCoverage[] | null, house?: string) {
+  const title = house ? `Who covers you at ${house}` : "Who is writing about you";
+  if (!coverage) {
+    addBodySlide(pptx, brand, { index: idx(), section, title, note: "Named-analyst coverage could not be read when this deck was generated.", caveat: "Absent, not empty: regenerate the deck to include the named analysts." });
+    return;
+  }
+  const scoped = house ? coverage.filter((r) => r.firm.toLowerCase() === house.toLowerCase()) : coverage;
+  const positioned = scoped.filter((r) => r.vendor_id === vendorId && r.stance_summary && r.source_url).sort((a, b) => String(b.published_date ?? "").localeCompare(String(a.published_date ?? "")));
+  const silent = scoped.filter((r) => !positioned.includes(r)).map((r) => `${r.analyst_name}${r.role ? ` (${r.role})` : ""}`);
+  if (!positioned.length && !silent.length) {
+    const { slide, contentTop } = addBodySlide(pptx, brand, { index: idx(), section, title, note: `No named analyst${house ? ` at ${house}` : ""} with a sourced position on ${vendorName} is on record.`, caveat: "On record means found and cited; it does not mean nobody covers you." });
+    addBulletList(slide, ["Named coverage is added only with a source URL carrying the position."], { x: 0.75, y: contentTop, w: 11.83, h: 1 });
+    return;
+  }
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    section,
+    title,
+    note: `${positioned.length} named analyst${positioned.length === 1 ? "" : "s"} with a published, sourced position on ${vendorName}${house ? ` at ${house}` : ""}.`,
+    caveat: "Positions are shown as published, with the date. A position more than two years old is historic coverage, not a current view.",
+    notes: `Source: named-analyst coverage held by AR SuperHero. ${positioned.slice(0, 8).map((r) => `${r.analyst_name} — ${r.source_url}`).join("; ")}`,
+  });
+  let y = contentTop;
+  if (positioned.length) {
+    addTable(slide, {
+      x: 0.75,
+      y,
+      w: 11.83,
+      colW: [2.3, 1.9, 6.1, 1.53],
+      headers: ["Analyst", "Firm", "Published position", "Date"],
+      rows: positioned.slice(0, 6).map((r) => ({ cells: [r.analyst_name + (r.role ? `\n${r.role}` : ""), r.firm, r.stance_summary ?? "", fmtDate(r.published_date ?? "", r.date_precision ?? "day")] })),
+      fontSize: 9,
+    });
+    y += 0.38 + Math.min(positioned.length, 6) * 0.52 + 0.25;
+  }
+  if (silent.length && y < CONTENT_BOTTOM - 0.6) {
+    addSectionLabel(slide, `Also covering this market${house ? ` at ${house}` : ""}, no published position on ${vendorName} found`, { x: 0.75, y, w: 11.83 });
+    slide.addText(silent.slice(0, 12).join("  ·  "), { x: 0.75, y: y + 0.28, w: 11.83, h: fitH(y + 0.28, 0.6), fontFace: FONT_BODY, fontSize: 10, color: AG.body, margin: 0, fit: "shrink", valign: "top" });
+  }
+}
+
+function addEvidenceSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, house: string | null) {
+  const { slide, contentTop } = addBodySlide(pptx, brand, {
+    index: idx(),
+    section,
+    title: "The evidence you must supply",
+    note: "Open inputs, by design. AR SuperHero holds the public record; the submission's proof comes from the firm.",
+    caveat: `${CONFIDENCE_FACTOR.headline} ${CONFIDENCE_FACTOR.detail.slice(0, 150)}…`,
+    notes: `Source: cross-house framework from the owner playbook. Evidence sources analysts triangulate: ${CONFIDENCE_FACTOR.evidenceSources.join(", ")}.`,
+  });
+  addRowList(
     slide,
-    [
-      "Marketing-approved client outcomes (named, current).",
-      "Analyst-cleared delivery outcomes.",
-      "Country-level delivery scale figures.",
-    ],
-    { x: 0.6, y: contentTop + 0.3, w: 5.9, h: 1.8, fontSize: 11 }
+    CROSS_HOUSE_FRAMEWORK.slice(0, 5).map((f) => ({ title: f.title, body: f.points[0] ?? "" })),
+    { x: 0.75, y: contentTop, w: 11.83, rowH: 0.78 }
   );
-  addSectionLabel(slide, "Requires no-NDA / do not claim", { x: 6.8, y: contentTop, w: 6, color: PALETTE.bad });
-  addBulletList(
-    slide,
-    [
-      "Production-grade AI tooling claims (currently unsupported).",
-      "NDA-only references in non-NDA settings.",
-      "Ecosystem-leadership claims without documented proof.",
-    ],
-    { x: 6.8, y: contentTop + 0.3, w: 5.93, h: 1.8, fontSize: 11 }
-  );
-  addSectionLabel(slide, "Likely analyst questions & proof to bring", { x: 0.6, y: contentTop + 2.3, w: 12 });
-  addTable(slide, {
-    x: 0.6,
-    y: contentTop + 2.6,
-    w: 12.13,
-    colW: [6.6, 5.53],
-    headers: ["LIKELY QUESTION", "PROOF TO BRING"],
-    rows: [
-      { cells: ["How does this repeat across regions and service lines?", "Quantified operating-model evidence (once cleared)."] },
-      { cells: ["Where is production-grade AI proof, not pilots?", "Named production outcomes (open input)."] },
-      { cells: ["What governance backs the AI claims?", "Responsible-AI operating evidence pack (open input)."] },
-    ],
-    fontSize: 10,
-  });
-}
-
-function addRfiPlan(pptx: pptxgen, brand: Brand, moment: AnalystMoment, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "RFI response plan",
-    note: "Section ownership, status, input needed, and evidence classification for the RFI response.",
-  });
-  addTable(slide, {
-    x: 0.6,
-    y: contentTop,
-    w: 12.13,
-    colW: [3.2, 2.0, 4.43, 2.5],
-    headers: ["SECTION", "STATUS", "INPUT NEEDED", "EVIDENCE CLASS"],
-    rows: [
-      { cells: ["Delivery scale & outcomes", "In review", "Confirm quantified repeatability evidence.", "AG demo / restricted"], tone: "warn" },
-      { cells: ["References", "Draft", "Permission state for two NDA-limited refs.", "Restricted"], tone: "warn" },
-      { cells: ["AI readiness", "Draft", "Named production outcomes; governance proof.", "Unsupported / open"], tone: "bad" },
-      { cells: ["Sustainability / trust", "Not started", "Supply current commitments and evidence.", "Input needed"], tone: "warn" },
-    ],
-    fontSize: 9.5,
-    headerFontSize: 9,
-  });
-  slide.addText(`Owner: ${moment.owner} · RFI state: ${moment.rfiState} · Due ${moment.due}.`, {
-    x: 0.6,
-    y: contentTop + 2.7,
-    w: 12.13,
-    h: 0.35,
-    fontFace: "Arial",
-    fontSize: 11,
-    color: PALETTE.slate,
-    margin: 0,
-    fit: "shrink",
-  });
-}
-
-function addRiskRegister(pptx: pptxgen, brand: Brand, moment: AnalystMoment, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "Risk register and controls",
-    note: "Directional risk framing and the controls that keep evidence reuse safe. Not a probability or outcome prediction.",
-  });
-  addSectionLabel(slide, "Risk register", { x: 0.6, y: contentTop, w: 12 });
-  addTable(slide, {
-    x: 0.6,
-    y: contentTop + 0.3,
-    w: 12.13,
-    colW: [4.4, 1.6, 4.33, 1.8],
-    headers: ["RISK", "SEVERITY", "MITIGATION", "OWNER"],
-    rows: [
-      { cells: ["Unsupported AI claim challenged in briefing", "High", "Keep AI tooling briefing-only until disclosure clears.", "Product + AR"], tone: "bad" },
-      { cells: ["Reference concentration across moments", "Medium", "Diversify and rotate references deliberately.", "Commercial + AR"], tone: "warn" },
-      { cells: ["NDA-only material reused externally", "Medium", "Mark reuse state on every proof item.", "Marketing + AR"], tone: "warn" },
-    ],
-    fontSize: 9.5,
-    headerFontSize: 9,
-  });
-  const cY = contentTop + 0.3 + 0.42 * 4 + 0.3;
-  addSectionLabel(slide, "Controls & governance", { x: 0.6, y: cY, w: 12 });
-  addTable(slide, {
-    x: 0.6,
-    y: cY + 0.3,
-    w: 12.13,
-    colW: [6.6, 3.53, 2.0],
-    headers: ["CONTROL", "DESCRIPTION", "STATUS"],
-    rows: [
-      { cells: ["Evidence reuse classification", "Every proof item carries Safe / Restricted / Unsupported.", "In place"], tone: "good" },
-      { cells: ["NDA control on analyst quotes", "NDA-only material flagged and blocked from external reuse.", "In place"], tone: "good" },
-      { cells: ["AnalystGenius validation gate", "Cross-client learning gated on AG researcher validation.", "Recommended"], tone: "default" },
-    ],
-    fontSize: 9.5,
-    headerFontSize: 9,
-  });
-}
-
-function addProvenance(pptx: pptxgen, brand: Brand, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "Assumptions, open inputs and provenance",
-    note: "Where the content comes from. Estimated, demo and open-input sections are marked — nothing here is audited fact.",
-  });
-  addTable(slide, {
-    x: 0.6,
-    y: contentTop,
-    w: 12.13,
-    colW: [4.6, 7.53],
-    headers: ["SECTION", "BASIS"],
-    rows: [
-      { cells: ["Readiness band, coverage, gaps", "AG DEMO DATA — derived from the AnalystGenius Succeed model for the demo customer."], tone: "default" },
-      { cells: ["Readiness snapshot by criterion", "AG DEMO DATA — current demo evidence states; revalidate per assessment."], tone: "default" },
-      { cells: ["Briefing strategy, RFI plan", "AG DEMO DATA + TEMPLATE — illustrative ownership and structure; confirm before submission."], tone: "default" },
-      { cells: ["Risk register", "MODELLED / TEMPLATE — directional risk framing, not a probability or outcome prediction."], tone: "warn" },
-      { cells: ["Open inputs", "MISSING INPUTS — fields requiring user uploads or AnalystGenius evidence before client-ready use."], tone: "warn" },
-    ],
-    fontSize: 10,
-    headerFontSize: 9.5,
-  });
-}
-
-function addSupport(pptx: pptxgen, brand: Brand, idx: () => string) {
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    title: "AnalystGenius expert support",
-    note: "Point-of-need support — bring AG analysts in where evidence is thin or the assessment is high-stakes.",
-  });
-  addBulletList(
-    slide,
-    [
-      "Open a readiness session to close the highest-severity evidence gaps in this pack.",
-      "Ask AnalystGenius to validate Restricted / Unsupported proof before client-facing reuse.",
-      "Use AG analysts to rehearse the briefing and pressure-test likely analyst questions.",
-      "Bring AG in to convert modelled risk framing into evidence-backed positioning.",
-    ],
-    { x: 0.6, y: contentTop, w: 12.13, h: 3.6, fontSize: 13 }
-  );
+  if (house) {
+    // Nothing house-specific is invented here; the house's own criteria
+    // override the framework, and that is said on the slide above.
+  }
 }

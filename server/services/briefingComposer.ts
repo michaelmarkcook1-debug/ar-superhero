@@ -4,13 +4,16 @@ import {
   deckToBuffer,
   addCover,
   addClosing,
-  addCeoBioSlide,
   addBodySlide,
   addBulletList,
+  addCards,
+  addRowList,
   addSectionLabel,
   addTable,
+  AG,
+  CONTENT_BOTTOM,
   FONT_BODY,
-  PALETTE,
+  todayLabel,
   type Brand,
 } from "./boardPack";
 import { addAgIntelligenceSlides } from "./agIntelligenceSlide";
@@ -18,12 +21,7 @@ import { type DeckLibraryRow } from "../storage";
 import { deckStore } from "./deckStore";
 import { houseLearnings } from "./resultsLearning";
 import { vendorById } from "./vendors";
-import {
-  CONFIDENCE_FACTOR,
-  ENGAGEMENT_STAGES,
-  playbookById,
-  type AnalystHouseId,
-} from "@shared/assessmentPlaybooks";
+import { CONFIDENCE_FACTOR, ENGAGEMENT_STAGES, playbookById, type AnalystHouseId } from "@shared/assessmentPlaybooks";
 
 // ============================================================================
 // Briefing composer — Succeed tab.
@@ -34,7 +32,7 @@ import {
 //   2. Reused content from INGESTED prior decks — verbatim extracted text,
 //      ranked by overlap with the briefing topic/region, always with
 //      "from <file> · slide N" provenance
-//   3. Live AG intelligence slides (signal read, competitive, gap analysis)
+//   3. The AnalystGenius read (standing, competitive field, narrative gap)
 //   4. User variables (topic, region, length, executives) driving cover,
 //      agenda and slide budget
 // Sections that need human content ship as clearly-marked OPEN INPUT slides —
@@ -73,10 +71,6 @@ function slugify(v: string): string {
   return v.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function todayLabel(): string {
-  return new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-}
-
 /** Slide budget from briefing length: fixed overhead + content slides. */
 function slideBudget(mins: number): { reusedMax: number } {
   if (mins <= 30) return { reusedMax: 3 };
@@ -84,16 +78,10 @@ function slideBudget(mins: number): { reusedMax: number } {
   return { reusedMax: 8 };
 }
 
-const STOPWORDS = new Set([
-  "the", "and", "for", "with", "our", "your", "from", "into", "that", "this",
-  "are", "was", "will", "has", "have", "been", "its", "of", "in", "on", "to", "a", "an",
-]);
+const STOPWORDS = new Set(["the", "and", "for", "with", "our", "your", "from", "into", "that", "this", "are", "was", "will", "has", "have", "been", "its", "of", "in", "on", "to", "a", "an"]);
 
 function terms(s: string): string[] {
-  return s
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+  return s.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOPWORDS.has(w));
 }
 
 /** Rank ingested slides by verbatim term overlap with topic + region. */
@@ -103,18 +91,11 @@ function pickReusedSlides(decks: DeckLibraryRow[], vars: ComposerVariables, max:
   for (const deck of decks) {
     for (const slide of deck.slides) {
       if (!slide.texts.length) continue;
-      const slideTerms = terms(slide.texts.join(" "));
       let score = 0;
-      for (const t of slideTerms) if (queryTerms.has(t)) score++;
-      picks.push({
-        deck: { id: deck.id, filename: deck.filename },
-        slideIndex: slide.index,
-        texts: slide.texts,
-        score,
-      });
+      for (const t of terms(slide.texts.join(" "))) if (queryTerms.has(t)) score++;
+      picks.push({ deck: { id: deck.id, filename: deck.filename }, slideIndex: slide.index, texts: slide.texts, score });
     }
   }
-  // Highest topical overlap first; slides with zero overlap only fill leftover space.
   return picks.sort((a, b) => b.score - a.score).slice(0, max);
 }
 
@@ -130,202 +111,136 @@ export async function composeBriefingDeck(req: ComposeRequest): Promise<Buffer> 
   const vendorName = vendor.name;
   const { reusedMax } = slideBudget(vars.briefingLengthMins);
 
-  const decks = (await Promise.all(req.deckIds.map((id) => deckStore.get(id)))).filter(
-    (d): d is DeckLibraryRow => d !== null
-  );
+  const decks = (await Promise.all(req.deckIds.map((id) => deckStore.get(id)))).filter((d): d is DeckLibraryRow => d !== null);
   const reused = pickReusedSlides(decks, vars, reusedMax);
   const learnings = (await houseLearnings(req.houseId).catch(() => []))[0];
 
-  const brand: Brand = {
-    vendorName,
-    vendorMark: vendor.mark,
-    vendorAccent: vendor.accent,
-    deckLabel: `${playbook.house} ${playbook.assessment.name} briefing`,
-  };
-
-  const pptx = newDeck({
-    title: `${vendorName} — ${playbook.house} ${vars.topic} briefing`,
-    subject: `AnalystGenius AR SuperHero composed briefing for ${playbook.house}`,
-  });
-
+  const brand: Brand = { vendorName, vendorMark: vendor.mark, vendorAccent: vendor.accent, deckLabel: `${playbook.house} briefing` };
+  const pptx = newDeck({ title: `${vendorName} — ${playbook.house} ${vars.topic} briefing`, subject: `AnalystGenius composed briefing for ${playbook.house}` });
   let n = 0;
   const idx = () => String(++n).padStart(2, "0");
 
-  // 1. Cover — variables-driven.
+  const agenda = ["Agenda", `Targeting ${playbook.house}`, "The AnalystGenius read", ...(reused.length ? ["Evidence from prior briefings"] : []), "Open inputs", "Next steps"];
+
   addCover(pptx, brand, {
-    kicker: `${playbook.house.toUpperCase()} · ${playbook.assessment.name.toUpperCase()} · AR INTERNAL DRAFT`,
-    bigTitle: `${vendorName} — ${vars.topic}`,
-    subTitle: [vars.region, `${vars.briefingLengthMins}-minute briefing`].filter(Boolean).join(" · "),
-    generatedLabel: `Composed ${todayLabel()}`,
-    contextRight: vars.executives.length
-      ? `Presenting: ${vars.executives.map((e) => `${e.name} (${e.title})`).join(" · ")}`
-      : "Presenting executives: open input",
-    footNote:
-      "Composed draft: house playbook structure + reused prior-deck content (verbatim, provenance-tagged) + live AnalystGenius signals. Open-input sections are explicitly marked and must be completed by the briefing owner.",
+    kicker: `Prepared for ${vendorName} · ${todayLabel()}`,
+    titleA: vars.topic,
+    titleB: `for ${playbook.house}.`,
+    subTitle: `A ${vars.briefingLengthMins}-minute briefing${vars.region ? ` for ${vars.region}` : ""}, targeted at the ${playbook.house} ${playbook.assessment.name} cycle.`,
+    contextLines: [
+      vars.executives.length ? `Presenting: ${vars.executives.map((e) => `${e.name} (${e.title})`).join(" · ")}` : "Presenting executives: open input.",
+      "Composed draft. Open-input sections are marked and must be completed by the briefing owner.",
+    ],
+    stats: [
+      { value: String(vars.briefingLengthMins), label: "Minutes" },
+      { value: String(reused.length), label: "Reused slides" },
+      { value: playbook.status === "populated" ? "Ready" : "Open", label: "House guidance" },
+    ],
+    preparedFor: { name: vars.executives[0] ? `${vars.executives[0].name}` : "Briefing owner", role: vars.executives[0] ? `${vars.executives[0].title}, ${vendorName}` : vendorName },
+    agenda,
+    notes: `Composed by AnalystGenius AR SuperHero on ${todayLabel()}. Layers: ${playbook.house} playbook structure; ${reused.length} reused slide(s) from ${decks.length} ingested deck(s); the AnalystGenius read; user variables.`,
   });
 
-  // 2. Agenda — scaled to briefing length.
+  // Agenda.
   {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
+      section: agenda[0],
       title: `Agenda — ${vars.briefingLengthMins} minutes`,
       note: `Targeted at the ${playbook.house} ${playbook.assessment.name} evaluation cycle.`,
     });
-    const agenda = [
-      `Opening & introductions${vars.executives.length ? ` — ${vars.executives.map((e) => e.name).join(", ")}` : " — OPEN INPUT: presenter names"}`,
-      `${vars.topic} — position and momentum`,
-      "Evidence from prior briefings (reused, provenance-tagged)",
-      "Live market signals (AnalystGenius)",
-      "OPEN INPUT — client evidence & roadmap specifics",
-      "Q&A / analyst discussion time",
-    ];
-    addBulletList(slide, agenda, { x: 0.6, y: contentTop + 0.2, w: 12.1, h: 4.6, fontSize: 13 });
+    addRowList(
+      slide,
+      [
+        { title: "Opening and introductions", body: vars.executives.length ? vars.executives.map((e) => e.name).join(", ") : "OPEN INPUT: presenter names." },
+        { title: `${vars.topic} — position and momentum`, body: "The position you are taking into the cycle." },
+        { title: "Evidence from prior briefings", body: reused.length ? `${reused.length} reused slide${reused.length === 1 ? "" : "s"}, verbatim and provenance-tagged.` : "No prior deck selected." },
+        { title: "The AnalystGenius read", body: "Standing, the competitive field, and narrative against measured reality." },
+        { title: "OPEN INPUT — client evidence and roadmap specifics", body: "Named, permissioned references and owner-confirmed roadmap." },
+        { title: "Analyst discussion", body: "Time held for questions." },
+      ],
+      { x: 0.75, y: contentTop, w: 11.83, rowH: 0.66 }
+    );
   }
 
-  // 3. House targeting slide — playbook structure + guidance state.
+  // House targeting.
   {
     const deckStage = playbook.stages.find((s) => s.stage === "briefing-deck");
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
+      section: agenda[1],
       title: `Targeting the ${playbook.house} ${playbook.assessment.name}`,
-      note: deckStage?.dos[0]
-        ? `${playbook.assessment.leadership} House deck rule #1: ${deckStage.dos[0]}`
-        : playbook.assessment.leadership,
+      note: playbook.assessment.leadership,
+      caveat: deckStage?.dos[0] ? `House deck rule: ${deckStage.dos[0]}` : "House guidance is a synthesis of published methodology, not published weights.",
     });
-    addSectionLabel(slide, "Evaluation structure", { x: 0.6, y: contentTop + 0.1, w: 5.9 });
-    addTable(slide, {
-      x: 0.6,
-      y: contentTop + 0.42,
-      w: 5.9,
-      colW: [2.4, 3.5],
-      headers: ["Axis", "Published label"],
-      rows: [
-        { cells: ["X", playbook.assessment.axes[0]] },
-        { cells: ["Y", playbook.assessment.axes[1]] },
-      ],
-      fontSize: 10.5,
-    });
-
-    addSectionLabel(slide, `What moves rankings at ${playbook.house}`, { x: 6.9, y: contentTop + 0.1, w: 5.8 });
+    addSectionLabel(slide, "Evaluation structure", { x: 0.75, y: contentTop, w: 5.8 });
+    addTable(slide, { x: 0.75, y: contentTop + 0.3, w: 5.8, colW: [1.2, 4.6], headers: ["Axis", "Published label"], rows: [{ cells: ["X", playbook.assessment.axes[0]] }, { cells: ["Y", playbook.assessment.axes[1]] }], fontSize: 10.5 });
+    addSectionLabel(slide, `What moves rankings at ${playbook.house}`, { x: 6.8, y: contentTop, w: 5.78 });
     if (playbook.status === "populated") {
-      const lines = [
-        playbook.movementDriver.headline,
-        ...playbook.movementDriver.drivers.slice(0, 3),
-      ];
-      addBulletList(slide, lines, {
-        x: 6.9,
-        y: contentTop + 0.42,
-        w: 5.8,
-        h: 3.6,
-        fontSize: 10.5,
-      });
+      addBulletList(slide, [playbook.movementDriver.headline, ...playbook.movementDriver.drivers.slice(0, 3)], { x: 6.8, y: contentTop + 0.3, w: 5.78, h: 2.2, fontSize: 10.5 });
     } else {
-      addBulletList(
-        slide,
-        [
-          "OPEN INPUT — house-specific guidance not yet ingested.",
-          "The owner playbook document populates: leadership framework, stage-level do's/don'ts, best practice.",
-          "Structure is ready; this slide fills automatically once the document lands.",
-        ],
-        { x: 6.9, y: contentTop + 0.42, w: 5.8, h: 3.6, fontSize: 10.5, color: PALETTE.slate }
-      );
+      addBulletList(slide, ["OPEN INPUT — house-specific guidance not yet ingested.", "Structure is ready; this slide fills once the owner playbook document lands."], { x: 6.8, y: contentTop + 0.3, w: 5.78, h: 2.2, fontSize: 10.5, color: AG.muted });
     }
-
-    // Learned-from-results lines — observational, augmenting the playbook.
+    let y = contentTop + 2.0;
     if (learnings?.lines.length) {
-      addSectionLabel(slide, `Learned from your ${playbook.house} results (${learnings.cycles} cycle${learnings.cycles === 1 ? "" : "s"}) — observational`, {
-        x: 0.6,
-        y: contentTop + 2.35,
-        w: 12.1,
-      });
-      addBulletList(slide, learnings.lines.slice(0, 2).map((l) => l.line), {
-        x: 0.6,
-        y: contentTop + 2.67,
-        w: 12.1,
-        h: 0.85,
-        fontSize: 9,
-        color: PALETTE.slate,
-      });
+      addSectionLabel(slide, `Learned from your ${playbook.house} results (${learnings.cycles} cycle${learnings.cycles === 1 ? "" : "s"}), observational`, { x: 0.75, y, w: 5.8 });
+      addBulletList(slide, learnings.lines.slice(0, 2).map((l) => l.line), { x: 0.75, y: y + 0.3, w: 5.8, h: 1.0, fontSize: 9.5, color: AG.body });
     }
-
-    // Engagement moments strip.
-    const stripY = contentTop + 3.55;
-    addSectionLabel(slide, "Engagement moments this deck serves", { x: 0.6, y: stripY, w: 12.1 });
-    slide.addText(
-      ENGAGEMENT_STAGES.map((s) => s.label).join("   →   "),
-      {
-        x: 0.6,
-        y: stripY + 0.32,
-        w: 12.1,
-        h: 0.4,
-        fontFace: FONT_BODY,
-        fontSize: 11,
-        color: PALETTE.ink,
-        margin: 0,
-      }
-    );
+    y = contentTop + 3.2;
+    if (y < CONTENT_BOTTOM - 0.5) {
+      addSectionLabel(slide, "Engagement moments this deck serves", { x: 0.75, y, w: 11.83 });
+      slide.addText(ENGAGEMENT_STAGES.map((s) => s.label).join("   →   "), { x: 0.75, y: y + 0.3, w: 11.83, h: 0.4, fontFace: FONT_BODY, fontSize: 11, color: AG.ink, margin: 0, fit: "shrink" });
+    }
   }
 
-  // 4. Live AG intelligence overlay (signal read + competitive + gap analysis).
-  await addAgIntelligenceSlides(pptx, brand, idx, req.competitorTickers, vendor.agTicker);
+  // The AnalystGenius read.
+  await addAgIntelligenceSlides(pptx, brand, idx, req.competitorTickers, vendor.agTicker, agenda[2]);
 
-  // 5. Reused prior-deck content — verbatim with provenance.
+  // Reused prior-deck content — verbatim with provenance.
   for (const pick of reused) {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
+      section: "Evidence from prior briefings",
       title: pick.texts[0]?.slice(0, 80) || `Reused content — slide ${pick.slideIndex}`,
-      note: `Reused verbatim from "${pick.deck.filename}" · slide ${pick.slideIndex}${
-        pick.score > 0 ? ` · matched "${vars.topic}"` : " · general content"
-      }. Review for currency before presenting.`,
+      note: `Reused verbatim from "${pick.deck.filename}" · slide ${pick.slideIndex}${pick.score > 0 ? ` · matched "${vars.topic}"` : " · general content"}.`,
+      caveat: "Review for currency before presenting.",
     });
-    addBulletList(slide, pick.texts.slice(1, 11), {
-      x: 0.6,
-      y: contentTop + 0.2,
-      w: 12.1,
-      h: 4.8,
-      fontSize: 11.5,
-    });
+    addBulletList(slide, pick.texts.slice(1, 11), { x: 0.75, y: contentTop, w: 11.83, h: 4.0, fontSize: 11.5 });
   }
   if (decks.length && !reused.length) {
-    const { slide, contentTop } = addBodySlide(pptx, brand, {
-      index: idx(),
-      title: "Reused content — nothing matched",
-      note: "The selected prior decks contained no extractable slide text.",
-    });
-    addBulletList(slide, ["Re-check the uploaded files, or proceed with open-input sections only."], {
-      x: 0.6,
-      y: contentTop + 0.2,
-      w: 12.1,
-      h: 1.5,
-    });
+    const { slide, contentTop } = addBodySlide(pptx, brand, { index: idx(), section: "Evidence from prior briefings", title: "Reused content — nothing matched", note: "The selected prior decks contained no extractable slide text." });
+    addBulletList(slide, ["Re-check the uploaded files, or proceed with the open-input sections only."], { x: 0.75, y: contentTop, w: 11.83, h: 1.2 });
   }
 
-  // 6. Open-input sections — explicit, never auto-filled.
+  // Open inputs — explicit, never auto-filled.
   {
     const { slide, contentTop } = addBodySlide(pptx, brand, {
       index: idx(),
-      title: "OPEN INPUT — sections the briefing owner must complete",
-      note: "These are deliberately left unfilled. Composing tools must not invent client evidence, roadmap detail, or financial claims.",
+      section: "Open inputs",
+      title: "OPEN INPUT — what the briefing owner must complete",
+      note: "Left unfilled by design. Composing tools must not invent client evidence, roadmap detail or financial claims.",
+      caveat: CONFIDENCE_FACTOR.detail.slice(0, 180) + (CONFIDENCE_FACTOR.detail.length > 180 ? "…" : ""),
     });
-    const openSections = [
-      `Client evidence for ${vars.topic}${vars.region ? ` in ${vars.region}` : ""} — named, permissioned references only.`,
-      "Roadmap specifics and investment commitments — must come from product/strategy owners.",
-      "Commercial proof points and pricing posture — must be cleared for analyst use.",
-      ...(vars.objectives?.length ? vars.objectives.map((o) => `Objective evidence: ${o}`) : []),
-      `Consistency check before the briefing: ${CONFIDENCE_FACTOR.detail}`,
+    const cards = [
+      { title: "Client evidence", body: `Named, permissioned references for ${vars.topic}${vars.region ? ` in ${vars.region}` : ""}.` },
+      { title: "Roadmap specifics", body: "Investment commitments confirmed by product and strategy owners." },
+      { title: "Commercial proof", body: "Proof points and pricing posture cleared for analyst use." },
+      ...(vars.objectives?.length ? vars.objectives.slice(0, 3).map((o) => ({ title: "Objective evidence", body: o })) : []),
     ];
-    addBulletList(slide, openSections, { x: 0.6, y: contentTop + 0.25, w: 12.1, h: 4.6, fontSize: 12.5 });
+    addCards(slide, cards, { x: 0.75, y: contentTop, w: 11.83, cols: 3, h: 1.5 });
   }
 
   addClosing(pptx, brand, {
-    heading: "A draft that is honest about what it doesn't know.",
-    body:
-      "Everything in this deck traces to a named layer: house structure, reused prior-deck content with provenance, live AnalystGenius signals, or your own inputs. Complete the open-input sections before the briefing.",
-    disclaimer:
-      "Generated by AnalystGenius AR SuperHero briefing composer. Reused content is verbatim from ingested decks; live signals are AnalystGenius API values at composition time; open-input sections are unfilled by design. Internal draft — not analyst research. © 2026 AnalystGenius.",
+    titleA: "The next step",
+    titleB: `with ${vendorName}.`,
+    body: "A draft that is honest about what it does not know. Everything traces to a named layer: house structure, reused content with provenance, the AnalystGenius read, or your own inputs.",
+    nextSteps: [
+      { title: "Complete the open inputs", body: "Client evidence, roadmap specifics and commercial proof, from their owners.", owner: `${vendorName} briefing owner` },
+      { title: "Review reused slides for currency", body: "Each reused slide names the file and slide it came from.", owner: `${vendorName} briefing owner` },
+      { title: "Regenerate before the briefing", body: "The AnalystGenius read is a point-in-time value.", owner: "AnalystGenius follow-up" },
+    ],
+    disclaimer: "Generated by AnalystGenius AR SuperHero briefing composer. Reused content is verbatim from ingested decks; open-input sections are unfilled by design. Internal draft, not analyst research. © 2026 AnalystGenius.",
   });
-
-  addCeoBioSlide(pptx);
 
   return deckToBuffer(pptx);
 }

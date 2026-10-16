@@ -337,23 +337,25 @@ export async function registerRoutes(
   // Analyst briefing deck generation
   // --------------------------------------------------------------------------
 
-  const briefingDeckSchema = z.object({
-    momentId: z.string().min(1),
-    vendorId: z.string().optional(),
-    competitorTickers: z.array(z.string()).max(8).optional(),
-  });
+  // Evaluation defence pack: either a cited evaluation series (firm + report
+  // name) or, for the legacy Succeed buttons, a moment id → the general form.
+  const briefingDeckSchema = z
+    .object({
+      momentId: z.string().min(1).optional(),
+      firm: z.string().min(1).max(120).optional(),
+      reportName: z.string().min(1).max(300).optional(),
+      vendorId: z.string().optional(),
+      competitorTickers: z.array(z.string()).max(8).optional(),
+    })
+    .refine((v) => Boolean(v.momentId) || Boolean(v.firm && v.reportName), "momentId, or firm and reportName, is required");
 
   app.post("/api/briefing-decks/generate", async (req: Request, res: Response) => {
     const parse = briefingDeckSchema.safeParse(req.body);
     if (!parse.success) return res.status(400).json({ error: parse.error.issues });
 
     try {
-      const buffer = await createBriefingDeck(
-        parse.data.momentId,
-        parse.data.vendorId,
-        parse.data.competitorTickers
-      );
-      const filename = getBriefingDeckFilename(parse.data.momentId, parse.data.vendorId);
+      const buffer = await createBriefingDeck(parse.data);
+      const filename = getBriefingDeckFilename(parse.data);
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
