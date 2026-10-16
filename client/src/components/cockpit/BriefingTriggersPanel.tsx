@@ -77,7 +77,26 @@ function formatDate(d: string | null): string | null {
   return Number.isNaN(dt.getTime()) ? d : dt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default function BriefingTriggersPanel({ vendorId }: { vendorId: string }) {
+export type { TriggerKind };
+
+export default function BriefingTriggersPanel({
+  vendorId,
+  kinds,
+  eyebrow = "Briefing triggers",
+  emptyNow,
+  emptyAhead,
+  footerHref = "/succeed",
+  footerLabel = "Evaluations",
+}: {
+  vendorId: string;
+  /** Restrict to these trigger kinds (e.g. the evaluation kinds on Succeed). */
+  kinds?: TriggerKind[];
+  eyebrow?: string;
+  emptyNow?: string;
+  emptyAhead?: string;
+  footerHref?: string | null;
+  footerLabel?: string;
+}) {
   const effectiveVendor = vendorId || VENDOR_OPTIONS[0].id;
   const vendorLabel = VENDOR_OPTIONS.find((v) => v.id === effectiveVendor)?.label ?? effectiveVendor;
   const { data, isLoading, isError } = useQuery<Triggers>({
@@ -86,7 +105,7 @@ export default function BriefingTriggersPanel({ vendorId }: { vendorId: string }
   const [seedRequest, setSeedRequest] = useState<SeedRequest | null>(null);
   const [showAll, setShowAll] = useState<{ now: boolean; ahead: boolean }>({ now: false, ahead: false });
 
-  const all = data?.triggers ?? [];
+  const all = (data?.triggers ?? []).filter((t) => !kinds || kinds.includes(t.kind));
   const now = all.filter((t) => t.priority === "now");
   const ahead = all.filter((t) => t.priority !== "now");
 
@@ -187,9 +206,9 @@ export default function BriefingTriggersPanel({ vendorId }: { vendorId: string }
   return (
     <section className="mb-14" data-testid="briefing-triggers">
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
-        <Eyebrow className="text-white/65">Briefing triggers · {vendorLabel}</Eyebrow>
+        <Eyebrow className="text-white/65">{eyebrow} · {vendorLabel}</Eyebrow>
         <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
-          {data ? `${data.counts.now} act now · ${data.counts.soon + data.counts.later} prepare ahead` : "Act now · Prepare ahead"}
+          {data ? `${now.length} act now · ${ahead.length} prepare ahead` : "Act now · Prepare ahead"}
         </div>
       </div>
 
@@ -201,8 +220,8 @@ export default function BriefingTriggersPanel({ vendorId }: { vendorId: string }
 
       {!isError && (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          {column("Act now", now, "now", "gold", `Nothing is firing for ${vendorLabel} right now: no position published in the last 90 days, no evaluation at its anniversary, no lens moving, no ask overdue.`)}
-          {column("Prepare ahead", ahead, "ahead", "teal", `Nothing to prepare ahead of for ${vendorLabel}: no coverage going stale, no evaluation approaching, no recognition in its leverage window.`)}
+          {column("Act now", now, "now", "gold", emptyNow ?? `Nothing is firing for ${vendorLabel} right now: no position published in the last 90 days, no evaluation at its anniversary, no lens moving, no ask overdue.`)}
+          {column("Prepare ahead", ahead, "ahead", "teal", emptyAhead ?? `Nothing to prepare ahead of for ${vendorLabel}: no coverage going stale, no evaluation approaching, no recognition in its leverage window.`)}
         </div>
       )}
 
@@ -215,9 +234,11 @@ export default function BriefingTriggersPanel({ vendorId }: { vendorId: string }
               {data.inputs.analystGenius === "stale" ? " The AnalystGenius read is the last complete one; AnalystGenius was not responding." : ""}
               {data.notes.map((n) => ` ${n}`).join("")}
             </p>
-            <Link href="/succeed" className="inline-flex items-center gap-1 font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
-              Evaluations <ArrowUpRight className="h-3 w-3" />
-            </Link>
+            {footerHref && (
+              <Link href={footerHref} className="inline-flex items-center gap-1 font-medium uppercase tracking-[0.16em] text-[#d5b46b] hover:text-[#f0dca8]">
+                {footerLabel} <ArrowUpRight className="h-3 w-3" />
+              </Link>
+            )}
           </div>
         </>
       )}
