@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 import { ChevronRight, FileDown, FileText, Calendar, Target } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { storedCompetitorTickers, useFocalVendor } from "@/lib/agBrief";
@@ -13,8 +14,6 @@ import {
   HFS_GUIDANCE,
   SUCCEED_UPLOADS,
   SUCCEED_MATERIAL_TYPES,
-  SUCCEED_DECISION_STAGES,
-  SUCCEED_MODEL_IMPACTS,
   VENDOR_OPTIONS,
   type AnalystMoment,
   type SucceedUpload,
@@ -23,7 +22,6 @@ import {
 import {
   UploadPanel,
   UploadedItemsList,
-  DecisionModel,
   type GenericUploadedItem,
 } from "@/components/cockpit/upload";
 import {
@@ -38,7 +36,7 @@ import {
   NumberMark,
   SubNav,
 } from "@/components/cockpit/atoms";
-import { Target as TargetIcon, FolderOpen, GitBranch } from "lucide-react";
+import { Target as TargetIcon, FolderOpen } from "lucide-react";
 
 const LIVE_DEMO_MOMENT_IDS = ["m1", "m2"];
 
@@ -52,7 +50,7 @@ export default function Succeed() {
     () => EVIDENCE_GAPS.filter((gap) => liveMomentIds.has(gap.momentId)),
     [liveMomentIds]
   );
-  const [tab, setTab] = useState<"readiness" | "documents" | "pipeline">("readiness");
+  const [tab, setTab] = useState<"readiness" | "documents">("readiness");
   const [selectedId, setSelectedId] = useState<string>(liveMoments[0].id);
   const [showHfsDetail, setShowHfsDetail] = useState(false);
   const [extraUploads, setExtraUploads] = useState<SucceedUpload[]>([]);
@@ -165,7 +163,6 @@ export default function Succeed() {
         items={[
           { id: "readiness", label: "Readiness", icon: <TargetIcon className="h-3.5 w-3.5" /> },
           { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
-          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
         ]}
         active={tab}
         onChange={setTab}
@@ -362,23 +359,16 @@ export default function Succeed() {
           description={`${uploadedItems.length} items analysed across two live assessment views. Each item shows what the model captured and where it is in the workflow.`}
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
+        <p className="mt-4 text-[12px] text-white/50">
+          This upload panel simulates the Succeed decision model.{" "}
+          <Link href="/how-it-works" className="font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:text-[#f0dca8]">
+            See how it works
+          </Link>
+        </p>
       </section>
         </>
       )}
 
-      {tab === "pipeline" && (
-      <section className="mb-16">
-        <DecisionModel<SucceedMaterialType>
-          accent="gold"
-          eyebrow="Succeed decision model"
-          title="From upload to readiness."
-          description="Eight stages turn raw material into criteria, gaps, prompts, and learning signals. Outputs feed this customer's readiness directly. Cross-client learning runs only through validated AnalystGenius researcher review."
-          stages={SUCCEED_DECISION_STAGES}
-          impacts={SUCCEED_MODEL_IMPACTS}
-          finalNote="AnalystGenius learning uses validated patterns only. Third-party analyst text, scoring rationale, or methodology IP is never republished across clients."
-        />
-      </section>
-      )}
 
       {tab === "readiness" && (
         <>

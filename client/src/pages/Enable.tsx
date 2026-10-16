@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 import { Shield, TrendingUp, AlertOctagon } from "lucide-react";
 import {
   SELL_PROOF,
@@ -8,8 +9,6 @@ import {
   PRESENCE_GAPS,
   ENABLE_UPLOADS,
   ENABLE_MATERIAL_TYPES,
-  ENABLE_DECISION_STAGES,
-  ENABLE_MODEL_IMPACTS,
   ENABLE_SELL_DELIVERABLES,
   ENABLE_PRESENCE_DELIVERABLES,
   ENABLE_DELIVERABLES_NOTE,
@@ -27,11 +26,10 @@ import {
   NumberMark,
   SubNav,
 } from "@/components/cockpit/atoms";
-import { Megaphone, FolderOpen, GitBranch, FileSearch } from "lucide-react";
+import { Megaphone, FolderOpen, FileSearch } from "lucide-react";
 import {
   UploadPanel,
   UploadedItemsList,
-  DecisionModel,
   type GenericUploadedItem,
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
@@ -40,7 +38,7 @@ import RfpAnalyzer from "@/components/cockpit/RfpAnalyzer";
 type Tab = "sell" | "presence";
 
 export default function Enable() {
-  const [view, setView] = useState<"enablement" | "documents" | "rfp" | "pipeline">("enablement");
+  const [view, setView] = useState<"enablement" | "documents" | "rfp">("enablement");
   const [tab, setTab] = useState<Tab>("sell");
   const [extraUploads, setExtraUploads] = useState<EnableUpload[]>([]);
 
@@ -100,7 +98,6 @@ export default function Enable() {
           { id: "enablement", label: "Enablement", icon: <Megaphone className="h-3.5 w-3.5" /> },
           { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
           { id: "rfp", label: "RFP / RFI", hint: "AI-reviewed", icon: <FileSearch className="h-3.5 w-3.5" /> },
-          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
         ]}
         active={view}
         onChange={setView}
@@ -174,22 +171,15 @@ export default function Enable() {
           description={`${uploadedItems.length} items analysed across Sell and Build market presence. Each item shows its captured signals and where the model routed it.`}
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
+        <p className="mt-4 text-[12px] text-white/50">
+          This upload panel simulates the Enable decision model.{" "}
+          <Link href="/how-it-works" className="font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:text-[#f0dca8]">
+            See how it works
+          </Link>
+        </p>
       </section>
       )}
 
-      {view === "pipeline" && (
-      <section className="mb-4">
-        <DecisionModel<EnableMaterialType>
-          accent="gold"
-          eyebrow="Enable decision model"
-          title="From upload to sales-safe guidance."
-          description="Six stages turn raw enablement material into cleared proof, restricted claims, audience-permitted reuse, presence-gap mapping, and internal thought-leadership prompts."
-          stages={ENABLE_DECISION_STAGES}
-          impacts={ENABLE_MODEL_IMPACTS}
-          finalNote="All outputs are internal-only. Sellers see sales-safe proof; marketing sees restricted claims to avoid."
-        />
-      </section>
-      )}
     </div>
   );
 }

@@ -157,21 +157,30 @@ export default function Admin() {
             <ConfigBlock
               icon={<Database className="h-4 w-4" />}
               label="Data sources"
-              value="11 connected"
-              detail="AnalystGenius intelligence layer + internal sources. External signals labelled where shown."
+              value="Live"
+              detail="AnalystGenius API (provider snapshot, narrative–reality gap, reputation trends), Postgres on Supabase, and the cited placement and coverage records loaded from research. Every figure shown carries its source."
             />
             <ConfigBlock
               icon={<Settings className="h-4 w-4" />}
               label="Environment"
               value="Production"
-              detail="Demo mode active. Demo customer: Northstar Digital Services."
+              detail="Five tracked vendors: Capgemini, Cognizant, Accenture, IBM and Virtusa. Every page follows the vendor picked on Mission Control."
             />
             <ConfigBlock
               icon={<Users className="h-4 w-4" />}
-              label="Seat owners"
-              value="6 AR seats"
-              detail="Mireille Okonkwo (AR Director) + 5 analysts."
+              label="Decision models"
+              value="Three"
+              detail="How material is meant to flow through Succeed, Direct and Enable, on one page. The upload panels simulate this flow today."
             />
+          </div>
+          <div className="mt-6">
+            <Link
+              href="/how-it-works"
+              data-testid="link-how-it-works"
+              className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-[#d5b46b] transition hover:text-[#f0dca8]"
+            >
+              How it works
+            </Link>
           </div>
         </Pane>
       </section>

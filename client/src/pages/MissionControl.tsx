@@ -5,12 +5,11 @@ import { useArBrief, useCompetitorSelection, useFocalVendor } from "@/lib/agBrie
 import { NarrativeGapHero, CompetitivePanel } from "@/components/cockpit/AgPulsePanel";
 import { MODES, BRIEF_ITEMS, VENDOR_OPTIONS, vendorTicker } from "@/lib/cockpit";
 import { Pane, Eyebrow } from "@/components/cockpit/atoms";
-import CurrentBriefingOpportunities from "@/components/cockpit/CurrentBriefingOpportunities";
-import FutureBriefingOpportunities from "@/components/cockpit/FutureBriefingOpportunities";
 import PublicRankingsSection from "@/components/cockpit/PublicRankingsSection";
 import AnalystCoverageSection from "@/components/cockpit/AnalystCoverageSection";
 import YourAnalystsPanel from "@/components/cockpit/YourAnalystsPanel";
 import ThisWeekPanel from "@/components/cockpit/ThisWeekPanel";
+import BriefingTriggersPanel from "@/components/cockpit/BriefingTriggersPanel";
 
 /** Human-readable age for the stale-read notice. Mirrors the server wording. */
 function describeAge(minutes: number): string {
@@ -141,6 +140,9 @@ export default function MissionControl() {
       {/* This week — the time axis: asks due, evaluation anniversaries, analysts owed a call */}
       <ThisWeekPanel vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
 
+      {/* Briefing triggers — when to act, derived from real inputs with the rule stated */}
+      <BriefingTriggersPanel vendorId={focalVendorId || VENDOR_OPTIONS[0].id} />
+
       {/* ====================================================================
           What changed / Where exposed — supporting the hero
       ==================================================================== */}
@@ -189,23 +191,6 @@ export default function MissionControl() {
           <CompetitivePanel brief={arBrief} competitors={competitors} onChange={setCompetitors} />
         </section>
       )}
-
-      {/* ====================================================================
-          Briefing opportunities — current + future (core AR function,
-          reinstated to the main view rather than gated behind a side tab)
-      ==================================================================== */}
-      <section className="mb-14" data-testid="intelligence-monitor">
-        <div className="mb-7 flex items-baseline justify-between">
-          <Eyebrow className="text-white/65">Briefing opportunities</Eyebrow>
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-white/50">
-            Act now · Prepare ahead
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          <CurrentBriefingOpportunities />
-          <FutureBriefingOpportunities />
-        </div>
-      </section>
 
       {/* ====================================================================
           Tri-mode cockpit

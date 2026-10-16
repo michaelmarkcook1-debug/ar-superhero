@@ -12,7 +12,6 @@ import {
   listDirectPersonaIds,
   type PersonaId,
 } from "./services/directPersonaDeck";
-import { getIntelligenceMonitor } from "./services/intelligenceMonitor";
 import {
   AG_ENDPOINTS,
   AG_ENDPOINT_KEYS,
@@ -40,6 +39,7 @@ import { syncRosterFromCoverage, vendorAnalystView } from "./services/rosterSync
 import { buildWorkSeed } from "./services/workSeed";
 import { vendorEvaluationCalendar } from "./services/evaluationCalendar";
 import { askStore, ASK_STATUSES } from "./services/askStore";
+import { deriveBriefingTriggers } from "./services/briefingTriggers";
 
 // ============================================================================
 // API routes for the AR SuperHero backend.
@@ -717,10 +717,19 @@ export async function registerRoutes(
     }
   });
 
-  // The "who is writing about us / who do I owe a call" answer for one vendor:
-  // coverage (what each named analyst has published, with its source) merged
-  // with the roster (what the AR team has recorded about the relationship).
-  // Registered before the :id routes so the literal segment is not read as an id.
+  // Briefing triggers: when AR should act, derived from coverage, placements,
+  // anniversaries, asks and the AnalystGenius read, each with its rule and
+  // source. Replaces the seeded briefing-opportunities feed on Mission Control.
+  app.get("/api/briefing-triggers", async (req, res) => {
+    const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId.trim() : "";
+    if (!vendorId) return res.status(400).json({ error: "vendorId is required" });
+    try {
+      res.json(await deriveBriefingTriggers(vendorId));
+    } catch (err) {
+      res.status(503).json({ error: (err as Error).message });
+    }
+  });
+
   // Evaluation anniversaries: the age of the last logged placement per
   // evaluation series. Not a calendar — SuperHero holds no house agenda — and
   // every row says so; see evaluationCalendar.ts for the bands.
@@ -818,6 +827,10 @@ export async function registerRoutes(
     }
   });
 
+  // The "who is writing about us / who do I owe a call" answer for one vendor:
+  // coverage (what each named analyst has published, with its source) merged
+  // with the roster (what the AR team has recorded about the relationship).
+  // Registered before the :id routes so the literal segment is not read as an id.
   app.get("/api/analysts/vendor-view", async (req, res) => {
     const vendorId = typeof req.query.vendorId === "string" ? req.query.vendorId.trim() : "";
     if (!vendorId) return res.status(400).json({ error: "vendorId is required" });
@@ -1244,13 +1257,7 @@ export async function registerRoutes(
   });
 
   // --------------------------------------------------------------------------
-  // Intelligence Monitor — Mission Control briefing-opportunity feeds.
-  // Demo/seeded data; honours INTELLIGENCE_MONITOR_PATH override when present.
   // --------------------------------------------------------------------------
-
-  app.get("/api/intelligence-monitor", (_req, res) => {
-    res.json(getIntelligenceMonitor());
-  });
 
   // --------------------------------------------------------------------------
   // Customers

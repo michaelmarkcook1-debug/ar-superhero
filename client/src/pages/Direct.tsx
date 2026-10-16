@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 import { ArrowRight, ChevronRight, AlertTriangle, Sparkles, FileDown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { storedCompetitorTickers, useFocalVendor } from "@/lib/agBrief";
@@ -8,8 +9,6 @@ import {
   LENSES,
   DIRECT_UPLOADS,
   DIRECT_MATERIAL_TYPES,
-  DIRECT_DECISION_STAGES,
-  DIRECT_MODEL_IMPACTS,
   DIRECT_DELIVERABLES,
   DIRECT_DELIVERABLES_NOTE,
   VENDOR_OPTIONS,
@@ -25,11 +24,10 @@ import {
   Glyph,
   SubNav,
 } from "@/components/cockpit/atoms";
-import { Users, FolderOpen, GitBranch } from "lucide-react";
+import { Users, FolderOpen } from "lucide-react";
 import {
   UploadPanel,
   UploadedItemsList,
-  DecisionModel,
   type GenericUploadedItem,
 } from "@/components/cockpit/upload";
 import { DeliverablesPanel } from "@/components/cockpit/deliverables";
@@ -37,7 +35,7 @@ import WorkSeedDialog, { type SeedRequest } from "@/components/cockpit/WorkSeedD
 import AsksPanel from "@/components/cockpit/AsksPanel";
 
 export default function Direct() {
-  const [tab, setTab] = useState<"briefings" | "documents" | "pipeline">("briefings");
+  const [tab, setTab] = useState<"briefings" | "documents">("briefings");
   const [selectedId, setSelectedId] = useState<LensId>("executive");
   const [extraUploads, setExtraUploads] = useState<DirectUpload[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -159,7 +157,6 @@ export default function Direct() {
         items={[
           { id: "briefings", label: "Briefings", icon: <Users className="h-3.5 w-3.5" /> },
           { id: "documents", label: "Documents", hint: "Upload · Library", icon: <FolderOpen className="h-3.5 w-3.5" /> },
-          { id: "pipeline", label: "Pipeline", hint: "Decision model", icon: <GitBranch className="h-3.5 w-3.5" /> },
         ]}
         active={tab}
         onChange={setTab}
@@ -492,23 +489,16 @@ export default function Direct() {
           description={`${uploadedItems.length} items analysed across seven stakeholder lenses. Each item shows where it has been routed and what AR captured.`}
         />
         <UploadedItemsList items={uploadedItems} newIds={newIds} />
+        <p className="mt-4 text-[12px] text-white/50">
+          This upload panel simulates the Direct decision model.{" "}
+          <Link href="/how-it-works" className="font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:text-[#f0dca8]">
+            See how it works
+          </Link>
+        </p>
       </section>
         </>
       )}
 
-      {tab === "pipeline" && (
-      <section className="mb-16">
-        <DecisionModel<DirectMaterialType>
-          accent="gold"
-          eyebrow="Direct decision model"
-          title="From upload to leader briefing."
-          description="Five stages turn raw internal material into lens-routed brief inputs, action asks, and risks or opportunities by lens — a briefing-ready summary with NDA controls applied."
-          stages={DIRECT_DECISION_STAGES}
-          impacts={DIRECT_MODEL_IMPACTS}
-          finalNote="Brief summaries surface what AR observes. Leader relationship stance is held back unless AR chooses to include it."
-        />
-      </section>
-      )}
 
       {tab === "briefings" && (
         <>

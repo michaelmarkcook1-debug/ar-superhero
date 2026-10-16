@@ -107,6 +107,9 @@ const memoryStore: AskStore = {
 
 function makePgStore(sql: ReturnType<typeof postgres>): AskStore {
   let ensured: Promise<void> | null = null;
+  // A transient failure (a pooler reset, a cold connection) must not be cached
+  // as a permanent rejection, or the store stays dead for the life of the
+  // instance. On failure the memo is cleared so the next call retries.
   function ensureTable(): Promise<void> {
     if (!ensured) {
       ensured = (async () => {
@@ -126,7 +129,10 @@ function makePgStore(sql: ReturnType<typeof postgres>): AskStore {
         `;
         await sql`CREATE INDEX IF NOT EXISTS idx_arsh_asks_vendor ON ar_superhero_asks (vendor_id, persona_id)`.catch(() => {});
         await sql.unsafe(`ALTER TABLE ar_superhero_asks ENABLE ROW LEVEL SECURITY`).catch(() => {});
-      })();
+      })().catch((err) => {
+        ensured = null;
+        throw err;
+      });
     }
     return ensured;
   }

@@ -31,6 +31,10 @@ function ensureTable(sql: NonNullable<ReturnType<typeof getPgSql>>): Promise<voi
       )
     `.then(async () => {
       await sql`ALTER TABLE ar_superhero_brief_cache ENABLE ROW LEVEL SECURITY`.catch(() => {});
+    }).catch((err) => {
+      // Do not cache a transient failure as a permanent one; retry next call.
+      ensured = null;
+      throw err;
     });
   }
   return ensured;

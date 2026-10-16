@@ -17,6 +17,7 @@ import Succeed from "@/pages/Succeed";
 import Direct from "@/pages/Direct";
 import Enable from "@/pages/Enable";
 import Admin from "@/pages/Admin";
+import HowItWorks from "@/pages/HowItWorks";
 
 // Legacy operational pages — kept behind /admin/* for AR admins
 import CommandCentre from "@/pages/CommandCentre";
@@ -42,6 +43,7 @@ function CockpitRouter() {
       <Route path="/direct" component={Direct} />
       <Route path="/enable" component={Enable} />
       <Route path="/admin" component={Admin} />
+      <Route path="/how-it-works" component={HowItWorks} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -82,7 +84,7 @@ function RoutedExperience() {
   }
 
   // Cockpit pages — Mission Control, Succeed, Direct, Enable, Admin index
-  const cockpitRoutes = ["/mission", "/succeed", "/direct", "/enable", "/admin"];
+  const cockpitRoutes = ["/mission", "/succeed", "/direct", "/enable", "/admin", "/how-it-works"];
   if (cockpitRoutes.some((r) => location === r)) {
     return (
       <MissionShell>
