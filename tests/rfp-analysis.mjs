@@ -55,6 +55,8 @@ try {
       const denied=await post(input);const deniedBody=await denied.json();assert.equal(denied.status,502);assert.equal(deniedBody.errorCode,'provider_401');assert.equal(deniedBody.retryable,false);
       globalThis.__rfpError=Object.assign(new Error('PRIVATE DOCUMENT MUST NOT BE LOGGED'),{statusCode:429});
       const limited=await post(input);assert.equal(limited.status,429);assert.equal((await limited.json()).retryable,true);
+      globalThis.__rfpError=Object.assign(new Error('Your credit balance is too low. PRIVATE DOCUMENT MUST NOT BE LOGGED'),{statusCode:400});
+      const billing=await post(input);const billingBody=await billing.json();assert.equal(billingBody.errorCode,'provider_billing');assert.equal(billingBody.retryable,false);assert.doesNotMatch(JSON.stringify(billingBody),/PRIVATE DOCUMENT/);
       assert.doesNotMatch(JSON.stringify(logs),/PRIVATE DOCUMENT/);
     }finally{globalThis.__rfpError=null;console.error=originalLog;}
     delete process.env.ANTHROPIC_API_KEY;const unavailable=await post(input);assert.equal(unavailable.status,503);assert.equal((await unavailable.json()).retryable,false);
