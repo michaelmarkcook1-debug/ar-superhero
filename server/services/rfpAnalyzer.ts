@@ -22,6 +22,11 @@ export function rfpSources(brief: ArBrief): RfpSource[] {
   }));
 }
 const normalize = (text: string) => text.replace(/\s+/g, ' ').trim();
+export class RfpReviewError extends Error {
+  constructor(public code: 'document_reference' | 'source_reference' | 'numeric_reference' | 'output_limit', message: string) {
+    super(message);
+  }
+}
 
 /** Fail closed on fabricated document quotations or source IDs. Draft prose
  * remains an AI recommendation, never labelled as verified or cleared for reuse. */
@@ -30,15 +35,15 @@ export function validateRfpReview(raw: unknown, documentText: string, sources: R
   const text = normalize(documentText);
   const references = [...result.requirements, ...result.suggestions, ...result.analystInsights, ...result.strengthsFound];
   for (const item of references) {
-    if (!normalize(item.documentQuote) || !text.includes(normalize(item.documentQuote))) throw new Error('Analysis returned an unsupported document reference. Retry this section.');
+    if (!normalize(item.documentQuote) || !text.includes(normalize(item.documentQuote))) throw new RfpReviewError('document_reference', 'Analysis returned an unsupported document reference. Retry this section.');
   }
   for (const item of result.analystInsights) {
-    if (item.sourceIds.some(id => !sources.some(s => s.id === id))) throw new Error('Analysis returned an unknown AG source. Retry this section.');
+    if (item.sourceIds.some(id => !sources.some(s => s.id === id))) throw new RfpReviewError('source_reference', 'Analysis returned an unknown AG source. Retry this section.');
     // Guard numerical insertions: values must occur in the cited evidence.
-    const evidence = item.sourceIds.map(id => sources.find(s => s.id === id)!).map(s => `${s.title} ${s.detail}`).join(' ');
+    const evidence = item.sourceIds.map(id => sources.find(s => s.id === id)!).map(s => `${s.title} ${s.detail} ${s.retrievedAt}`).join(' ');
     const numericTokens = (value: string) => value.match(/[-+]?\d+(?:[.,]\d+)*(?:%)?/g) ?? [];
     const evidenceNumbers = new Set(numericTokens(evidence));
-    if (numericTokens(item.suggestedText).some(n => !evidenceNumbers.has(n))) throw new Error('Suggested insertion contains a number absent from its cited AG evidence. Retry this section.');
+    if (numericTokens(item.suggestedText).some(n => !evidenceNumbers.has(n))) throw new RfpReviewError('numeric_reference', 'Suggested insertion contains a number absent from its cited AG evidence. Retry this section.');
   }
   return result;
 }
@@ -69,7 +74,7 @@ Keep facts separate from recommendations. Summarise this section neutrally. Do n
     prompt: JSON.stringify({ company: vendor.name, documentKind: input.documentKind, filename: input.filename, dataStatus, dataNote, agEvidence: sources, documentText: input.documentText }),
     output: Output.object({ schema: RfpReviewSchema }),
   });
-  if (generated.finishReason === 'length') throw new Error('Analysis exceeded its output limit. No completed result was recorded; split this section and retry.');
+  if (generated.finishReason === 'length') throw new RfpReviewError('output_limit', 'Analysis exceeded its output limit. No completed result was recorded; split this section and retry.');
   const review = validateRfpReview(generated.output, input.documentText, sources);
   return { ...review, filename: input.filename, vendorName: vendor.name, documentKind: input.documentKind, sources, dataStatus, dataNote, analysedCharacters: input.documentText.length, completedAt: new Date().toISOString() };
 }

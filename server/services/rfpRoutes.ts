@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { z } from "zod";
 import { VENDORS } from "./vendors";
 import { RFP_SECTION_CHARS, RFP_TYPES } from "@shared/rfpAnalysis";
-import { analyzeRfp } from "./rfpAnalyzer";
+import { analyzeRfp, RfpReviewError } from "./rfpAnalyzer";
 
 export function registerRfpRoutes(app: Express) {
   const rfpInputSchema = z.object({
@@ -19,8 +19,21 @@ export function registerRfpRoutes(app: Express) {
     if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: "Document analysis is not configured on this server. No analysis was performed.", retryable: false });
     try {
       res.json(await analyzeRfp(parsed.data));
-    } catch {
-      res.status(502).json({ error: "This section could not be analysed or its references could not be validated. Retry the unfinished sections.", retryable: true });
+    } catch (error) {
+      const candidate = error as { statusCode?: unknown; name?: unknown } | null;
+      const upstreamStatus = typeof candidate?.statusCode === 'number' ? candidate.statusCode : undefined;
+      const code = error instanceof RfpReviewError ? error.code
+        : upstreamStatus ? `provider_${upstreamStatus}`
+        : candidate?.name === 'AI_NoObjectGeneratedError' || candidate?.name === 'AI_NoOutputGeneratedError' ? 'invalid_model_output'
+        : candidate?.name === 'TimeoutError' || candidate?.name === 'AbortError' ? 'analysis_timeout' : 'analysis_failed';
+      const retryable = !upstreamStatus || upstreamStatus === 408 || upstreamStatus === 409 || upstreamStatus === 429 || upstreamStatus >= 500;
+      // Only classifications are logged. SDK error objects can contain document
+      // text, complete prompts and credential-bearing request metadata.
+      console.error('RFP section analysis failed', { code, upstreamStatus });
+      res.status(upstreamStatus === 429 ? 429 : 502).json({
+        error: retryable ? 'This section could not be analysed or its references could not be validated. Retry the unfinished sections.' : 'The AI service rejected the request. Its account or model configuration needs attention.',
+        errorCode: code, retryable,
+      });
     }
   });
 
