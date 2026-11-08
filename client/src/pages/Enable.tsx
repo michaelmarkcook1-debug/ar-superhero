@@ -129,7 +129,8 @@ export default function Enable() {
 
       {view === "documents" && (
         <>
-      {/* Upload commercial / presence material */}
+      <RfpAnalyzer />
+      {/* Sample material remains explicitly separate from real analysis. */}
       <section className="mb-12" id="upload-material">
         <UploadPanel<EnableMaterialType>
           accent="gold"
