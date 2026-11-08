@@ -9,7 +9,7 @@ await mkdir('node_modules/.cache', {recursive:true});
 const output = `${process.cwd()}/node_modules/.cache/rfp-tests.cjs`;
 await build({ stdin:{contents:`export * from './server/services/rfpAnalyzer'; export * from './shared/rfpAnalysis'; export {registerRfpRoutes} from './server/services/rfpRoutes';`,resolveDir:process.cwd()}, outfile:output,bundle:true,platform:'node',format:'cjs',packages:'external',plugins:[{name:'fixtures',setup(b){
   b.onResolve({filter:/^(ai|@ai-sdk\/anthropic)$|\.\/agIntelligence$/},a=>({path:a.path,namespace:'mock'}));
-  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
+  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; if(globalThis.__rfpError)throw globalThis.__rfpError; return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
 }}]});
 try {
   const {validateRfpReview,rfpSources,analyzeRfp,RFP_MAX_BYTES,RFP_MAX_CHARS,RFP_SECTION_CHARS,RFP_SERVER_TIMEOUT_MS,RFP_REQUEST_TIMEOUT_MS,registerRfpRoutes}=require(output);
@@ -22,6 +22,7 @@ try {
   const sources=rfpSources(brief);
   const review={documentSummary:'TEST summary.',requirements:[{documentQuote:'Supplier must provide three client references.',location:'Within this section',requirement:'Provide references',responseGuidance:'Confirm permission and relevance.',priority:'high'}],suggestions:[],strengthsFound:[],analystInsights:[{documentQuote:'Explain your AI readiness.',location:'AI readiness answer',sourceIds:[sources.find(s=>s.title.includes('AI readiness'.toLowerCase())).id],rationale:'Provides a sourced baseline.',suggestedText:'AI readiness 45.'}]};
   assert.equal(validateRfpReview(review,doc,sources).requirements.length,1);
+  assert.equal(validateRfpReview({...review,analystInsights:[{...review.analystInsights[0],suggestedText:'AG read in 2026: AI readiness 45.'}]},doc,sources).analystInsights.length,1);
   assert.throws(()=>validateRfpReview({...review,requirements:[{...review.requirements[0],documentQuote:'Invented deadline'}]},doc,sources),/unsupported document/);
   assert.throws(()=>validateRfpReview({...review,analystInsights:[{...review.analystInsights[0],sourceIds:['made-up']}]},doc,sources),/unknown AG source/);
   assert.throws(()=>validateRfpReview({...review,analystInsights:[{...review.analystInsights[0],suggestedText:'AI readiness 99.'}]},doc,sources),/number absent/);
@@ -48,6 +49,14 @@ try {
     const response=await post(input);assert.equal(response.status,200);assert.equal((await response.json()).analysedCharacters,doc.length);
     assert.equal((await post({...input,vendorId:'unknown'})).status,400);
     assert.equal((await post({...input,documentText:'X'.repeat(12001)})).status,400);
+    const originalLog=console.error;const logs=[];console.error=(...args)=>logs.push(args);
+    try{
+      globalThis.__rfpError=Object.assign(new Error('PRIVATE DOCUMENT MUST NOT BE LOGGED'),{statusCode:401});
+      const denied=await post(input);const deniedBody=await denied.json();assert.equal(denied.status,502);assert.equal(deniedBody.errorCode,'provider_401');assert.equal(deniedBody.retryable,false);
+      globalThis.__rfpError=Object.assign(new Error('PRIVATE DOCUMENT MUST NOT BE LOGGED'),{statusCode:429});
+      const limited=await post(input);assert.equal(limited.status,429);assert.equal((await limited.json()).retryable,true);
+      assert.doesNotMatch(JSON.stringify(logs),/PRIVATE DOCUMENT/);
+    }finally{globalThis.__rfpError=null;console.error=originalLog;}
     delete process.env.ANTHROPIC_API_KEY;const unavailable=await post(input);assert.equal(unavailable.status,503);assert.equal((await unavailable.json()).retryable,false);
     console.log('PASS actual HTTP handler: successful structured result, vendor/section validation and honest unconfigured response');
   } finally {await new Promise(resolve=>http.close(resolve));}
