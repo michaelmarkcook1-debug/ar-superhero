@@ -76,15 +76,13 @@ export default function Enable() {
       filename: info.filename,
       type: info.type,
       size: info.size,
-      uploadedBy: "You",
+      uploadedBy: "Demo",
       uploadedAt: "Just now",
-      state: "Analysed",
+      state: "Demo sample",
       summary:
-        "Captured. Claims audited, proof clearance checked, presence-gap mapping run.",
+        "Fictional sample only. No claims audited, proof cleared or messaging checked.",
       signals: [
-        "Routed to proof clearance",
-        "Claim audit completed",
-        "Presence-gap mapping refreshed",
+        "No document analysis performed",
       ],
       routedTo: tab === "sell" ? "Sell" : "Build market presence",
     };
@@ -131,16 +129,17 @@ export default function Enable() {
 
       {view === "documents" && (
         <>
-      {/* Upload commercial / presence material */}
+      <RfpAnalyzer />
+      {/* Sample material remains explicitly separate from real analysis. */}
       <section className="mb-12" id="upload-material">
         <UploadPanel<EnableMaterialType>
           accent="gold"
           eyebrow="Mode III · Enable"
-          title="Upload material to enable selling and presence."
-          subtitle="Sales decks, approved proof points, case studies, references, messaging drafts, campaign plans, thought-leadership drafts, website copy, enablement notes, claim lists, recognition snippets, internal comms drafts. Each upload is audited for proof clearance, claim risk, and presence-gap fit."
+          title="Explore the enablement document demo."
+          subtitle="Sales decks, approved proof points, case studies, references, messaging drafts, campaign plans, thought-leadership drafts, website copy, enablement notes, claim lists, recognition snippets, internal comms drafts. Fictional examples illustrate proof clearance, claim risk and presence-gap fit; no checks are performed."
           types={ENABLE_MATERIAL_TYPES}
           onSimulatedUpload={handleSimulatedUpload}
-          permissionNote="Outputs are internal-only. Sales-safe proof is cleared for buyer-facing reuse; restricted proof shows its permitted audience."
+          permissionNote="Demo examples are for internal illustration only. They do not establish permission or proof clearance for buyer-facing reuse."
         />
       </section>
         </>
@@ -167,10 +166,10 @@ export default function Enable() {
       <section className="mb-14 mt-14">
         <SectionTitle
           eyebrow="Enablement material library"
-          title="Everything uploaded, audited for reuse."
-          description={`${uploadedItems.length} items analysed across Sell and Build market presence. Each item shows its captured signals and where the model routed it.`}
+          title="Sample enablement material."
+          description={`${uploadedItems.length} fictional examples across Sell and Build market presence. No document analysis or reuse audit has been performed.`}
         />
-        <UploadedItemsList items={uploadedItems} newIds={newIds} />
+        <UploadedItemsList items={uploadedItems} newIds={newIds} demo />
         <p className="mt-4 text-[12px] text-white/50">
           This upload panel simulates the Enable decision model.{" "}
           <Link href="/how-it-works" className="font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:text-[#f0dca8]">

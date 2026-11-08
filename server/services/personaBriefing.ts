@@ -154,6 +154,7 @@ function recognitionLabel(direction: string | null | undefined, score: number | 
 async function focalQuarterlyRevenue(ticker: string): Promise<QuarterPoint[]> {
   try {
     const res = await agFetch("providers/snapshot", { ticker });
+    if (res.status !== 200 || (res.body as any)?.success === false) return [];
     const body = res.body as { snapshot?: { quarterlyRevenue?: unknown } } | undefined;
     const raw = body?.snapshot?.quarterlyRevenue;
     if (!Array.isArray(raw)) return [];
@@ -196,13 +197,14 @@ interface TalentRead {
 async function talentRead(ticker: string): Promise<TalentRead | null> {
   try {
     const res = await agFetch("talent/intelligence", { ticker });
+    if (res.status !== 200 || (res.body as any)?.success === false) return null;
     const b = res.body as
       | { kpis?: Record<string, unknown>; flowSignals?: Record<string, unknown> }
       | undefined;
     if (!b?.kpis) return null;
     const k = b.kpis;
     const f = b.flowSignals ?? {};
-    const n = (v: unknown): number | null => (typeof v === "number" ? v : null);
+    const n = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
     return {
       ticker,
       headcount: n(k.headcount),
@@ -321,9 +323,9 @@ export async function buildPersonaBriefing(
       c.gapDirection === "over-hyped"
         ? "Narrative running ahead of delivery — contestable in evaluations."
         : c.gapDirection === "under-recognized"
-          ? "Delivering ahead of its story — likely to gain recognition."
+          ? "AG reads performance ahead of the narrative; future recognition is not established."
           : c.gapDirection === "aligned"
-            ? "Story and delivery aligned — expect stable positioning."
+            ? "AG reads narrative and performance as aligned at this observation."
             : "AG carries no recognition read for this firm.";
     return { name: c.name, standing, quarterRead, watchItem };
   });
@@ -436,7 +438,7 @@ export async function buildPersonaBriefing(
   const dataGaps: string[] = [];
   if (focal.revenueUsd === null && focal.revenueGrowthYoy === null) {
     dataGaps.push(
-      `${focal.name} is privately held, so AG carries no revenue or market series for it. Financial comparison below is therefore peer-side only.`
+      `No revenue or revenue-growth figure is available for ${focal.name} in this AG read. Its ownership status cannot be inferred from missing data.`
     );
   }
   if (!quarterlyRevenue.length && focal.revenueUsd !== null) {

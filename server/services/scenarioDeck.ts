@@ -1,3 +1,6 @@
+import { buildPersonaBriefing } from "./personaBriefing";
+import { buildStakeholderInsight } from "./stakeholderDeckInsight";
+import { addStakeholderDecisionSlides, addStakeholderEvidenceAppendix } from "./stakeholderDeckSlides";
 import type pptxgen from "pptxgenjs";
 import {
   newDeck,
@@ -90,13 +93,20 @@ function addCompetitorBarChart(pptx: pptxgen, slide: pptxgen.Slide, brief: ArBri
   const rows = [
     { name: f.name, assessment: f.assessmentScore, ai: f.aiReadinessScore },
     ...brief.competitors.map((c) => ({ name: c.name, assessment: c.assessmentScore, ai: c.aiReadinessScore })),
-  ].filter((r) => r.assessment != null || r.ai != null);
-  if (rows.length < 2) return false;
+  ].filter((r) => Number.isFinite(r.assessment) && Number.isFinite(r.ai));
+  if (rows.length < 2) {
+    slide.addText("No comparison chart: fewer than two firms have both scores.", { x: box.x, y: box.y + 0.5, w: box.w, h: 0.7, fontFace: FONT_BODY, fontSize: 12, color: AG.muted, margin: 0, fit: "shrink" });
+    return false;
+  }
+  if (rows.length < 1 + brief.competitors.length) {
+    slide.addText("Only firms with both scores are charted; missing scores are not zero.", { x: box.x, y: box.y, w: box.w, h: 0.25, fontFace: FONT_BODY, fontSize: 8, color: AG.muted, margin: 0 });
+    box = { ...box, y: box.y + 0.3, h: box.h - 0.3 };
+  }
   slide.addChart(
     pptx.ChartType.bar,
     [
-      { name: "Assessment", labels: rows.map((r) => r.name), values: rows.map((r) => r.assessment ?? 0) },
-      { name: "AI readiness", labels: rows.map((r) => r.name), values: rows.map((r) => r.ai ?? 0) },
+      { name: "Assessment", labels: rows.map((r) => r.name), values: rows.map((r) => r.assessment!) },
+      { name: "AI readiness", labels: rows.map((r) => r.name), values: rows.map((r) => r.ai!) },
     ],
     {
       ...box,
@@ -379,32 +389,6 @@ function addPersonaReadSlide(pptx: pptxgen, brand: Brand, view: PersonaView, bri
   }
 }
 
-function addAdviceSlide(pptx: pptxgen, brand: Brand, view: PersonaView, idx: () => string, section: string) {
-  if (!view.advice.length && !view.questions.length) return;
-  const { slide, contentTop } = addBodySlide(pptx, brand, {
-    index: idx(),
-    section,
-    title: "What this means for your role",
-    note: "Readings of the signals above. Each line names the signal it comes from.",
-    caveat: "Derived readings, not predictions. No outcome or ranking is forecast.",
-  });
-  if (view.advice.length) {
-    addSectionLabel(slide, "What the signals mean for you", { x: 0.75, y: contentTop, w: 11.83 });
-    slide.addText(
-      view.advice.flatMap((a) => [
-        { text: a.line, options: { bullet: { code: "25A0", indent: 14 }, breakLine: true, fontSize: 11, color: AG.ink } },
-        { text: `     ${a.source}`, options: { breakLine: true, fontSize: 8, color: AG.muted, italic: true } },
-      ]),
-      { x: 0.75, y: contentTop + 0.3, w: 11.83, h: fitH(contentTop + 0.3, view.questions.length ? 2.6 : 3.9), fontFace: FONT_BODY, lineSpacingMultiple: 1.08, paraSpaceAfter: 4, valign: "top", margin: 0, fit: "shrink" }
-    );
-  }
-  if (view.questions.length) {
-    const qTop = contentTop + (view.advice.length ? 3.05 : 0);
-    addSectionLabel(slide, "Questions you should personally be ready for", { x: 0.75, y: qTop, w: 11.83 });
-    addBulletList(slide, view.questions, { x: 0.75, y: qTop + 0.3, w: 11.83, h: 1.1, fontSize: 10.5 });
-  }
-}
-
 function addUnavailableSlide(pptx: pptxgen, brand: Brand, idx: () => string, section: string, reason?: string) {
   const { slide, contentTop } = addBodySlide(pptx, brand, {
     index: idx(),
@@ -439,11 +423,11 @@ function planFor(scenarioId: string, vendorName: string, house: string): Plan {
     case "quarterly-update":
       return { titleA: "The quarter,", titleB: "measured.", agenda: ["Your market read", "The quarter in charts", "Reputation this quarter", "Placements this quarter", "What this means for your role", "Next steps"] };
     case "pre-briefing-prep":
-      return { titleA: "Before the briefing", titleB: `with ${house}.`, agenda: ["Your market read", `What ${house} will probe`, `Who covers you at ${house}`, `What ${house} has published`, "What this means for your role", "Next steps"] };
+      return { titleA: "Before the briefing", titleB: `with ${house}.`, agenda: ["Your market read", `Briefing preparation for ${house}`, `Who covers you at ${house}`, `What ${house} has published`, "What this means for your role", "Next steps"] };
     case "assessment-kickoff":
       return { titleA: "Entering the", titleB: `${house} cycle.`, agenda: ["Your market read", `What moves rankings at ${house}`, "The competitive field", `Who covers you at ${house}`, "Your published record", "Next steps"] };
     case "competitive-shift":
-      return { titleA: "The field", titleB: "has moved.", agenda: ["Your market read", "The competitive field, measured", "Published placements across the field", "What this means for your role", "Next steps"] };
+      return { titleA: "The field", titleB: "in comparison.", agenda: ["Your market read", "The competitive field, measured", "Published placements across the field", "What this means for your role", "Next steps"] };
     case "reputation-pulse":
       return { titleA: "Reputation,", titleB: "this quarter.", agenda: ["Your market read", "Reputation across every lens", "What this means for your role", "Next steps"] };
     case "narrative-campaign":
@@ -460,6 +444,7 @@ function planFor(scenarioId: string, vendorName: string, house: string): Plan {
 export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buffer> {
   const scenario = scenarioById(req.scenarioId);
   if (!scenario) throw new Error(`Unknown scenario: ${req.scenarioId}`);
+  if (!scenario.personas.includes(req.personaId)) throw new Error("Unsupported persona and deck type combination");
   const personaLabel = PERSONA_LABEL[req.personaId] ?? req.personaId;
   const audience = PERSONA_AUDIENCE[req.personaId] ?? personaLabel;
   const vendor = vendorById(req.vendorId);
@@ -472,10 +457,10 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
   const view = brief.live && !brief.degraded ? derivePersonaView(brief, req.personaId) : null;
 
   const focalTicker = brief.focal?.ticker ?? vendor.agTicker;
-  const [snapR, repR] = await Promise.all([agFetch("providers/snapshot", { ticker: focalTicker }), agFetch("reputation-tracker/trends", { ticker: focalTicker })]);
-  const snap = snapR.status === 200 ? (snapR.body as any)?.snapshot : null;
+  const [snapR, repR, personaContext] = await Promise.all([agFetch("providers/snapshot", { ticker: focalTicker }), agFetch("reputation-tracker/trends", { ticker: focalTicker }), view ? buildPersonaBriefing(brief, req.personaId) : Promise.resolve(null)]);
+  const snap = snapR.status === 200 && (snapR.body as any)?.success !== false ? (snapR.body as any)?.snapshot : null;
   const quarterly: { quarter: string; revenueUsdM: number }[] = snap?.quarterlyRevenue ?? [];
-  const repBody = repR.status === 200 ? (repR.body as any) : null;
+  const repBody = repR.status === 200 && (repR.body as any)?.success !== false ? (repR.body as any) : null;
   const trend: TrendSeries | null = repBody?.sentimentTrend?.series?.length ? repBody.sentimentTrend : null;
 
   const brand: Brand = { vendorName, vendorMark: vendor.mark, vendorAccent: vendor.accent, deckLabel: scenario.label };
@@ -483,25 +468,22 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
   const pptx = newDeck({ title: `${vendorName} — ${personaLabel} ${scenario.label}`, subject: `AnalystGenius briefing: ${scenario.label} for ${audience}` });
   let n = 0;
   const idx = () => String(++n).padStart(2, "0");
-  const f = brief.focal;
+  const f = brief.live && !brief.degraded ? brief.focal : undefined;
+  const insight = buildStakeholderInsight(brief, req.personaId, scenario.id, personaContext);
 
   addCover(pptx, brand, {
     kicker: `Prepared for ${vendorName} · ${todayLabel()}`,
     titleA: plan.titleA,
     titleB: plan.titleB,
-    subTitle: scenario.when,
+    subTitle: insight.question,
     contextLines: [`${scenario.label} for ${audience.toLowerCase()}.`, "For circulation within the leadership team."],
-    stats: f
-      ? [
-          { value: f.assessmentScore == null ? "—" : String(f.assessmentScore), label: "Assessment" },
-          { value: f.aiReadinessScore == null ? "—" : String(f.aiReadinessScore), label: "AI readiness" },
-          { value: f.gapScore == null ? "—" : String(f.gapScore), label: "Narrative gap" },
-        ]
-      : [],
+    stats: view?.metrics.slice(0, 3).map(m => ({ value: m.value, label: m.label })) ?? [],
     preparedFor: { name: audience, role: vendorName },
-    agenda: plan.agenda,
+    agenda: ["Your decision brief", ...plan.agenda.slice(0, 4), "Evidence and next steps"],
     notes: `Generated by AnalystGenius AR SuperHero on ${todayLabel()}. Scenario: ${scenario.label}. Persona: ${personaLabel}. Peer set: ${(req.competitorTickers ?? []).join(", ") || "AnalystGenius default"}. ${brief.live ? readProvenance(brief) : "AnalystGenius read unavailable."}`,
   });
+
+  addStakeholderDecisionSlides(pptx, brand, insight, brief, idx);
 
   const sec = (i: number) => plan.agenda[i] ?? scenario.label;
 
@@ -517,7 +499,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           section: sec(1),
           title: "The quarter in charts",
           note: "Reported revenue trend and the competitive score field.",
-          caveat: `${readProvenance(brief)} Charts draw verbatim series only; a missing series is stated, not estimated.`,
+          caveat: `${readProvenance(brief)} Charts use reported series. The score chart includes only firms with both scores; missing values are not zero.`,
         });
         const drewRev = addRevenueLineChart(pptx, slide, quarterly, { x: 0.75, y: contentTop + 0.3, w: 5.8, h: 3.6 });
         addSectionLabel(slide, drewRev ? "Revenue trend (USD m, reported)" : "Revenue trend — no series carried", { x: 0.75, y: contentTop, w: 5.8 });
@@ -527,8 +509,9 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           const s2 = addBodySlide(pptx, brand, { index: idx(), section: sec(2), title: "Reputation across every lens this quarter", note: "Sentiment trend by lens, as tracked by AnalystGenius.", caveat: readProvenance(brief) });
           addReputationLineChart(pptx, s2.slide, trend, { x: 0.75, y: s2.contentTop + 0.1, w: 11.83, h: 3.9 });
         }
-        const since = new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        addPlacementSlide(pptx, brand, idx, sec(3), vendorName, await loadPlacements(vendor.id, req.competitorTickers, undefined, since), {
+        const now = new Date();
+        const since = new Date(Date.UTC(now.getUTCFullYear(), Math.floor(now.getUTCMonth() / 3) * 3, 1)).toISOString().slice(0, 10);
+        addPlacementSlide(pptx, brand, idx, sec(3), vendorName, await loadPlacements(vendor.id, brief.competitorTickers, undefined, since), {
           title: "Analyst placements published this quarter",
           note: `Cited placements dated on or after ${formatPlacementDate(since, "day")} for you and your peer set.`,
         });
@@ -540,7 +523,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         const { slide, contentTop } = addBodySlide(pptx, brand, {
           index: idx(),
           section: sec(1),
-          title: `What ${playbook.house} will probe, and how to answer`,
+          title: `Evidence to prepare for ${playbook.house}`,
           note: stage?.note ?? playbook.assessment.leadership,
           caveat: "House rules are a synthesis of published methodology and the owner playbook, not published weights. The study's own criteria override them.",
         });
@@ -551,7 +534,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         const rules = [...(stage?.dos.slice(0, 3) ?? []).map((d) => `Do — ${d}`), ...(stage?.donts.slice(0, 3) ?? []).map((d) => `Don't — ${d}`)];
         addBulletList(slide, rules, { x: 0.75, y: contentTop + 2.15, w: 11.83, h: 1.9, fontSize: 10 });
         await addCoverageSlide(pptx, brand, idx, sec(2), vendor.id, vendorName, playbook.house);
-        addPlacementSlide(pptx, brand, idx, sec(3), vendorName, await loadPlacements(vendor.id, req.competitorTickers, playbook.house), {
+        addPlacementSlide(pptx, brand, idx, sec(3), vendorName, await loadPlacements(vendor.id, brief.competitorTickers, playbook.house), {
           title: `What ${playbook.house} has already published`,
           note: `Cited ${playbook.house} placements for you and your peer set — the record behind the questions they will ask.`,
         });
@@ -582,7 +565,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         const s2 = addBodySlide(pptx, brand, { index: idx(), section: sec(2), title: "Competitive positions entering the cycle", caveat: readProvenance(brief) });
         addCompetitorBarChart(pptx, s2.slide, brief, { x: 0.75, y: s2.contentTop + 0.1, w: 11.83, h: 4.2 });
         await addCoverageSlide(pptx, brand, idx, sec(3), vendor.id, vendorName, playbook.house);
-        addPlacementSlide(pptx, brand, idx, sec(4), vendorName, await loadPlacements(vendor.id, req.competitorTickers, playbook.house), {
+        addPlacementSlide(pptx, brand, idx, sec(4), vendorName, await loadPlacements(vendor.id, brief.competitorTickers, playbook.house), {
           title: `${playbook.house} — your published placement record`,
           note: `Cited ${playbook.house} placements for you and your peer set: what the house has already said in public.`,
         });
@@ -613,7 +596,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           ],
           fontSize: 9.5,
         });
-        addPlacementSlide(pptx, brand, idx, sec(2), vendorName, await loadPlacements(vendor.id, req.competitorTickers), {
+        addPlacementSlide(pptx, brand, idx, sec(2), vendorName, await loadPlacements(vendor.id, brief.competitorTickers), {
           title: "Published placements across the field",
           note: "Cited analyst placements on record for you and the named competitors.",
         });
@@ -658,7 +641,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           headerFontSize: 8.5,
         });
         const spine = contentTop + 2.85;
-        addSectionLabel(slide, "Campaign spine — themes where reality outruns the story", { x: 0.75, y: spine, w: 11.83 });
+        addSectionLabel(slide, "Narrative themes to test against the evidence", { x: 0.75, y: spine, w: 11.83 });
         addBulletList(slide, (brief.gapAnalysis?.topDivergences ?? []).map((d) => `${d.theme} — ${d.interpretation ?? ""} (Δ ${d.delta ?? "—"})`), { x: 0.75, y: spine + 0.3, w: 11.83, h: 1.0, fontSize: 9.5 });
         break;
       }
@@ -680,7 +663,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
           addSectionLabel(slide, "Caution — the story is running ahead of measured reality", { x: 6.8, y: contentTop + 2.5, w: 5.78, color: AG.gold });
           addBulletList(slide, [`Gap ${f.gapScore}: brief sellers on which claims are defensible before analysts or clients test them.`], { x: 6.8, y: contentTop + 2.8, w: 5.78, h: 0.9, fontSize: 9.5 });
         }
-        addPlacementSlide(pptx, brand, idx, sec(2), vendorName, await loadPlacements(vendor.id, req.competitorTickers), {
+        addPlacementSlide(pptx, brand, idx, sec(2), vendorName, await loadPlacements(vendor.id, brief.competitorTickers), {
           title: "Analyst placements you can cite in this pursuit",
           note: "Published, source-linked placements: third-party proof, and what the competitor can cite back.",
         });
@@ -726,7 +709,7 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
         const s2 = addBodySlide(pptx, brand, { index: idx(), section: sec(2), title: "The competitive field", caveat: readProvenance(brief) });
         addCompetitorBarChart(pptx, s2.slide, brief, { x: 0.75, y: s2.contentTop + 0.1, w: 11.83, h: 4.2 });
         await addCoverageSlide(pptx, brand, idx, sec(3), vendor.id, vendorName);
-        addPlacementSlide(pptx, brand, idx, sec(4), vendorName, await loadPlacements(vendor.id, req.competitorTickers), {
+        addPlacementSlide(pptx, brand, idx, sec(4), vendorName, await loadPlacements(vendor.id, brief.competitorTickers), {
           title: "The published analyst record",
           note: "Cited placements across the analyst firms covering this market.",
         });
@@ -734,21 +717,21 @@ export async function composeScenarioDeck(req: ScenarioDeckRequest): Promise<Buf
       }
     }
 
-    addAdviceSlide(pptx, brand, view, idx, plan.agenda[plan.agenda.length - 2] ?? "What this means for your role");
+    // The decision brief replaces the generic role advice reused across scenarios.
   }
 
   // Next steps: the role's own advice lines where the read is live, otherwise
   // the two process steps that are always true of a point-in-time read.
-  const steps = (view?.advice ?? []).slice(0, 2).map((a) => ({ title: a.line.length > 60 ? `${a.line.slice(0, 57)}…` : a.line, body: a.line, owner: a.source }));
-  steps.push({ title: "Regenerate before the meeting", body: "The AnalystGenius read is a point-in-time value and drifts between sessions.", owner: "AnalystGenius follow-up" });
-  if (steps.length < 3) steps.push({ title: "Log what the room decided", body: "Record the outcome against this scenario so the next read starts from it.", owner: `${vendorName} leadership` });
+  addStakeholderEvidenceAppendix(pptx, brand, insight, brief, idx);
+  const steps = insight.priorities.map(p => ({ title: p.title.length > 60 ? `${p.title.slice(0, 57)}…` : p.title, body: p.recommendation, owner: `Proposed owner: ${audience}` }));
+  if (!steps.length) steps.push({ title: "Restore the evidence before deciding", body: insight.output, owner: audience });
 
   addClosing(pptx, brand, {
     titleA: "The next step",
     titleB: `with ${vendorName}.`,
     body: `${scenario.label} for ${audience.toLowerCase()}, grounded in what the signals say. Where a signal was unavailable it is stated as such; nothing is estimated in its place.`,
     nextSteps: steps.slice(0, 3),
-    disclaimer: "Generated by AnalystGenius AR SuperHero. Live signals at generation time; no outcome prediction. Internal briefing material, not analyst research. © 2026 AnalystGenius.",
+    disclaimer: "Generated by AnalystGenius AR SuperHero. Source dates and any stale reads are labelled. Recommendations are not forecasts. Prepared by AnalystGenius for internal leadership use. © 2026 AnalystGenius.",
   });
 
   return deckToBuffer(pptx);

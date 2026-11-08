@@ -1,11 +1,9 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   UploadCloud,
   FileText,
   CheckCircle2,
   AlertCircle,
-  Loader2,
-  ShieldCheck,
   ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,8 +12,8 @@ import type { DecisionStage } from "@/lib/cockpit";
 import { UPLOAD_BACKEND_NOTE } from "@/lib/cockpit";
 
 // ===========================================================================
-// UploadPanel — drag-and-drop demo with type selector. No real parsing.
-// Reused across Succeed / Direct / Enable. Tailored via accent + copy props.
+// UploadPanel — sample-only demo with type selector. Real files are not accepted.
+// Used by Direct / Enable. Tailored via accent + copy props.
 // ===========================================================================
 
 export type MaterialTypeOption<T extends string = string> = {
@@ -42,7 +40,7 @@ export type UploadPanelProps<T extends string = string> = {
   permissionNote: string;
 };
 
-// Demo filenames chosen to feel real but never collide with shipped data.
+// Fictional filenames used only by the explicitly labelled sample action.
 const DEMO_FILENAMES = [
   "Analyst_Update_May16.pdf",
   "Briefing_Draft_v4.docx",
@@ -62,11 +60,9 @@ export function UploadPanel<T extends string>({
   permissionNote,
 }: UploadPanelProps<T>) {
   const [selectedType, setSelectedType] = useState<T>(types[0].id);
-  const [dragOver, setDragOver] = useState(false);
-  const [phase, setPhase] = useState<"idle" | "uploading" | "analysing" | "done">("idle");
+  const [fileRejected, setFileRejected] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "done">("idle");
   const [currentFilename, setCurrentFilename] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const accentHex = accent === "gold" ? "#a88945" : "#00a7b7";
   const accentLight = accent === "gold" ? "#d5b46b" : "#63d7de";
@@ -75,45 +71,19 @@ export function UploadPanel<T extends string>({
       ? "rgba(168,137,69,0.10)"
       : "rgba(0,167,183,0.10)";
 
-  function runSimulatedUpload(filename: string) {
-    setCurrentFilename(filename);
-    setPhase("uploading");
-    setProgress(0);
-
-    const sizeKB = 80 + Math.floor(Math.random() * 4000);
-    const size = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB} KB`;
-
-    let p = 0;
-    const tick = () => {
-      p = Math.min(100, p + 12 + Math.random() * 14);
-      setProgress(p);
-      if (p < 100) {
-        setTimeout(tick, 110);
-      } else {
-        setPhase("analysing");
-        setTimeout(() => {
-          setPhase("done");
-          onSimulatedUpload?.({ filename, type: selectedType, size });
-        }, 900);
-      }
-    };
-    setTimeout(tick, 120);
-  }
-
   function reset() {
     setPhase("idle");
-    setProgress(0);
     setCurrentFilename(null);
-  }
-
-  function handleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    runSimulatedUpload(files[0].name);
+    setFileRejected(false);
   }
 
   function handleSimulateClick() {
+    if (phase !== "idle") return;
     const filename = DEMO_FILENAMES[Math.floor(Math.random() * DEMO_FILENAMES.length)];
-    runSimulatedUpload(filename);
+    setCurrentFilename(filename);
+    setFileRejected(false);
+    setPhase("done");
+    onSimulatedUpload?.({ filename, type: selectedType, size: "Sample only" });
   }
 
   return (
@@ -132,11 +102,11 @@ export function UploadPanel<T extends string>({
             {subtitle}
           </p>
         </div>
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#3d8f6d]/[0.20] bg-[#1a5540]/[0.18] px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/65 md:inline-flex">
-          <ShieldCheck className="h-3 w-3" />
-          Source-traced
-        </div>
       </div>
+      <p role="note" className="mt-4 rounded-xl border border-[#d5b46b]/40 bg-[#d5b46b]/[0.08] p-4 text-[13px] text-[#f4eed8]">
+        Demo only. This panel does not upload, read or analyse documents. Sample
+        entries are fictional and do not update live results or clear claims for reuse.
+      </p>
 
       <HairLine className="my-6" />
 
@@ -195,41 +165,23 @@ export function UploadPanel<T extends string>({
           </ul>
         </div>
 
-        {/* Drop zone / progress */}
+        {/* Sample action; reject real file drops without reading them. */}
         <div className="flex flex-col">
-          <Eyebrow className="mb-3">Drop or simulate</Eyebrow>
+          <Eyebrow className="mb-3">Sample demonstration</Eyebrow>
           <div
             data-testid="upload-dropzone"
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
+            onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
-              setDragOver(false);
-              handleFiles(e.dataTransfer.files);
+              setFileRejected(true);
             }}
-            onClick={() => fileInputRef.current?.click()}
-            className={cn(
-              "relative flex min-h-[200px] flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-8 text-center transition",
-              dragOver
-                ? "border-white/30 bg-[#1a5540]/[0.26]"
-                : "border-white/[0.10] bg-white/[0.012] hover:border-white/[0.18] hover:bg-[#1a5540]/[0.20]"
-            )}
-            style={
-              dragOver
-                ? { borderColor: accentHex, background: accentSoft }
-                : undefined
-            }
+            className="relative flex min-h-[200px] flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.10] px-6 py-8 text-center"
           >
-            <input aria-label="Choose a file to upload"
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              data-testid="input-file"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
+            {fileRejected && (
+              <p role="alert" className="mb-4 text-[13px] text-[#e5c989]">
+                File not accepted. No document was uploaded or analysed. Use the sample demonstration instead.
+              </p>
+            )}
 
             {phase === "idle" && (
               <div className="flex flex-col items-center gap-3">
@@ -244,10 +196,10 @@ export function UploadPanel<T extends string>({
                 </span>
                 <div>
                   <div className="text-[14px] font-medium text-[#f4eed8]">
-                    Drop a file, or click to browse.
+                    Real document upload is unavailable here.
                   </div>
                   <div className="mt-1 text-[11.5px] text-white/65">
-                    PDF · DOCX · PPTX · XLSX · EML · PNG · JPG — up to 50 MB.
+                    Preview the workflow using a fictional sample.
                   </div>
                 </div>
                 <button
@@ -264,46 +216,21 @@ export function UploadPanel<T extends string>({
                     background: "transparent",
                   }}
                 >
-                  Simulate upload
+                  Show sample entry
                   <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             )}
 
-            {(phase === "uploading" || phase === "analysing") && (
-              <div className="flex w-full flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin" style={{ color: accentLight }} />
-                <div className="w-full max-w-sm">
-                  <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
-                    <span className="truncate pr-3 text-white/75">
-                      {currentFilename}
-                    </span>
-                    <span>
-                      {phase === "uploading" ? `${Math.round(progress)}%` : "Analysing"}
-                    </span>
-                  </div>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#1a5540]/[0.34]">
-                    <div
-                      className="h-full transition"
-                      style={{
-                        width: `${phase === "uploading" ? progress : 100}%`,
-                        background: accentHex,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
             {phase === "done" && (
-              <div className="flex flex-col items-center gap-3">
+              <div role="status" className="flex flex-col items-center gap-3">
                 <CheckCircle2 className="h-7 w-7 text-[#a5d8ab]" />
                 <div>
                   <div className="text-[14px] font-medium text-[#f4eed8]">
-                    Analysed — feeding the decision model.
+                    Demo sample added. No analysis performed.
                   </div>
                   <div className="mt-1 text-[11.5px] text-white/50">
-                    {currentFilename} captured. Signals routed.
+                    {currentFilename} is a fictional sample. Live results are unchanged.
                   </div>
                 </div>
                 <button
@@ -315,7 +242,7 @@ export function UploadPanel<T extends string>({
                   }}
                   className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-white/[0.10] bg-[#1a5540]/[0.18] px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/65 hover:border-[#3d8f6d]/36 hover:text-white/85"
                 >
-                  Upload another
+                  Show another sample
                 </button>
               </div>
             )}
@@ -335,7 +262,7 @@ export function UploadPanel<T extends string>({
 }
 
 // ===========================================================================
-// UploadedItemsList — shared list view for analysed uploads
+// UploadedItemsList — shared list view; demo content must be explicitly marked
 // ===========================================================================
 
 export type GenericUploadedItem = {
@@ -368,16 +295,19 @@ const STATE_TONES: Record<string, string> = {
 export function UploadedItemsList({
   items,
   newIds = [],
+  demo = false,
 }: {
   items: GenericUploadedItem[];
   newIds?: string[];
+  demo?: boolean;
 }) {
   return (
     <Pane className="overflow-hidden p-0" data-testid="uploaded-items-list">
+      {demo && <p role="note" className="px-6 py-4 text-[13px] text-[#e5c989]">Demo library: all entries, signals and states below are fictional examples, not document analysis or reuse clearance.</p>}
       <div className="grid grid-cols-12 gap-4 border-b border-[#3d8f6d]/[0.16] px-6 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-white/60">
         <div className="col-span-5">File · type</div>
-        <div className="col-span-3">Captured signals</div>
-        <div className="col-span-2">Uploaded</div>
+        <div className="col-span-3">{demo ? "Example signals" : "Captured signals"}</div>
+        <div className="col-span-2">{demo ? "Example attribution" : "Uploaded"}</div>
         <div className="col-span-2 text-right">State</div>
       </div>
       <ul>
@@ -399,7 +329,7 @@ export function UploadedItemsList({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-[13.5px] font-medium text-[#e7e3d8]">
-                      {it.filename}
+                      {demo && "Demo · "}{it.filename}
                     </span>
                     {isNew && (
                       <span className="rounded-full border border-[#d5b46b]/40 bg-[#d5b46b]/[0.08] px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[#d5b46b]">
@@ -419,7 +349,7 @@ export function UploadedItemsList({
                     )}
                   </div>
                   <p className="mt-2 text-[12.5px] leading-relaxed text-white/55">
-                    {it.summary}
+                    {demo && "Example: "}{it.summary}
                   </p>
                 </div>
               </div>
@@ -427,7 +357,7 @@ export function UploadedItemsList({
                 <ul className="space-y-1">
                   {it.signals.slice(0, 3).map((s, i) => (
                     <li key={i} className="flex items-start gap-2 text-[11.5px] text-white/65">
-                      <StatusDot status="live" />
+                      {!demo && <StatusDot status="live" />}
                       <span className="leading-snug">{s}</span>
                     </li>
                   ))}
@@ -446,7 +376,7 @@ export function UploadedItemsList({
                     STATE_TONES[it.state] || "border-white/[0.12] bg-[#1a5540]/[0.18] text-white/55"
                   )}
                 >
-                  {it.state}
+                  {demo && "Demo · "}{it.state}
                 </span>
               </div>
             </li>
@@ -563,14 +493,14 @@ export function DecisionModel<F extends string>({
       {/* Observed impacts */}
       <div className="mt-10">
         <Eyebrow tone={accent} className="mb-3">
-          Observed model impacts
+          Demo model impacts
         </Eyebrow>
         <h3 className="text-[20px] font-semibold tracking-tight text-[#e7e3d8]">
-          What recent uploads have changed.
+          Example effects in the demo workflow.
         </h3>
         <p className="mt-2 max-w-3xl text-[13px] leading-relaxed text-white/55">
-          Captured, not predicted. Each line is an observed state change after a specific
-          upload was analysed.
+          Fictional examples only. These are not observed changes from document
+          analysis, and sample actions do not update the live decision model.
         </p>
 
         <Pane className="mt-5 overflow-hidden p-0">
@@ -599,7 +529,7 @@ export function DecisionModel<F extends string>({
               </div>
               <div className="col-span-5">
                 <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">
-                  Observed
+                  Example outcome
                 </div>
                 <div className="mt-1 text-[13px] leading-relaxed text-[#e7e3d8]">
                   {m.observed}

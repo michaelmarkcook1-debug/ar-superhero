@@ -136,16 +136,15 @@ export default function Direct() {
       filename: info.filename,
       type: info.type,
       size: info.size,
-      uploadedBy: "You",
+      uploadedBy: "Demo",
       uploadedAt: "Just now",
       lensId: selectedId,
-      state: "Routed to lens",
+      state: "Demo sample",
       summary:
-        "Captured. Routed to the selected lens. Brief inputs and action asks updated.",
+        "Fictional sample only. No briefing inputs extracted or action asks updated.",
       signals: [
-        `Routed to ${selectedId} lens`,
-        "Brief inputs extracted",
-        "Action ask candidates surfaced",
+        `Example lens: ${selectedId}`,
+        "No document analysis performed",
       ],
     };
     setExtraUploads((prev) => [newItem, ...prev]);
@@ -475,21 +474,21 @@ export default function Direct() {
         <UploadPanel<DirectMaterialType>
           accent="gold"
           eyebrow="Mode II · Direct"
-          title="Upload material to feed leader briefings."
-          subtitle="Internal leadership notes, briefing requests, board drafts, service-line or delivery updates, regional updates, internal plans, and analyst-derived summaries already approved for internal use. Each upload is routed to the right stakeholder lens."
+          title="Explore the leader briefing document demo."
+          subtitle="Internal leadership notes, briefing requests, board drafts, service-line or delivery updates, regional updates, internal plans, and analyst-derived summaries already approved for internal use. Fictional examples illustrate stakeholder lenses; no documents are processed or routed."
           types={DIRECT_MATERIAL_TYPES}
           onSimulatedUpload={handleSimulatedUpload}
-          permissionNote="Internal-only material. Used to build stakeholder briefings and action asks. Relationship stance stays hidden unless you choose to surface it."
+          permissionNote="Demo examples are for internal illustration only. They do not update stakeholder briefings or action asks."
         />
       </section>
 
       <section className="mb-14">
         <SectionTitle
           eyebrow="Lens material library"
-          title="Everything uploaded, routed by lens."
-          description={`${uploadedItems.length} items analysed across seven stakeholder lenses. Each item shows where it has been routed and what AR captured.`}
+          title="Sample material by lens."
+          description={`${uploadedItems.length} fictional examples across seven stakeholder lenses. No document analysis or live routing has been performed.`}
         />
-        <UploadedItemsList items={uploadedItems} newIds={newIds} />
+        <UploadedItemsList items={uploadedItems} newIds={newIds} demo />
         <p className="mt-4 text-[12px] text-white/50">
           This upload panel simulates the Direct decision model.{" "}
           <Link href="/how-it-works" className="font-medium uppercase tracking-[0.14em] text-[#d5b46b] transition hover:text-[#f0dca8]">
