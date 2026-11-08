@@ -20,10 +20,16 @@ export function registerRfpRoutes(app: Express) {
     try {
       res.json(await analyzeRfp(parsed.data));
     } catch (error) {
-      const candidate = error as { statusCode?: unknown; name?: unknown } | null;
+      const candidate = error as { statusCode?: unknown; name?: unknown; message?: unknown } | null;
       const upstreamStatus = typeof candidate?.statusCode === 'number' ? candidate.statusCode : undefined;
+      const message = typeof candidate?.message === 'string' ? candidate.message : '';
+      const providerReason = /credit balance|billing|payment|insufficient.*credit/i.test(message) ? 'provider_billing'
+        : /schema|output_config|output_format|structured output/i.test(message) ? 'provider_schema'
+        : /max_tokens|max_output_tokens|context.*(window|length)|too many tokens/i.test(message) ? 'provider_limits'
+        : /model.*(not found|not exist|not supported|invalid)|not found.*model/i.test(message) ? 'provider_model'
+        : undefined;
       const code = error instanceof RfpReviewError ? error.code
-        : upstreamStatus ? `provider_${upstreamStatus}`
+        : upstreamStatus ? providerReason ?? `provider_${upstreamStatus}`
         : candidate?.name === 'AI_NoObjectGeneratedError' || candidate?.name === 'AI_NoOutputGeneratedError' ? 'invalid_model_output'
         : candidate?.name === 'TimeoutError' || candidate?.name === 'AbortError' ? 'analysis_timeout' : 'analysis_failed';
       const retryable = !upstreamStatus || upstreamStatus === 408 || upstreamStatus === 409 || upstreamStatus === 429 || upstreamStatus >= 500;
@@ -31,7 +37,8 @@ export function registerRfpRoutes(app: Express) {
       // text, complete prompts and credential-bearing request metadata.
       console.error('RFP section analysis failed', { code, upstreamStatus });
       res.status(upstreamStatus === 429 ? 429 : 502).json({
-        error: retryable ? 'This section could not be analysed or its references could not be validated. Retry the unfinished sections.' : 'The AI service rejected the request. Its account or model configuration needs attention.',
+        error: code === 'provider_billing' ? 'The AI provider account needs billing attention before document analysis can run. No analysis was completed.'
+          : retryable ? 'This section could not be analysed or its references could not be validated. Retry the unfinished sections.' : 'The AI service rejected the request. Its account or model configuration needs attention.',
         errorCode: code, retryable,
       });
     }
