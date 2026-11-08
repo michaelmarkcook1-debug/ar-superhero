@@ -710,7 +710,7 @@ export type DirectUpload = {
   uploadedBy: string;
   uploadedAt: string;
   lensId?: LensId; // links to LENSES
-  state: "Analysed" | "Routed to lens" | "Needs review" | "Briefing-ready";
+  state: "Demo sample" | "Analysed" | "Routed to lens" | "Needs review" | "Briefing-ready";
   summary: string;
   signals: string[];
 };
@@ -934,6 +934,7 @@ export type EnableUpload = {
   uploadedBy: string;
   uploadedAt: string;
   state:
+    | "Demo sample"
     | "Analysed"
     | "Cleared for sell"
     | "Restricted"
@@ -1129,7 +1130,7 @@ export const ENABLE_MODEL_IMPACTS: ModelImpact[] = [
 
 // Shared note used across upload panels
 export const UPLOAD_BACKEND_NOTE =
-  "Live document ingestion will use the backend parser pipeline. This view shows the analysed state.";
+  "Demo only: real document ingestion is not connected to this panel. No analysis is performed.";
 
 // ============================================================================
 // Deliverables — AnalystGenius-controlled output templates
