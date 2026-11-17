@@ -67,7 +67,7 @@ export async function parseRfpFile(file: File, progress: (message: string) => vo
   return { text, sections: splitRfpText(text), pages, warnings };
 }
 
-export async function reviewRfpSection(input: { filename: string; documentText: string; documentKind: 'request' | 'response'; vendorId: string; competitorTickers: string[] }, signal: AbortSignal): Promise<RfpResult> {
+export async function reviewRfpSection(input: { filename: string; documentText: string; documentKind: 'request' | 'response'; vendorId: string; competitorTickers: string[]; fictional?: boolean }, signal: AbortSignal): Promise<RfpResult> {
   let error: Error = new Error('Analysis failed.');
   for (let attempt = 0; attempt < 3; attempt++) {
     signal.throwIfAborted();

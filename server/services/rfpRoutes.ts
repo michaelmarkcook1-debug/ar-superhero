@@ -9,6 +9,7 @@ export function registerRfpRoutes(app: Express) {
     filename: z.string().min(1).max(240),
     vendorId: z.string().refine(id => VENDORS.some(v => v.id === id), "Unknown vendor"),
     documentKind: z.enum(RFP_TYPES),
+    fictional: z.boolean().optional(),
     documentText: z.string().min(1).max(RFP_SECTION_CHARS).refine(text => Boolean(text.trim())),
     competitorTickers: z.array(z.string().max(12)).max(8).optional(),
   });

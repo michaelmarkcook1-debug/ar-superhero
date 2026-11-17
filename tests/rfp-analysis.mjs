@@ -37,6 +37,23 @@ try {
   let result=await analyzeRfp(input);
   assert.equal(globalThis.__rfpOptions.focalTicker,'CTSH');assert.equal(result.analysedCharacters,doc.length);
   assert.equal(result.dataStatus,'live');assert.doesNotMatch(globalThis.__rfpPrompt,/SELL_PROOF|Northstar|APPROVED.*PROOF/);
+  const fictionalBrief = {...brief, gapAnalysis: {topDivergences: [{
+    theme:'Workforce reduction for efficiency', narrativeScore:55, realityScore:44,
+    interpretation:'Offers very limited direct discussion on profitability.',
+  }], generatedAt:'2026-11-07T10:00:00Z'}};
+  const [analogy] = rfpSources(fictionalBrief, true);
+  assert.equal(rfpSources(fictionalBrief, true).length, 1);
+  assert.equal(analogy.recordPath, '/api/ag/narrative-reality-gap?ticker=CTSH');
+  assert.equal(analogy.publisher, 'AnalystGenius');
+  assert.doesNotMatch(analogy.detail, /55|44/);
+  const fictionalInput = {...input, documentText:'FICTIONAL / NON-SENSITIVE TEST INPUT\n' + doc};
+  const analogousInsertion = {...review.analystInsights[0], sourceIds:[analogy.id], suggestedText:'Request a baseline.', rationale:'Illustrates the need for direct evidence.'};
+  globalThis.__rfpBrief = fictionalBrief;
+  globalThis.__rfpResponse.output = {...review, analystInsights:[analogousInsertion, {...analogousInsertion, suggestedText:'Where Capgemini responds, request a baseline.'}]};
+  result = await analyzeRfp(fictionalInput);
+  assert.equal(result.fictional, true); assert.equal(JSON.parse(globalThis.__rfpPrompt).company, null);
+  assert.deepEqual(result.analystInsights, [analogousInsertion]);
+  globalThis.__rfpResponse.output = review;
   globalThis.__rfpBrief={...brief,stale:true};result=await analyzeRfp(input);assert.equal(result.dataStatus,'stale');
   globalThis.__rfpBrief={...brief,live:false};globalThis.__rfpResponse.output={...review,analystInsights:[]};result=await analyzeRfp(input);assert.equal(result.dataStatus,'unavailable');assert.equal(result.sources.length,0);
   globalThis.__rfpResponse.finishReason='length';await assert.rejects(()=>analyzeRfp(input),/output limit/);
