@@ -39,7 +39,7 @@ try {
   assert.equal(result.dataStatus,'live');assert.doesNotMatch(globalThis.__rfpPrompt,/SELL_PROOF|Northstar|APPROVED.*PROOF/);
   const fictionalInput = {...input, documentText:'FICTIONAL / NON-SENSITIVE TEST INPUT\nProvide an annual service price and explain how automation will reduce cost.'};
   const risk = 'Client struggles with AI value demonstration and cost control';
-  const snapshot = {ticker:'CTSH',name:'TEST vendor',topRisks:[...Array(8).fill('Below-average deal momentum'),risk],assessmentScore:99};
+  const snapshot = {ticker:'CTSH',name:'Cognizant',topRisks:[...Array(8).fill('Below-average deal momentum'),risk],assessmentScore:99};
   globalThis.__rfpRecords = {'providers/snapshot':{status:200,body:{success:true,snapshot}}};
   const direct = await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
   const [analogy] = direct.sources;
@@ -66,6 +66,8 @@ try {
   assert.equal(result.fictional,true);assert.equal(result.executiveDecision.owner,'CFO');
   assert.deepEqual(result.analystInsights,[analogousInsertion]);
   assert.ok(JSON.parse(globalThis.__rfpPrompt).agEvidence.some(s=>s.detail===risk));
+  assert.doesNotMatch(globalThis.__rfpPrompt,/Cognizant/);
+  assert.ok(result.sources.some(s=>s.title.includes('Cognizant')));
   assert.equal(result.dataStatus,'live');
   globalThis.__rfpApplication.output.analystInsights=[{...analogousInsertion,suggestedText:'Where Capgemini responds, request a baseline.'}];
   await assert.rejects(()=>analyzeRfp(fictionalInput),e=>e.code==='vendor_reference');

@@ -40,6 +40,13 @@ export function rfpSources(brief: ArBrief): RfpSource[] {
   });
 }
 const normalize = (text: string) => text.replace(/\s+/g, ' ').trim();
+// Original named records remain intact in the result and export. Only the
+// drafting context uses a neutral entity label, so real-company names cannot
+// be copied into the fictional bidder's proposed wording.
+function fictionalDraftSources(sources: RfpSource[]) {
+  const neutral = (text: string) => VENDORS.reduce((value, vendor) => value.replace(new RegExp(vendor.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), 'the separate AG company context'), text);
+  return sources.map(source => ({ ...source, title: neutral(source.title), detail: neutral(source.detail), scope: source.scope ? neutral(source.scope) : undefined }));
+}
 export class RfpReviewError extends Error {
   constructor(public code: 'document_reference' | 'source_reference' | 'numeric_reference' | 'output_limit' | 'vendor_reference' | 'insertion_explanation', message: string) {
     super(message);
@@ -94,7 +101,7 @@ For a request, identify obligations, submission rules, deliverables, dates, eval
 Use exact, nonempty documentQuote excerpts for every requirement, suggestion, strength and insight. Use location to describe a real page/heading if supplied, otherwise say 'Within this section'. Never invent page numbers, requirements, clients, credentials, commitments, deadlines or compliance scores.
 Suggested analyst insight inclusions must be relevant to that document quote and cite only sourceIds in the supplied AG evidence. Provide suggestedText suitable for human review, a rationale, and placement via location. Preserve numbers, periods, scope and qualifications exactly. A composite score is not proof of a specific service capability or a forecast. Do not imply licensed quotation or external reuse permission. With no relevant AG evidence return an empty analystInsights array. Never use demo proof points.
 Keep facts separate from recommendations. Summarise this section neutrally. Do not assert exhaustive compliance or that every requirement has been met.`,
-    prompt: JSON.stringify({ company: fictional ? null : vendor.name, fictional, documentKind: input.documentKind, filename: input.filename, dataStatus, dataNote, agEvidence: sources, documentText: input.documentText }),
+    prompt: JSON.stringify({ company: fictional ? null : vendor.name, fictional, documentKind: input.documentKind, filename: input.filename, dataStatus, dataNote, agEvidence: fictional ? [] : sources, documentText: input.documentText }),
     output: Output.object({ schema: RfpReviewSchema }),
   });
   if (generated.finishReason === 'length') throw new RfpReviewError('output_limit', 'Analysis exceeded its output limit. No completed result was recorded; split this section and retry.');
@@ -114,7 +121,7 @@ For an explicit commercial gap with relevant AI/cost/value evidence, draft an ad
 Cite only supplied sourceIds. Explain in rationale what the AG excerpt says, why it motivates this requirement and what it does not establish. Use non-numeric draft wording. No source-company figures, savings forecasts or guaranteed results. State that the separate context does not corroborate the fictional bid or savings claim. Do not name any real company in generated fields: call it the separate AG company context. Source identities will be displayed in source cards.
 The executiveDecision must name the decision owner explicitly identified in the document, state the recommended action before approval and list missing evidence. Return null only if the document supplies no decision owner. Do not invent an owner.
 If none of the sources can motivate a relevant evidence request, return no analystInsights and explain why in noInsertionReason. Otherwise noInsertionReason may be empty. Never force an unrelated citation.`,
-      prompt: JSON.stringify({ documentText: input.documentText, documentKind: input.documentKind, review, agEvidence: sources }),
+      prompt: JSON.stringify({ documentText: input.documentText, documentKind: input.documentKind, review, agEvidence: fictionalDraftSources(sources) }),
       output: Output.object({ schema: RfpApplicationSchema }),
     });
     if (application.finishReason === 'length') throw new RfpReviewError('output_limit', 'Evidence application exceeded its output limit. No completed result was recorded.');
