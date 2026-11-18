@@ -9,7 +9,7 @@ await mkdir('node_modules/.cache', {recursive:true});
 const output = `${process.cwd()}/node_modules/.cache/rfp-tests.cjs`;
 await build({ stdin:{contents:`export * from './server/services/rfpAnalyzer'; export * from './server/services/rfpEvidence'; export * from './shared/rfpAnalysis'; export {registerRfpRoutes} from './server/services/rfpRoutes';`,resolveDir:process.cwd()}, outfile:output,bundle:true,platform:'node',format:'cjs',packages:'external',plugins:[{name:'fixtures',setup(b){
   b.onResolve({filter:/^(ai|@ai-sdk\/anthropic)$|\.\/(?:agIntelligence|agApi)$/},a=>({path:a.path,namespace:'mock'}));
-  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; if(globalThis.__rfpError)throw globalThis.__rfpError; return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:a.path==='./agApi'?`export async function agFetch(path,query){return globalThis.__rfpRecords?.[path]??{status:503,body:null};}`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
+  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; if(globalThis.__rfpError)throw globalThis.__rfpError; if(opts.system.startsWith('You perform evidence application'))return globalThis.__rfpApplication;return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:a.path==='./agApi'?`export async function agFetch(path,query){return globalThis.__rfpRecords?.[path]??{status:503,body:null};}`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
 }}]});
 try {
   const {validateRfpReview,rfpSources,getFictionalRfpEvidence,analyzeRfp,RFP_MAX_BYTES,RFP_MAX_CHARS,RFP_SECTION_CHARS,RFP_SERVER_TIMEOUT_MS,RFP_REQUEST_TIMEOUT_MS,registerRfpRoutes}=require(output);
@@ -39,7 +39,7 @@ try {
   assert.equal(result.dataStatus,'live');assert.doesNotMatch(globalThis.__rfpPrompt,/SELL_PROOF|Northstar|APPROVED.*PROOF/);
   const fictionalInput = {...input, documentText:'FICTIONAL / NON-SENSITIVE TEST INPUT\nProvide an annual service price and explain how automation will reduce cost.'};
   const risk = 'Client struggles with AI value demonstration and cost control';
-  const snapshot = {ticker:'CTSH',name:'TEST vendor',topRisks:[...Array(8).fill('Below-average deal momentum'),risk],assessmentScore:99};
+  const snapshot = {ticker:'CTSH',name:'Cognizant',topRisks:[...Array(8).fill('Below-average deal momentum'),risk],assessmentScore:99};
   globalThis.__rfpRecords = {'providers/snapshot':{status:200,body:{success:true,snapshot}}};
   const direct = await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
   const [analogy] = direct.sources;
@@ -60,12 +60,21 @@ try {
   const withQuestion=await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
   assert.ok(withQuestion.sources.some(s=>s.evidenceBasis.includes('question; not an observed')));
   const analogousInsertion = {documentQuote:'Provide an annual service price and explain how automation will reduce cost.',location:'Commercial case',sourceIds:[analogy.id],suggestedText:'Request a baseline and complete cost model.',rationale:'The separate qualitative risk motivates a request for evidence, not a savings forecast.'};
-  globalThis.__rfpResponse.output = {...review,requirements:[],analystInsights:[analogousInsertion,{...analogousInsertion,suggestedText:'Where Capgemini responds, request a baseline.'}]};
+  globalThis.__rfpResponse.output = {...review,requirements:[],analystInsights:[]};
+  globalThis.__rfpApplication={output:{analystInsights:[analogousInsertion],executiveDecision:{owner:'CFO',action:'Request evidence before approving the pilot.',evidenceNeeded:['Cost model']},noInsertionReason:''},finishReason:'stop'};
   result=await analyzeRfp(fictionalInput);
-  assert.equal(result.fictional,true);assert.equal(JSON.parse(globalThis.__rfpPrompt).company,null);
+  assert.equal(result.fictional,true);assert.equal(result.executiveDecision.owner,'CFO');
   assert.deepEqual(result.analystInsights,[analogousInsertion]);
   assert.ok(JSON.parse(globalThis.__rfpPrompt).agEvidence.some(s=>s.detail===risk));
+  assert.doesNotMatch(globalThis.__rfpPrompt,/Cognizant/);
+  assert.ok(result.sources.some(s=>s.title.includes('Cognizant')));
   assert.equal(result.dataStatus,'live');
+  globalThis.__rfpApplication.output.analystInsights=[{...analogousInsertion,suggestedText:'Where Capgemini responds, request a baseline.'}];
+  await assert.rejects(()=>analyzeRfp(fictionalInput),e=>e.code==='vendor_reference');
+  globalThis.__rfpApplication.output.analystInsights=[];
+  await assert.rejects(()=>analyzeRfp(fictionalInput),e=>e.code==='insertion_explanation');
+  globalThis.__rfpApplication.output.noInsertionReason='TEST evidence is not relevant to this requirement.';
+  result=await analyzeRfp(fictionalInput);assert.equal(result.insightNote,'TEST evidence is not relevant to this requirement.');
   globalThis.__rfpRecords={};globalThis.__rfpResponse.output={...review,requirements:[],analystInsights:[]};
   result=await analyzeRfp(fictionalInput);assert.equal(result.dataStatus,'unavailable');assert.equal(result.sources.length,0);
   console.log('PASS direct qualitative retrieval beyond cockpit cutoff, topic relevance, exact locator, source basis, vendor isolation and unavailable handling');
