@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/lib/theme";
 // Public + new cockpit pages
 import Landing from "@/pages/Landing";
 import MissionControl from "@/pages/MissionControl";
+import BriefingRehearsal from "@/pages/BriefingRehearsal";
 import Succeed from "@/pages/Succeed";
 import Direct from "@/pages/Direct";
 import Enable from "@/pages/Enable";
@@ -39,6 +40,7 @@ function CockpitRouter() {
   return (
     <Switch>
       <Route path="/mission" component={MissionControl} />
+      <Route path="/succeed/briefing-rehearsal" component={BriefingRehearsal} />
       <Route path="/succeed" component={Succeed} />
       <Route path="/direct" component={Direct} />
       <Route path="/enable" component={Enable} />

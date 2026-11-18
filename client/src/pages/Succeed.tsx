@@ -102,6 +102,15 @@ export default function Succeed() {
         </div>
       </section>
 
+      <Link href="/succeed/briefing-rehearsal" className="group mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#a88945]/40 bg-[#a88945]/[0.08] p-6 hover:border-[#d5b46b]">
+        <div>
+          <Eyebrow tone="gold">Accenture sample · Two analysts</Eyebrow>
+          <h2 className="mt-2 text-2xl font-semibold">Briefing rehearsal</h2>
+          <p className="mt-1 text-sm text-white/65">See how published research and an open commitment change the executive brief.</p>
+        </div>
+        <span className="inline-flex items-center gap-2 font-medium">Open rehearsal <ArrowUpRight size={16} /></span>
+      </Link>
+
       {/* Headline numbers — each one a count of a real record, with its source */}
       <section className="mb-14 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#3d8f6d]/[0.16] bg-[#1a5540]/[0.26] md:grid-cols-5" data-testid="succeed-headline">
         <div className="bg-[#0c1a15] p-6">
