@@ -7,12 +7,12 @@ import { mkdir, rm, readFile } from 'node:fs/promises';
 const require = createRequire(import.meta.url);
 await mkdir('node_modules/.cache', {recursive:true});
 const output = `${process.cwd()}/node_modules/.cache/rfp-tests.cjs`;
-await build({ stdin:{contents:`export * from './server/services/rfpAnalyzer'; export * from './shared/rfpAnalysis'; export {registerRfpRoutes} from './server/services/rfpRoutes';`,resolveDir:process.cwd()}, outfile:output,bundle:true,platform:'node',format:'cjs',packages:'external',plugins:[{name:'fixtures',setup(b){
-  b.onResolve({filter:/^(ai|@ai-sdk\/anthropic)$|\.\/agIntelligence$/},a=>({path:a.path,namespace:'mock'}));
-  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; if(globalThis.__rfpError)throw globalThis.__rfpError; return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
+await build({ stdin:{contents:`export * from './server/services/rfpAnalyzer'; export * from './server/services/rfpEvidence'; export * from './shared/rfpAnalysis'; export {registerRfpRoutes} from './server/services/rfpRoutes';`,resolveDir:process.cwd()}, outfile:output,bundle:true,platform:'node',format:'cjs',packages:'external',plugins:[{name:'fixtures',setup(b){
+  b.onResolve({filter:/^(ai|@ai-sdk\/anthropic)$|\.\/(?:agIntelligence|agApi)$/},a=>({path:a.path,namespace:'mock'}));
+  b.onLoad({filter:/.*/,namespace:'mock'},a=>({contents:a.path==='ai'?`export const Output={object:x=>x}; export async function generateText(opts){globalThis.__rfpPrompt=opts.prompt; if(globalThis.__rfpError)throw globalThis.__rfpError; return globalThis.__rfpResponse;}`:a.path==='@ai-sdk/anthropic'?`export const anthropic=x=>x;`:a.path==='./agApi'?`export async function agFetch(path,query){return globalThis.__rfpRecords?.[path]??{status:503,body:null};}`:`export async function getArBrief(opts){globalThis.__rfpOptions=opts;return globalThis.__rfpBrief;}`,loader:'js'}));
 }}]});
 try {
-  const {validateRfpReview,rfpSources,analyzeRfp,RFP_MAX_BYTES,RFP_MAX_CHARS,RFP_SECTION_CHARS,RFP_SERVER_TIMEOUT_MS,RFP_REQUEST_TIMEOUT_MS,registerRfpRoutes}=require(output);
+  const {validateRfpReview,rfpSources,getFictionalRfpEvidence,analyzeRfp,RFP_MAX_BYTES,RFP_MAX_CHARS,RFP_SECTION_CHARS,RFP_SERVER_TIMEOUT_MS,RFP_REQUEST_TIMEOUT_MS,registerRfpRoutes}=require(output);
   assert.equal(RFP_MAX_BYTES,20*1024*1024);assert.equal(RFP_MAX_CHARS,600000);assert.equal(RFP_SECTION_CHARS,12000);
   const config=JSON.parse(await readFile('vercel.json','utf8'));
   assert.equal(config.functions['api/index.ts'].maxDuration,300);
@@ -37,22 +37,38 @@ try {
   let result=await analyzeRfp(input);
   assert.equal(globalThis.__rfpOptions.focalTicker,'CTSH');assert.equal(result.analysedCharacters,doc.length);
   assert.equal(result.dataStatus,'live');assert.doesNotMatch(globalThis.__rfpPrompt,/SELL_PROOF|Northstar|APPROVED.*PROOF/);
-  const fictionalBrief = {...brief, gapAnalysis: {topDivergences: [{
-    theme:'Workforce reduction for efficiency', narrativeScore:55, realityScore:44,
-    interpretation:'Offers very limited direct discussion on profitability.',
-  }], generatedAt:'2026-11-07T10:00:00Z'}};
-  const [analogy] = rfpSources(fictionalBrief, true);
-  assert.equal(rfpSources(fictionalBrief, true).length, 1);
-  assert.equal(analogy.recordPath, '/api/ag/narrative-reality-gap?ticker=CTSH');
-  assert.equal(analogy.publisher, 'AnalystGenius');
-  assert.doesNotMatch(analogy.detail, /55|44/);
-  const fictionalInput = {...input, documentText:'FICTIONAL / NON-SENSITIVE TEST INPUT\n' + doc};
-  const analogousInsertion = {...review.analystInsights[0], sourceIds:[analogy.id], suggestedText:'Request a baseline.', rationale:'Illustrates the need for direct evidence.'};
-  globalThis.__rfpBrief = fictionalBrief;
-  globalThis.__rfpResponse.output = {...review, analystInsights:[analogousInsertion, {...analogousInsertion, suggestedText:'Where Capgemini responds, request a baseline.'}]};
-  result = await analyzeRfp(fictionalInput);
-  assert.equal(result.fictional, true); assert.equal(JSON.parse(globalThis.__rfpPrompt).company, null);
-  assert.deepEqual(result.analystInsights, [analogousInsertion]);
+  const fictionalInput = {...input, documentText:'FICTIONAL / NON-SENSITIVE TEST INPUT\nProvide an annual service price and explain how automation will reduce cost.'};
+  const risk = 'Client struggles with AI value demonstration and cost control';
+  const snapshot = {ticker:'CTSH',name:'TEST vendor',topRisks:[...Array(8).fill('Below-average deal momentum'),risk],assessmentScore:99};
+  globalThis.__rfpRecords = {'providers/snapshot':{status:200,body:{success:true,snapshot}}};
+  const direct = await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
+  const [analogy] = direct.sources;
+  assert.equal(direct.sources.length,1);assert.equal(direct.available,1);
+  assert.equal(analogy.detail,risk);assert.equal(analogy.recordLocator,'snapshot.topRisks[8]');
+  assert.equal(analogy.recordPath,'/api/ag/snapshot?ticker=CTSH');
+  assert.equal(analogy.publisher,'AnalystGenius');assert.equal(analogy.sourceDate,undefined);
+  assert.match(analogy.evidenceBasis,/not independently corroborated/);
+  assert.doesNotMatch(JSON.stringify(direct.sources),/assessmentScore|99/);
+  assert.equal((await getFictionalRfpEvidence('Please deliver office furniture.','CTSH')).sources.length,0);
+  assert.equal((await getFictionalRfpEvidence(fictionalInput.documentText,'IBM')).sources.length,0);
+  const normalizedGap = {status:200,body:{success:true,gap:{ticker:'CTSH',generatedAt:'2026-11-07T10:00:00Z',topDivergences:[{theme:'Profitability detail',interpretation:"The coverage doesn't provide enough detail to compare profitability."}]}}};
+  globalThis.__rfpRecords['narrative-reality-gap']=normalizedGap;
+  const withLimitation=await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
+  assert.equal(withLimitation.sources.length,2);
+  assert.ok(withLimitation.sources.some(s=>s.sourceDate==='2026-11-07T10:00:00Z'));
+  globalThis.__rfpRecords['reputation-tracker/trends']={status:200,body:{success:true,ticker:'CTSH',suggestedQuestions:['How will AI investment costs be measured?'],generatedAt:'2026-11-07T09:00:00Z'}};
+  const withQuestion=await getFictionalRfpEvidence(fictionalInput.documentText,'CTSH');
+  assert.ok(withQuestion.sources.some(s=>s.evidenceBasis.includes('question; not an observed')));
+  const analogousInsertion = {documentQuote:'Provide an annual service price and explain how automation will reduce cost.',location:'Commercial case',sourceIds:[analogy.id],suggestedText:'Request a baseline and complete cost model.',rationale:'The separate qualitative risk motivates a request for evidence, not a savings forecast.'};
+  globalThis.__rfpResponse.output = {...review,requirements:[],analystInsights:[analogousInsertion,{...analogousInsertion,suggestedText:'Where Capgemini responds, request a baseline.'}]};
+  result=await analyzeRfp(fictionalInput);
+  assert.equal(result.fictional,true);assert.equal(JSON.parse(globalThis.__rfpPrompt).company,null);
+  assert.deepEqual(result.analystInsights,[analogousInsertion]);
+  assert.ok(JSON.parse(globalThis.__rfpPrompt).agEvidence.some(s=>s.detail===risk));
+  assert.equal(result.dataStatus,'live');
+  globalThis.__rfpRecords={};globalThis.__rfpResponse.output={...review,requirements:[],analystInsights:[]};
+  result=await analyzeRfp(fictionalInput);assert.equal(result.dataStatus,'unavailable');assert.equal(result.sources.length,0);
+  console.log('PASS direct qualitative retrieval beyond cockpit cutoff, topic relevance, exact locator, source basis, vendor isolation and unavailable handling');
   globalThis.__rfpResponse.output = review;
   globalThis.__rfpBrief={...brief,stale:true};result=await analyzeRfp(input);assert.equal(result.dataStatus,'stale');
   globalThis.__rfpBrief={...brief,live:false};globalThis.__rfpResponse.output={...review,analystInsights:[]};result=await analyzeRfp(input);assert.equal(result.dataStatus,'unavailable');assert.equal(result.sources.length,0);

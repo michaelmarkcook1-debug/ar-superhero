@@ -26,6 +26,7 @@ export type RfpReview = z.infer<typeof RfpReviewSchema>;
 export const RfpSourceSchema = z.object({ id: z.string(), title: z.string(), detail: z.string(), source: z.string(), retrievedAt: z.string(),
   publisher: z.string().optional(), recordPath: z.string().optional(),
   sourceDate: z.string().optional(), reportingPeriod: z.string().optional(),
+  evidenceBasis: z.string().optional(), scope: z.string().optional(), recordLocator: z.string().optional(),
 });
 export type RfpSource = z.infer<typeof RfpSourceSchema>;
 export const RfpResultSchema = RfpReviewSchema.extend({
