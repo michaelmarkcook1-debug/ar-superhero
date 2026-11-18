@@ -23,6 +23,11 @@ export const RfpReviewSchema = z.object({
   strengthsFound: z.array(reference.extend({ observation: z.string() })),
 });
 export type RfpReview = z.infer<typeof RfpReviewSchema>;
+export const RfpApplicationSchema = z.object({
+  analystInsights: RfpReviewSchema.shape.analystInsights,
+  executiveDecision: RfpReviewSchema.shape.executiveDecision.unwrap().nullable(),
+  noInsertionReason: z.string(),
+});
 export const RfpSourceSchema = z.object({ id: z.string(), title: z.string(), detail: z.string(), source: z.string(), retrievedAt: z.string(),
   publisher: z.string().optional(), recordPath: z.string().optional(),
   sourceDate: z.string().optional(), reportingPeriod: z.string().optional(),
@@ -32,6 +37,7 @@ export type RfpSource = z.infer<typeof RfpSourceSchema>;
 export const RfpResultSchema = RfpReviewSchema.extend({
   filename: z.string(), vendorName: z.string(), documentKind: z.enum(RFP_TYPES),
   fictional: z.boolean().optional(),
+  insightNote: z.string().optional(),
   sources: z.array(RfpSourceSchema), dataStatus: z.enum(['live', 'stale', 'unavailable']), dataNote: z.string(),
   analysedCharacters: z.number().int().positive(),
   completedAt: z.string(),

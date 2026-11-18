@@ -127,6 +127,7 @@ export default function RfpAnalyzer() {
       ...session.parsed.warnings,
       ...Object.entries(session.results).sort(([a], [b]) => +a - +b).flatMap(([i, r]) => [
         `\n## Section ${+i + 1} (AG comparison context: ${r.vendorName})`, r.documentSummary, `${r.dataStatus}: ${r.dataNote} Reviewed: ${r.completedAt}`,
+        ...(r.insightNote ? [`No analyst insertion: ${r.insightNote}`] : []),
         ...(r.executiveDecision ? [`Decision recommendation for ${r.executiveDecision.owner}\n${r.executiveDecision.action}\nEvidence needed: ${r.executiveDecision.evidenceNeeded.join(' · ')}`] : []),
         ...r.requirements.map(x => `\nRequirement (${x.priority}) at ${x.location}: ${x.requirement}\nDocument: ${x.documentQuote}\nResponse guidance: ${x.responseGuidance}`),
         ...r.strengthsFound.map(x => `\nStrength at ${x.location}: ${x.observation}\nDocument: ${x.documentQuote}`),
@@ -203,7 +204,7 @@ export default function RfpAnalyzer() {
         <h3 className="mt-5 font-semibold text-[#f4eed8]">Gaps, risks and improvements</h3>
         {result.suggestions.map((s,i) => <div key={i} className="my-3 rounded-lg bg-white/5 p-3"><strong>{s.title}</strong><p>{s.location}</p><p>{s.detail}</p><blockquote className="my-1 text-white/50">“{s.documentQuote}”</blockquote><p>Suggested action: {s.suggestedAction}</p></div>)}
         <h3 className="mt-5 font-semibold text-[#f4eed8]">Suggested analyst insight inclusions</h3>
-        {!result.analystInsights.length && <p>No relevant, source-linked AG inclusion was identified for this section.</p>}
+        {!result.analystInsights.length && <p>{result.insightNote ?? 'No relevant, source-linked AG inclusion was identified for this section.'}</p>}
         {result.analystInsights.map((s,i) => <div key={i} className="my-3 rounded-lg border border-[#a88945]/40 p-4"><h4 className="font-semibold">Suggested analyst insight insertion — draft for human review</h4><p><strong>Suggested placement:</strong> after the quoted text at {s.location}</p><blockquote className="my-2 text-white/50">“{s.documentQuote}”</blockquote><p>{s.rationale}</p><p className="mt-3 font-semibold">Draft wording for review</p><p className="my-2">{s.suggestedText}</p>{session.fictional && <p>{fictionalEvidenceLimit}</p>}{s.sourceIds.map(id => { const source = result.sources.find(x => x.id === id); return source ? <EvidenceCard key={id} source={source} /> : null; })}</div>)}
       </details>)}
     </div>}
