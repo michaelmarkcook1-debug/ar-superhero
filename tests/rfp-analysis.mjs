@@ -69,6 +69,8 @@ try {
   assert.doesNotMatch(globalThis.__rfpPrompt,/Cognizant/);
   assert.ok(result.sources.some(s=>s.title.includes('Cognizant')));
   assert.equal(result.dataStatus,'live');
+  globalThis.__rfpApplication.output.analystInsights=[{...analogousInsertion,rationale:'Organisations pursuing AI-enabled automation commonly face difficulty evidencing value.'}];
+  await assert.rejects(()=>analyzeRfp(fictionalInput),e=>e.code==='scope_reference');
   globalThis.__rfpApplication.output.analystInsights=[{...analogousInsertion,suggestedText:'Where Capgemini responds, request a baseline.'}];
   await assert.rejects(()=>analyzeRfp(fictionalInput),e=>e.code==='vendor_reference');
   globalThis.__rfpApplication.output.analystInsights=[];
